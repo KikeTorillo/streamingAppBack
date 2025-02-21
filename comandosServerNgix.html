@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explicación de Comandos</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #2d2d2d;
+            color: #f5f5f5;
+            padding: 20px;
+        }
+        pre {
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            color: #f5f5f5;
+        }
+        .command {
+            color: #4ec9b0;
+        }
+        .comment {
+            color: #6a9955;
+        }
+        .highlight {
+            color: #dcdcaa;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Explicación de Comandos</h1>
+
+<h2>1. Actualización e instalación de dependencias</h2>
+<pre>
+<code><span class="command">apt update && apt install build-essential git libpcre3-dev libssl-dev zlib1g-dev ffmpeg libxml2-dev</span></code>
+</pre>
+<p>
+    <span class="command">apt update</span>: Actualiza la lista de paquetes disponibles en los repositorios configurados.<br>
+    <span class="command">apt install</span>: Instala los paquetes necesarios para compilar y ejecutar Nginx con módulos adicionales.<br>
+    <span class="highlight">build-essential</span>: Contiene herramientas esenciales para compilar software (como <span class="highlight">gcc</span>, <span class="highlight">make</span>, etc.).<br>
+    <span class="highlight">git</span>: Sistema de control de versiones, necesario para clonar repositorios.<br>
+    <span class="highlight">libpcre3-dev</span>, <span class="highlight">libssl-dev</span>, <span class="highlight">zlib1g-dev</span>: Bibliotecas de desarrollo necesarias para Nginx.<br>
+    <span class="highlight">ffmpeg</span>: Herramienta para manipular archivos multimedia.<br>
+    <span class="highlight">libxml2-dev</span>: Biblioteca para manejar XML.
+</p>
+
+<h2>2. Descarga y extracción de Nginx</h2>
+<pre>
+<code><span class="command">wget http://nginx.org/download/nginx-1.27.4.tar.gz</span>
+<span class="command">tar -zxvf nginx-1.27.4.tar.gz</span></code>
+</pre>
+<p>
+    <span class="command">wget</span>: Descarga el archivo comprimido de Nginx desde su sitio oficial.<br>
+    <span class="command">tar -zxvf</span>: Extrae el archivo comprimido (<span class="highlight">-z</span> para gzip, <span class="highlight">-x</span> para extraer, <span class="highlight">-v</span> para verbose, <span class="highlight">-f</span> para especificar el archivo).
+</p>
+
+<h2>3. Descarga y extracción de módulos de Nginx</h2>
+<pre>
+<code><span class="command">wget https://github.com/kaltura/nginx-vod-module/archive/refs/tags/1.33.tar.gz</span>
+<span class="command">tar -zxvf 1.33.tar.gz</span>
+
+<span class="command">wget https://github.com/kaltura/nginx-aws-auth-module/archive/refs/tags/1.1.tar.gz</span>
+<span class="command">tar -zxvf 1.1.tar.gz</span>
+
+<span class="command">wget https://github.com/kaltura/nginx-secure-token-module/archive/refs/tags/1.5.tar.gz</span>
+<span class="command">tar -zxvf 1.5.tar.gz</span></code>
+</pre>
+<p>
+    <span class="command">wget</span>: Descarga los módulos adicionales para Nginx desde GitHub.<br>
+    <span class="command">tar -zxvf</span>: Extrae los archivos comprimidos de los módulos.
+</p>
+
+<h2>4. Configuración y compilación de Nginx</h2>
+<pre>
+<code><span class="command">cd nginx-1.27.4</span>
+<span class="command">./configure \
+    --prefix=/etc/nginx \
+    --conf-path=/etc/nginx/nginx.conf \
+    --error-log-path=/var/log/nginx/error.log \
+    --http-log-path=/var/log/nginx/access.log \
+    --pid-path=/run/nginx.pid \
+    --sbin-path=/usr/sbin/nginx \
+    --with-http_secure_link_module \
+    --with-http_ssl_module \
+    --with-http_v2_module \
+    --with-http_stub_status_module \
+    --with-http_realip_module \
+    --with-file-aio \
+    --with-http_mp4_module \
+    --with-http_slice_module \
+    --with-threads \
+    --with-stream \
+    --with-cc-opt="-O3 -mpopcnt" \
+    --add-module=../nginx-vod-module-1.33 \
+    --add-module=../nginx-aws-auth-module-1.1 \
+    --add-module=../nginx-secure-token-module-1.5
+    --with-http_map_module  # Asegúrate de incluir este módulo
+</span>
+
+<span class="command">make && make install</span></code>
+</pre>
+<p>
+    <span class="command">./configure</span>: Configura la compilación de Nginx con las rutas y módulos especificados.<br>
+    <span class="highlight">--prefix</span>, <span class="highlight">--conf-path</span>, etc.: Define las rutas de instalación y configuración.<br>
+    <span class="highlight">--with-http_*</span>: Habilita módulos específicos de Nginx.<br>
+    <span class="highlight">--add-module</span>: Añade módulos externos (VOD, AWS Auth, Secure Token).<br>
+    <span class="command">make</span>: Compila el código fuente.<br>
+    <span class="command">make install</span>: Instala Nginx en las rutas especificadas.
+</p>
+
+<h2>5. Mover y editar la configuración de Nginx</h2>
+<pre>
+<code><span class="command">mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.old</span>
+<span class="command">nano /lib/systemd/system/nginx.service</span></code>
+</pre>
+<p>
+    <span class="command">mv</span>: Mueve el archivo de configuración original a un archivo de respaldo.<br>
+    <span class="command">nano</span>: Abre el editor de texto para crear o editar el archivo de servicio de systemd para Nginx.
+</p>
+
+<h2>6. Crear un archivo de servicio para Nginx</h2>
+<pre>
+<code><span class="highlight">[Unit]</span>
+Description=Nginx VoD Server
+After=syslog.target network-online.target remote-fs.target nss-lookup.target
+Wants=network-online.target
+
+<span class="highlight">[Service]</span>
+Type=forking
+PIDFile=/run/nginx.pid
+ExecStartPre=/usr/sbin/nginx -t
+ExecStart=/usr/sbin/nginx
+ExecReload=/usr/sbin/nginx -s reload
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+
+<span class="highlight">[Install]</span>
+WantedBy=multi-user.target</code>
+</pre>
+<p>
+    <span class="highlight">[Unit]</span>: Define las dependencias y el orden de inicio.<br>
+    <span class="highlight">[Service]</span>: Especifica cómo se debe manejar el servicio.<br>
+    <span class="highlight">ExecStartPre</span>: Verifica la configuración antes de iniciar.<br>
+    <span class="highlight">ExecStart</span>: Inicia Nginx.<br>
+    <span class="highlight">ExecReload</span>: Recarga la configuración.<br>
+    <span class="highlight">ExecStop</span>: Detiene Nginx.<br>
+    <span class="highlight">[Install]</span>: Define cuándo se debe iniciar el servicio.
+</p>
+
+<h2>7. Comandos adicionales para configurar y gestionar Nginx</h2>
+<pre>
+<code><span class="command">sudo su</span>
+<span class="command">nano /etc/nginx/nginx.conf</span>
+<span class="command">nano /etc/netplan/pulsa tabulación para completar ruta</span>
+<span class="command">netplan apply</span>
+<span class="command">systemctl daemon-reload</span>
+<span class="command">systemctl enable nginx</span>
+<span class="command">systemctl status nginx</span>
+<span class="command">systemctl start nginx</span>
+<span class="command">systemctl stop nginx</span></code>
+</pre>
+<p>
+    <span class="command">sudo su</span>: Cambia al usuario root.<br>
+    <span class="command">nano /etc/nginx/nginx.conf</span>: Edita el archivo de configuración de Nginx.<br>
+    <span class="command">nano /etc/netplan/...</span>: Edita la configuración de red (completa la ruta con tabulación).<br>
+    <span class="command">netplan apply</span>: Aplica los cambios en la configuración de red.<br>
+    <span class="command">systemctl daemon-reload</span>: Recarga la configuración de systemd.<br>
+    <span class="command">systemctl enable nginx</span>: Habilita Nginx para que se inicie automáticamente al arrancar el sistema.<br>
+    <span class="command">systemctl status nginx</span>: Muestra el estado del servicio Nginx.<br>
+    <span class="command">systemctl start nginx</span>: Inicia el servicio Nginx.<br>
+    <span class="command">systemctl stop nginx</span>: Detiene el servicio Nginx.
+</p>
+
+</body>
+</html>
