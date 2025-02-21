@@ -33,18 +33,32 @@ El sistema está diseñado para ser modular, escalable y fácil de mantener. Uti
 ## **Estructura del Proyecto**
 
 streamingvideoappback/
-├── docker-compose.yml # Archivo de configuración de Docker Compose
-├── package.json # Dependencias y scripts del proyecto
-├── clean.js # Script para limpiar contenedores y carpetas locales
-├── index.js # Archivo principal del servidor Node.js
-├── aws.js # Configuración de MinIO
-├── servers/ # Carpetas para configuraciones específicas de servicios
-│ ├── cdn/ # Configuración de NGINX CDN
-│ ├── minio/ # Configuración de MinIO
-│ ├── postgresQl/ # Configuración de PostgreSQL
-│ └── transcoderServers/ # Configuración de servidores de transcodificación
-├── utils/ # Funciones auxiliares (transcodificación, generación de URLs, etc.)
-└── README.md # Documentación del proyecto
+
+├── docker-compose.yml → Archivo de configuración de Docker Compose
+
+├── package.json → Dependencias y scripts del proyecto
+
+├── clean.js → Script para limpiar contenedores y carpetas locales
+
+├── index.js → Archivo principal del servidor Node.js
+
+├── aws.js → Configuración de MinIO
+
+├── servers/ → Carpetas para configuraciones específicas de servicios
+
+│ ├── cdn/ → Configuración de NGINX CDN
+
+│ ├── minio/ → Configuración de MinIO
+
+│ ├── postgresQl/ → Configuración de PostgreSQL
+
+│ └── transcoderServers/ → Configuración de servidores de transcodificación
+
+├── utils/ → Funciones auxiliares (transcodificación, URLs, etc.)
+
+└── README.md → 
+
+Documentación del proyecto
 ---
 ## **Requisitos Previos**
 
