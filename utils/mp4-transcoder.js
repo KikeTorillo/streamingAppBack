@@ -1,9 +1,9 @@
-// Importación de dependencias
 const ffmpegStatic = require('ffmpeg-static'); // Proporciona un binario estático de FFmpeg
 const ffmpeg = require('fluent-ffmpeg'); // Interfaz para Node.js que facilita el uso de FFmpeg
 const fs = require('fs'); // Módulo de Node.js para interactuar con el sistema de archivos
 const path = require('path'); // Módulo de Node.js para manejar rutas de archivos
-const { upload: uploadToMinIO } = require('./aws'); // Importa la función de subida a MinIO
+const crypto = require('crypto'); // Módulo para calcular hashes
+const { upload: uploadToMinIO, checkIfFileExistsInMinIO } = require('./aws'); // Importa las funciones de subida y verificación en MinIO
 
 // Configuración de la ruta de FFmpeg
 ffmpeg.setFfmpegPath(ffmpegStatic);
@@ -62,113 +62,122 @@ const deleteVodDirectory = () => {
 };
 
 /**
+ * Calcula el hash SHA256 de un archivo.
+ * @param {string} filePath - Ruta del archivo.
+ * @returns {Promise<string>} - Hash del archivo.
+ */
+const calculateFileHash = (filePath) => {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const stream = fs.createReadStream(filePath);
+
+    stream.on('data', (chunk) => hash.update(chunk));
+    stream.on('end', () => resolve(hash.digest('hex')));
+    stream.on('error', (err) => reject(err));
+  });
+};
+
+/**
  * Función principal de transcodificación:
  * - Procesa un archivo de video, lo transcodifica en varias calidades y lo sube a MinIO.
  * - Acepta un callback `onProgress` para notificar el progreso al frontend.
  */
-const transcode = (filePath, onProgress) => {
-  return new Promise((resolve, reject) => {
+const transcode = async (filePath, onProgress) => {
+  return new Promise(async (resolve, reject) => {
     const fileName = path.parse(filePath).name; // Obtiene el nombre del archivo sin extensión
-    makeDir('vod'); // Crea el directorio "vod" si no existe
+    const localDir = `vod/${fileName}`; // Directorio local para el archivo
+    makeDir(localDir); // Crea la subcarpeta si no existe
 
-    /**
-     * Análisis del video original para obtener metadatos:
-     * - Usamos `ffmpeg.ffprobe` para extraer información sobre el archivo de video,
-     *   como su duración, resolución, codec de video/audio, etc.
-     */
-    ffmpeg.ffprobe(filePath, (err, data) => {
+    // Analiza el video original para obtener metadatos
+    ffmpeg.ffprobe(filePath, async (err, data) => {
       if (err) {
         console.error(`Error al analizar el video: ${err.message}`);
-        return reject(err); // Rechaza la promesa si hay un error
+        return reject(err);
       }
 
-      // Busca el stream de video en los metadatos
-      const videoStream = data.streams.find((item) => item.codec_type === 'video');
+      const videoStream = data.streams.find(
+        (item) => item.codec_type === 'video'
+      );
       if (!videoStream) {
         console.error('No se encontró un stream de video en el archivo.');
-        return reject(new Error('No se encontró un stream de video en el archivo.')); // Rechaza la promesa
+        return reject(
+          new Error('No se encontró un stream de video en el archivo.')
+        );
       }
 
-      /**
-       * Determina la máxima calidad basada en la altura del video original:
-       * - Si el video tiene una altura menor a 1080p, se ajusta la calidad máxima
-       *   para evitar procesar resoluciones innecesarias.
-       */
-      let maxQuality = 3; // Por defecto, 1080p
+      let maxQuality = 3;
       if (videoStream.height < 1080 && videoStream.height >= 720) {
-        maxQuality = 2; // 720p
+        maxQuality = 2;
       } else if (videoStream.height < 720 && videoStream.height >= 480) {
-        maxQuality = 1; // 480p
+        maxQuality = 1;
       } else if (videoStream.height < 480) {
-        maxQuality = 1; // 480p
+        maxQuality = 1;
       }
 
-      let filesProcessed = 0; // Contador para rastrear cuántos archivos han sido procesados
+      let filesProcessed = 0;
 
-      /**
-       * Transcodifica el video en las calidades seleccionadas:
-       * - Iteramos sobre las calidades definidas en el array `qualities`.
-       * - Para cada calidad, generamos un archivo transcodificado y lo subimos a MinIO.
-       */
-      qualities.slice(0, maxQuality).forEach((q, index) => {
-        const outputFile = `vod/${fileName}_${q.h}p.mp4`; // Ruta del archivo de salida
-        const remotePath = `videos/vod/${fileName}_${q.h}p.mp4`; // Ruta en MinIO
+      for (const [index, q] of qualities.slice(0, maxQuality).entries()) {
+        const outputFile = `${localDir}/${fileName}_${q.h}p.mp4`;
+        const remotePath = `vod/${fileName}/${fileName}_${q.h}p.mp4`;
 
-        /**
-         * Proceso de transcodificación con FFmpeg:
-         * - Usamos `ffmpeg` para transcodificar el video.
-         * - Los eventos `on('start')`, `on('progress')`, `on('error')`, y `on('end')`
-         *   nos permiten monitorear el progreso y manejar errores.
-         */
-        ffmpeg(filePath)
-          .output(outputFile)
-          .outputOptions(outputOptions[index]) // Opciones de FFmpeg para esta calidad
-          .on('progress', (progress) => {
-            console.log(
-              `Procesando ${outputFile} --> ${parseFloat(progress.percent).toFixed(2)}%`
-            );
-            /**
-             * Calcula el progreso general:
-             * - Combina el progreso de todas las calidades en un solo valor.
-             */
-            const overallProgress = ((filesProcessed + progress.percent / 100) / maxQuality) * 100;
-            onProgress(Math.round(overallProgress)); // Notifica el progreso al frontend
-          })
-          .on('end', () => {
-            console.log(`${outputFile} procesado correctamente`);
+        // Transcodifica el video
+        await new Promise((resolveTranscode, rejectTranscode) => {
+          ffmpeg(filePath)
+            .output(outputFile)
+            .outputOptions(outputOptions[index])
+            .on('progress', (progress) => {
+              const overallProgress =
+                ((filesProcessed + progress.percent / 100) / maxQuality) * 100;
+              onProgress(Math.round(overallProgress));
+            })
+            .on('end', () => {
+              console.log(`${outputFile} procesado correctamente`);
+              resolveTranscode();
+            })
+            .on('error', (err) => {
+              console.error(`Error al procesar el archivo: ${outputFile}`, err);
+              rejectTranscode(err);
+            })
+            .run();
+        });
 
-            /**
-             * Subir el archivo a MinIO:
-             * - Una vez que el archivo ha sido transcodificado, lo subimos a MinIO.
-             * - Incrementamos el contador `filesProcessed` para rastrear cuántos archivos
-             *   han sido procesados.
-             */
-            uploadToMinIO(outputFile, (error) => {
-              if (error) {
-                console.error(`Error al subir el archivo a MinIO: ${remotePath}`, error);
-                return reject(error); // Rechaza la promesa si hay un error durante la subida
-              }
+        // Verifica si el archivo ya existe en MinIO
+        const fileExists = await checkIfFileExistsInMinIO(remotePath);
+        if (fileExists) {
+          console.log(
+            `El archivo ${outputFile} ya existe en MinIO. Saltando...`
+          );
+          filesProcessed++;
+          if (filesProcessed === maxQuality) {
+            deleteVodDirectory();
+            resolve();
+          }
+          continue;
+        }
 
-              console.log(`Archivo subido a MinIO: ${remotePath}`);
-              filesProcessed++;
+        // Calcula el hash del archivo transcodificado
+        const fileHash = await calculateFileHash(outputFile);
 
-              /**
-               * Verifica si todos los archivos han sido procesados:
-               * - Si todos los archivos han sido procesados y subidos, resolvemos la promesa.
-               * - Esto asegura que el `await` en el servicio espere hasta que todo haya terminado.
-               */
-              if (filesProcessed === maxQuality) {
-                deleteVodDirectory(); // Borra el directorio `vod`
-                resolve(); // Resuelve la promesa cuando todo ha terminado
-              }
-            });
-          })
-          .on('error', (err) => {
-            console.error(`Error al procesar el archivo: ${outputFile}`, err);
-            reject(err); // Rechaza la promesa si hay un error durante la transcodificación
-          })
-          .run();
-      });
+        // Subir el archivo a MinIO
+        await new Promise((resolveUpload, rejectUpload) => {
+          uploadToMinIO(outputFile, remotePath, (error) => {
+            if (error) {
+              console.error(
+                `Error al subir el archivo a MinIO: ${remotePath}`,
+                error
+              );
+              return rejectUpload(error);
+            }
+            console.log(`Archivo subido a MinIO: ${remotePath}`);
+            filesProcessed++;
+            if (filesProcessed === maxQuality) {
+              deleteVodDirectory();
+              resolve();
+            }
+            resolveUpload();
+          });
+        });
+      }
     });
   });
 };

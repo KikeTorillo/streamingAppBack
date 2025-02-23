@@ -60,14 +60,14 @@ router.post('/upload', upload.single('video'), async (req, res, next) => {
     console.log('Archivo recibido:', req.file); // Registro del archivo recibido
 
     // Extraer datos adicionales del cuerpo de la solicitud
-    const { name, category, contentType } = req.body;
+    const fileInfo = req.body;
     const filePath = req.file.path; // Ruta temporal del archivo subido
 
     // Generar un ID único para la tarea
     const taskId = Date.now().toString();
     progressMap[taskId] = { status: 'processing', progress: 0 };
     // Procesar el archivo en segundo plano
-    processFile(taskId, name, category, contentType, filePath);
+    processFile(taskId, fileInfo, filePath);
 
     // Responder con el ID de la tarea
     res.json({ taskId });
@@ -109,14 +109,14 @@ router.get('/progress/:taskId', (req, res) => {
  * - Esta función maneja la lógica de transcodificación y notifica el progreso al frontend.
  * - Actualiza el estado de la tarea en `progressMap`.
  */
-async function processFile(taskId, name, category, contentType, filePath) {
+async function processFile(taskId, fileInfo, filePath) {
   try {
     // Actualizar el progreso inicial
     progressMap[taskId].status = 'transcoding'; // Estado: "transcodificando"
     progressMap[taskId].progress = 0; // Progreso inicial: 0%
 
     // Procesar el archivo con el servicio
-    await service.uploadVideo(name, category, contentType, filePath, (progress) => {
+    await service.uploadVideo(fileInfo, filePath, (progress) => {
       progressMap[taskId].progress = progress; // Actualiza el progreso en tiempo real
     });
 

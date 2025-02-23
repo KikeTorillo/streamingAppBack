@@ -104,6 +104,7 @@ services:
       - POSTGRES_DB=${DB_NAME} # Crea una base de datos llamada "my_api".
       - POSTGRES_USER=${DB_USER} # Define un usuario de PostgreSQL llamado "kike".
       - POSTGRES_PASSWORD=${DB_PASSWORD} # Establece la contraseña para el usuario "kike".
+      - TZ=America/Mexico_City # Configura la zona horaria aquí
     volumes:
       - ./servers/postgresQl/postgres_data:/var/lib/postgresql/data
       - ./servers/postgresQl/init.sql:/docker-entrypoint-initdb.d/init.sql # Script de inicialización

@@ -1,51 +1,129 @@
-// Este es el servicio que gestiona la data de los videos
-const fs = require('fs'); // Módulo para interactuar con el sistema de archivos
+// Importa módulos necesarios
+const fs = require('fs'); // Módulo para interactuar con el sistema de archivos (leer, escribir, eliminar archivos)
 const path = require('path'); // Módulo para manejar rutas de archivos
-const pool = require('../libs/postgresPool');
-const { transcode } = require('../utils/mp4-transcoder'); // Importa el script de transcodificación
-const { getUrl } = require('../utils/vod-unique-url');
-const { getPresignedUrl } = require('../utils/getPresignedUrl');
+const pool = require('../libs/postgresPool'); // Pool de conexiones a PostgreSQL
+const { transcode } = require('../utils/mp4-transcoder'); // Script para transcodificar videos
+const { getUrl } = require('../utils/vod-unique-url'); // Función para generar URLs únicas
+const { getPresignedUrl } = require('../utils/getPresignedUrl'); // Función para generar URLs prefirmadas
+const crypto = require('crypto'); // Módulo para calcular hashes
 
 class VideoService {
+  constructor() {
+    // Cada servicio tiene su propio pool de conexiones en el constructor
+    this.pool = pool;
+    // Escucha errores globales del pool
+    this.pool.on('error', (err) => console.error(err));
+  }
+
+  /**
+   * Obtiene todas las categorías disponibles.
+   * @returns {Promise<Array>} - Lista de categorías.
+   */
+  async getCategories() {
+    try {
+      const query = 'SELECT id, name FROM categories'; // Consulta SQL para obtener las categorías
+      const result = await this.pool.query(query); // Ejecuta la consulta
+      return result.rows; // Devuelve las filas obtenidas
+    } catch (error) {
+      // Manejo de errores: registra el error y lanza una excepción
+      console.error('Error al obtener las categorías:', error.message);
+      throw new Error('Error al obtener las categorías: ' + error.message);
+    }
+  }
+
+  /**
+   * Calcula el hash SHA256 de un archivo.
+   * @param {string} filePath - Ruta del archivo.
+   * @returns {Promise<string>} - Hash del archivo.
+   */
+  async calculateFileHash(filePath) {
+    return new Promise((resolve, reject) => {
+      const hash = crypto.createHash('sha256');
+      const stream = fs.createReadStream(filePath);
+      stream.on('data', (chunk) => hash.update(chunk));
+      stream.on('end', () => resolve(hash.digest('hex')));
+      stream.on('error', (err) => reject(err));
+    });
+  }
+
+  /**
+   * Verifica si el archivo ya existe en la base de datos.
+   * @param {string} fileHash - Hash del archivo.
+   * @returns {Promise<boolean>} - True si el archivo ya existe, false si no.
+   */
+  async checkIfFileExistsInDatabase(fileHash) {
+    const query = 'SELECT id FROM videos WHERE file_hash = $1';
+    const result = await this.pool.query(query, [fileHash]);
+    return result.rows.length > 0;
+  }
+
   /**
    * Sube un video, lo transcodifica y lo guarda en MinIO.
-   * @param {string} name - Nombre del video.
-   * @param {string} category - Categoría del video.
+   * @param {Object} fileInfo - Información del video (name, category, contentType).
    * @param {string} filePath - Ruta del archivo subido.
    * @param {function} onProgress - Callback para actualizar el progreso.
    * @returns {Promise<Object>} - Respuesta con el estado del proceso.
    */
-  async uploadVideo(name, category, contentType, filePath, onProgress) {
+  async uploadVideo(fileInfo, filePath, onProgress) {
+    const client = await this.pool.connect(); // Obtener una conexión individual
     try {
-      // Verificar si el archivo existe
+      const { name, category, contentType } = fileInfo;
+
+      // Validar datos de entrada
+      if (!name || !category || !contentType || !filePath) {
+        throw new Error('Faltan datos obligatorios.');
+      }
+      if (!['movie', 'series'].includes(contentType)) {
+        throw new Error('El tipo de contenido debe ser "movie" o "series".');
+      }
       if (!fs.existsSync(filePath)) {
         throw new Error('El archivo no existe en la ruta especificada.');
       }
 
+      // Calcular el hash del archivo
+      const fileHash = await this.calculateFileHash(filePath);
+      console.log(`Hash del archivo: ${fileHash}`);
+
+      // Verificar si el archivo ya existe en la base de datos
+      const fileExists = await this.checkIfFileExistsInDatabase(fileHash);
+      if (fileExists) {
+        throw new Error('El archivo ya existe en el sistema.');
+      }
+
+      // Iniciar transacción
+      await client.query('BEGIN');
+
       // Transcodificar el video
       console.log(`Transcodificando el archivo: ${filePath}`);
-      await transcode(filePath, onProgress); // Pasamos el callback de progreso
+      const fileName = path.parse(filePath).name; // Nombre del archivo sin extensión
+      const minioFolder = `vod/${fileName}`; // Carpeta en MinIO basada en el nombre del archivo
+      await transcode(filePath, onProgress);
 
-      // Guardar en la tabla videos
-      const rta = await pool.query(
-        'INSERT INTO videos (title, category_id, file_path) VALUES ($1, $2, $3) RETURNING *',
-        [name, category, filePath]
-      );
-
-      const videoId = rta.rows[0].id;
+      // Insertar en la tabla videos
+      const insertVideoQuery =
+        'INSERT INTO videos (title, category_id, file_path, minio_folder, file_hash) VALUES ($1, $2, $3, $4, $5) RETURNING *';
+      const videoResult = await client.query(insertVideoQuery, [
+        name,
+        category,
+        `${minioFolder}/${fileName}_720p.mp4`, // Ruta principal del archivo en MinIO
+        minioFolder, // Carpeta en MinIO
+        fileHash,
+      ]);
+      const videoId = videoResult.rows[0].id;
 
       // Registrar en movies o series según el tipo de contenido
       if (contentType === 'movie') {
-      await pool.query(
-        'INSERT INTO movies (title, category_id, video_id) VALUES ($1, $2, $3)',
-        [name, category, videoId]
-      );
+        const insertMovieQuery =
+          'INSERT INTO movies (title, category_id, video_id) VALUES ($1, $2, $3)';
+        await client.query(insertMovieQuery, [name, category, videoId]);
       } else if (contentType === 'series') {
-        await pool.query(
-         'INSERT INTO series (title, category_id) VALUES ($1, $2) RETURNING *',
-         [name, category]
-       );
+        const insertSeriesQuery =
+          'INSERT INTO series (title, category_id) VALUES ($1, $2) RETURNING *';
+        await client.query(insertSeriesQuery, [name, category]);
       }
+
+      // Confirmar la transacción
+      await client.query('COMMIT');
 
       // Eliminar el archivo original de la carpeta uploads/
       console.log(`Eliminando el archivo original: ${filePath}`);
@@ -55,8 +133,13 @@ class VideoService {
         message: 'Video subido, transcodificado y eliminado correctamente.',
       };
     } catch (error) {
+      // Rollback en caso de error
+      await client.query('ROLLBACK');
       console.error('Error al procesar el video:', error.message);
       throw new Error('Error al subir el video: ' + error.message);
+    } finally {
+      // Liberar la conexión
+      client.release();
     }
   }
 
@@ -64,37 +147,26 @@ class VideoService {
    * Obtiene los 10 videos más vistos.
    * @param {string} ip - Dirección IP del cliente.
    * @param {string} name - Nombre del video (opcional).
-   * @returns {Promise<void>}
+   * @returns {Promise<Array>} - Lista de videos más vistos.
    */
   async getTopVideos(ip, name = 'prueba') {
     try {
-      const bucketName = 'videos';
-      const objectName = 'vod/prueba_720p.mp4';
-
+      const bucketName = 'videos'; // Nombre del bucket en MinIO
+      const objectName = 'vod/prueba_720p.mp4'; // Nombre del objeto en MinIO
       // Generar una URL prefirmada para el video
-      const url = await getPresignedUrl(bucketName, objectName);
+      const url = await getPresignedUrl(bucketName, objectName); // Genera una URL prefirmada
       console.log('URL prefirmada generada:', url);
 
-      // Opcional: Obtener la URL única del video
-      // const uniqueUrl = await getUrl(ip, name);
-      // console.log('URL única generada:', uniqueUrl);
-
-      // Consultar los 10 videos más vistos en la base de datos (opcional)
-      // const result = await pool.query(
-      //   'SELECT * FROM videos ORDER BY views DESC LIMIT 10'
-      // );
-      // return result.rows;
+      // Consultar los 10 videos más vistos en la base de datos
+      const query = 'SELECT * FROM videos ORDER BY views DESC LIMIT 10'; // Consulta SQL para obtener los videos más vistos
+      const result = await this.pool.query(query); // Ejecuta la consulta
+      return result.rows; // Devuelve las filas obtenidas
     } catch (error) {
+      // Manejo de errores: registra el error y lanza una excepción
       console.error('Error al obtener los videos:', error.message);
       throw new Error('Error al obtener los videos: ' + error.message);
     }
   }
-
-  async getCategories() {
-    const query = `SELECT id, name FROM categories`;
-    const rta = await pool.query(query);
-    return rta.rows;
-  }
 }
 
-module.exports = VideoService;
+module.exports = VideoService; // Exporta la clase VideoService
