@@ -67,9 +67,9 @@ http {
         }
 
         # Manejo de solicitudes al endpoint /storage/
-        location ^~ /storage/ {
+        location ^~ /storage {
             internal; # Restringe el acceso directo a esta ubicación desde el exterior.
-            if ($uri ~ ^/storage/vod/hls/(.*\.mp4)(/.*)?$) {
+            if ($uri ~ ^/storage/hls/(.*\.mp4)(/.*)?$) {
                 set $file_uri /videos/vod/$1; # Extrae el nombre del archivo MP4 y lo asigna a $file_uri.
             }
             proxy_pass http://internal_minio$file_uri; # Redirige las solicitudes al servidor MinIO.
@@ -81,7 +81,7 @@ http {
         }
 
         # Manejo de solicitudes al endpoint /vod/hls/
-        location /vod/hls/ {
+        location /hls {
             vod hls; # Habilita el módulo VOD (Video On Demand) para HLS (HTTP Live Streaming).
             vod_mode remote; # Cambia a modo remoto para obtener segmentos de video desde un backend.
             vod_upstream_location /storage; # Ubicación upstream para obtener los segmentos de video.
@@ -98,6 +98,7 @@ http {
             vod_hls_absolute_master_urls off; # Desactiva URLs absolutas para playlists maestras.
             vod_hls_absolute_iframe_urls off; # Desactiva URLs absolutas para iframes.
             vod_hls_output_iframes_playlist off; # Desactiva la salida de playlists de iframes.
+
             gzip on; # Habilita la compresión Gzip.
             gzip_disable msie6; # Desactiva Gzip para navegadores antiguos como MSIE6.
             gzip_vary on; # Agrega el encabezado Vary: Accept-Encoding.

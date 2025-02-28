@@ -35,7 +35,6 @@ const storage = multer.diskStorage({
     ensureDirectoryExists(uploadDir); // Asegúrate de que la carpeta exista
     cb(null, uploadDir); // Pasar la ruta de la carpeta al callback
   },
-
   /**
    * filename:
    * - Define cómo se nombrarán los archivos subidos.
@@ -45,10 +44,8 @@ const storage = multer.diskStorage({
    *   2. El nombre del archivo.
    */
   filename: (req, file, cb) => {
-    cb(null, `${file.originalname}`); // Usa el nombre original del archivo
-    // NOTA: Esto puede causar sobrescrituras si dos usuarios suben archivos con el mismo nombre.
-    // Para evitar esto, puedes usar un nombre único (por ejemplo, basado en la marca de tiempo):
-    // cb(null, `${Date.now()}-${file.originalname}`);
+    cb(null, `${file.originalname}`); // Usa un nombre único basado en la marca de tiempo
+    // NOTA: Esto evita sobrescrituras si dos usuarios suben archivos con el mismo nombre.
   },
 });
 
@@ -60,5 +57,15 @@ const storage = multer.diskStorage({
  */
 const upload = multer({ storage });
 
-// Exportar el middleware `upload` para que pueda ser utilizado en otras partes de la aplicación
-module.exports = upload;
+/**
+ * Middleware para manejar múltiples campos de archivos:
+ * - `upload.fields()` permite especificar varios campos de archivos que se esperan en la solicitud.
+ * - En este caso, aceptamos dos campos: `video` y `coverImage`.
+ */
+const multiUpload = upload.fields([
+  { name: 'video', maxCount: 1 }, // Campo para el archivo de video (máximo 1 archivo)
+  { name: 'coverImage', maxCount: 1 }, // Campo para la imagen de portada (máximo 1 archivo)
+]);
+
+// Exportar el middleware `multiUpload` para que pueda ser utilizado en otras partes de la aplicación
+module.exports = multiUpload;

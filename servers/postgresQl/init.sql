@@ -1,3 +1,4 @@
+-- Crear la tabla `users`
 CREATE TABLE IF NOT EXISTS users (
     id serial NOT NULL,
     email character varying NOT NULL,
@@ -22,8 +23,9 @@ CREATE TABLE IF NOT EXISTS videos (
     description TEXT, -- Descripción opcional
     category_id INT REFERENCES categories(id), -- Relación con la categoría
     file_path VARCHAR(255) NOT NULL, -- Ruta del archivo en MinIO
-    minio_folder VARCHAR(255),
-    file_hash VARCHAR(64) UNIQUE,
+    minio_folder VARCHAR(255), -- Carpeta en MinIO donde se almacena el video
+    file_hash VARCHAR(64) UNIQUE, -- Hash único del archivo de video
+    cover_image VARCHAR(255), -- Ruta de la imagen de portada en MinIO
     duration INTERVAL, -- Duración del video (opcional)
     views INT DEFAULT 0, -- Número de visualizaciones
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha de creación

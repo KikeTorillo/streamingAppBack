@@ -6,6 +6,7 @@ const { transcode } = require('../utils/mp4-transcoder'); // Script para transco
 const { getUrl } = require('../utils/vod-unique-url'); // Función para generar URLs únicas
 const { getPresignedUrl } = require('../utils/getPresignedUrl'); // Función para generar URLs prefirmadas
 const crypto = require('crypto'); // Módulo para calcular hashes
+const { upload: uploadToMinIO } = require('../utils/aws'); // Función para subir archivos a MinIO
 
 class VideoService {
   constructor() {
@@ -59,33 +60,35 @@ class VideoService {
 
   /**
    * Sube un video, lo transcodifica y lo guarda en MinIO.
-   * @param {Object} fileInfo - Información del video (name, category, contentType).
-   * @param {string} filePath - Ruta del archivo subido.
+   * También sube la imagen de portada asociada.
+   * @param {Object} fileInfo - Información del video (name, category, contentType, coverImage).
+   * @param {string} videoFilePath - Ruta del archivo de video subido.
+   * @param {string} coverImagePath - Ruta del archivo de imagen de portada subido.
    * @param {function} onProgress - Callback para actualizar el progreso.
    * @returns {Promise<Object>} - Respuesta con el estado del proceso.
    */
-  async uploadVideo(fileInfo, filePath, onProgress) {
+  async uploadVideo(fileInfo, videoFilePath, coverImagePath, onProgress) {
     const client = await this.pool.connect(); // Obtener una conexión individual
     try {
       const { name, category, contentType } = fileInfo;
 
-      // Validar datos de entrada
-      if (!name || !category || !contentType || !filePath) {
+      // Validar datos obligatorios
+      if (!name || !category || !contentType || !videoFilePath || !coverImagePath) {
         throw new Error('Faltan datos obligatorios.');
       }
       if (!['movie', 'series'].includes(contentType)) {
         throw new Error('El tipo de contenido debe ser "movie" o "series".');
       }
-      if (!fs.existsSync(filePath)) {
-        throw new Error('El archivo no existe en la ruta especificada.');
+      if (!fs.existsSync(videoFilePath) || !fs.existsSync(coverImagePath)) {
+        throw new Error('Uno o más archivos no existen en la ruta especificada.');
       }
 
-      // Calcular el hash del archivo
-      const fileHash = await this.calculateFileHash(filePath);
-      console.log(`Hash del archivo: ${fileHash}`);
+      // Calcular el hash del archivo de video
+      const videoFileHash = await this.calculateFileHash(videoFilePath);
+      console.log(`Hash del archivo de video: ${videoFileHash}`);
 
       // Verificar si el archivo ya existe en la base de datos
-      const fileExists = await this.checkIfFileExistsInDatabase(fileHash);
+      const fileExists = await this.checkIfFileExistsInDatabase(videoFileHash);
       if (fileExists) {
         throw new Error('El archivo ya existe en el sistema.');
       }
@@ -93,21 +96,27 @@ class VideoService {
       // Iniciar transacción
       await client.query('BEGIN');
 
+      // Subir la imagen de portada a MinIO
+      const coverImageFileName = path.parse(coverImagePath).name;
+      const coverImageRemotePath = `covers/${coverImageFileName}.jpg`;
+      await uploadToMinIO(coverImagePath, coverImageRemotePath);
+      console.log(`Imagen de portada subida a MinIO: ${coverImageRemotePath}`);
+
       // Transcodificar el video
-      console.log(`Transcodificando el archivo: ${filePath}`);
-      const fileName = path.parse(filePath).name; // Nombre del archivo sin extensión
-      const minioFolder = `vod/${fileName}`; // Carpeta en MinIO basada en el nombre del archivo
-      await transcode(filePath, onProgress);
+      console.log(`Transcodificando el archivo: ${videoFilePath}`);
+      const minioFolder = `vod/${videoFileHash}`; // Carpeta en MinIO basada en el hash
+      await transcode(videoFilePath, onProgress);
 
       // Insertar en la tabla videos
       const insertVideoQuery =
-        'INSERT INTO videos (title, category_id, file_path, minio_folder, file_hash) VALUES ($1, $2, $3, $4, $5) RETURNING *';
+        'INSERT INTO videos (title, category_id, file_path, minio_folder, file_hash, cover_image) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
       const videoResult = await client.query(insertVideoQuery, [
-        name,
+        name, // Nombre proporcionado por el usuario
         category,
-        `${minioFolder}/${fileName}_720p.mp4`, // Ruta principal del archivo en MinIO
-        minioFolder, // Carpeta en MinIO
-        fileHash,
+        `${minioFolder}/_${720}p.mp4`, // Ruta principal del archivo en MinIO
+        minioFolder, // Carpeta en MinIO basada en el hash
+        videoFileHash,
+        coverImageRemotePath, // Ruta de la imagen de portada en MinIO
       ]);
       const videoId = videoResult.rows[0].id;
 
@@ -125,12 +134,14 @@ class VideoService {
       // Confirmar la transacción
       await client.query('COMMIT');
 
-      // Eliminar el archivo original de la carpeta uploads/
-      console.log(`Eliminando el archivo original: ${filePath}`);
-      fs.unlinkSync(filePath);
+      // Eliminar los archivos originales de la carpeta uploads/
+      console.log(`Eliminando el archivo original de video: ${videoFilePath}`);
+      fs.unlinkSync(videoFilePath);
+      console.log(`Eliminando el archivo original de portada: ${coverImagePath}`);
+      fs.unlinkSync(coverImagePath);
 
       return {
-        message: 'Video subido, transcodificado y eliminado correctamente.',
+        message: 'Video e imagen de portada subidos, transcodificados y eliminados correctamente.',
       };
     } catch (error) {
       // Rollback en caso de error
@@ -156,7 +167,6 @@ class VideoService {
       // Generar una URL prefirmada para el video
       const url = await getPresignedUrl(bucketName, objectName); // Genera una URL prefirmada
       console.log('URL prefirmada generada:', url);
-
       // Consultar los 10 videos más vistos en la base de datos
       const query = 'SELECT * FROM videos ORDER BY views DESC LIMIT 10'; // Consulta SQL para obtener los videos más vistos
       const result = await this.pool.query(query); // Ejecuta la consulta
