@@ -74,6 +74,7 @@ RUN cd nginx-${NGINX_VERSION} && \
     --with-http_slice_module \
     --with-cc-opt="-I/usr/include/ffmpeg" \
     --with-ld-opt="-lavcodec -lavformat -lavutil" \
+    --with-http_sub_module \
     --add-module=/modules/nginx-vod-module-1.33 \
     --add-module=/modules/nginx-aws-auth-module-1.1 \
     --add-module=/modules/nginx-secure-token-module-1.5 \

@@ -20,7 +20,7 @@ const progressMap = {};
  */
 router.get('/top', async (req, res, next) => {
   try {
-    // Obtener la IPmultiUpload del cliente
+    // Obtener la IP del cliente
     let clientIp =
       req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress;
     // Si X-Forwarded-For contiene múltiples IPs, tomar la primera
@@ -56,9 +56,6 @@ router.post('/upload', multiUpload, async (req, res, next) => {
     console.log('Archivo de video recibido:', req.files['video'][0]); // Registro del archivo de video
     console.log('Imagen de portada recibida:', req.files['coverImage'][0]); // Registro de la imagen de portada
 
-    // Extraer datos adicionales del cuerpo de la solicitud
-    const fileInfo = req.body;
-
     // Rutas temporales de los archivos subidos
     const videoFilePath = req.files['video'][0].path; // Ruta temporal del archivo de video
     const coverImagePath = req.files['coverImage'][0].path; // Ruta temporal de la imagen de portada
@@ -67,8 +64,15 @@ router.post('/upload', multiUpload, async (req, res, next) => {
     const taskId = Date.now().toString();
     progressMap[taskId] = { status: 'processing', progress: 0 };
 
+    // Extraer datos adicionales del cuerpo de la solicitud
+    const fileInfo = {
+      body: req.body,
+      videoFilePath: videoFilePath,
+      coverImagePath: coverImagePath
+    };
+
     // Procesar el archivo en segundo plano
-    processFile(taskId, fileInfo, videoFilePath, coverImagePath);
+    processFile(taskId, fileInfo);
 
     // Responder con el ID de la tarea
     res.json({ taskId });
@@ -108,18 +112,38 @@ router.get('/progress/:taskId', (req, res) => {
 });
 
 /**
+ * Endpoint para buscar videos por nombre:
+ * - Esta ruta maneja una solicitud GET para buscar videos cuyos nombres coincidan con una consulta.
+ * - La consulta debe ser proporcionada como un parámetro de consulta (`name`).
+ */
+router.get('/search', async (req, res, next) => {
+  try {
+    const { name, contentType } = req.query; // Obtener el nombre y el tipo de contenido
+    if (!name || name.length < 3) {
+      return res.status(400).json({ error: 'La consulta debe tener al menos 3 caracteres.' });
+    }
+
+    // Llamar al servicio con el tipo de contenido
+    const results = await service.searchVideosByName(name, contentType);
+    res.json(results); // Responder con los resultados de la búsqueda
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * Función para procesar el archivo y actualizar el progreso:
  * - Esta función maneja la lógica de transcodificación y notifica el progreso al frontend.
  * - Actualiza el estado de la tarea en `progressMap`.
  */
-async function processFile(taskId, fileInfo, videoFilePath, coverImagePath) {
+async function processFile(taskId, fileInfo) {
   try {
     // Actualizar el progreso inicial
     progressMap[taskId].status = 'transcoding'; // Estado: "transcodificando"
     progressMap[taskId].progress = 0; // Progreso inicial: 0%
 
     // Procesar el archivo con el servicio
-    await service.uploadVideo(fileInfo, videoFilePath, coverImagePath, (progress) => {
+    await service.uploadVideo(fileInfo, (progress) => {
       progressMap[taskId].progress = progress; // Actualiza el progreso en tiempo real
     });
 

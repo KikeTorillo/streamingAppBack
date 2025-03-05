@@ -50,7 +50,7 @@ async function checkIfFileExistsInMinIO(remotePath) {
  * @param {string} remotePath - Ruta remota del archivo en MinIO (incluyendo subcarpeta).
  * @param {function} callback - Función de callback para manejar el resultado de la subida.
  */
-function UploadLargeFiles(filePath, remotePath, callback) {
+function uploadToMinIO(filePath, remotePath, callback) {
   // Crea un stream passthrough para enviar los datos al bucket
   const pass = new stream.PassThrough();
 
@@ -106,6 +106,6 @@ function UploadLargeFiles(filePath, remotePath, callback) {
 
 // Exporta las funciones para que puedan ser utilizadas en otros archivos
 module.exports = {
-  upload: UploadLargeFiles, // Función para subir archivos grandes
+  uploadToMinIO, // Función para subir archivos grandes
   checkIfFileExistsInMinIO, // Función para verificar si un archivo existe en MinIO
 };

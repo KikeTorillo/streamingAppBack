@@ -22,8 +22,6 @@ CREATE TABLE IF NOT EXISTS videos (
     title VARCHAR(255) NOT NULL, -- Título del video
     description TEXT, -- Descripción opcional
     category_id INT REFERENCES categories(id), -- Relación con la categoría
-    file_path VARCHAR(255) NOT NULL, -- Ruta del archivo en MinIO
-    minio_folder VARCHAR(255), -- Carpeta en MinIO donde se almacena el video
     file_hash VARCHAR(64) UNIQUE, -- Hash único del archivo de video
     cover_image VARCHAR(255), -- Ruta de la imagen de portada en MinIO
     duration INTERVAL, -- Duración del video (opcional)
