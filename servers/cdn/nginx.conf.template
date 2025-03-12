@@ -66,6 +66,19 @@ http {
             add_header Cache-Control no-cache;
 
         }
+
+        location ~* \.(vtt)$ {
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_pass http://${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}$request_uri;
+            proxy_cache off;
+
+            # Forzar tipo MIME y evitar caché del navegador
+            add_header Content-Type "text/vtt; charset=utf-8";
+            add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
+            add_header Access-Control-Allow-Headers 'Range';
+            add_header Cache-Control no-cache;
+
+        }
     }
 
     # vod media server upstream

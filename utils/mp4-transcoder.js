@@ -10,7 +10,7 @@ ffmpeg.setFfmpegPath(ffmpegStatic);
 
 /**
  * Definición de calidades base para transcodificación:
- * - Cada calidad tiene una altura (`h`), un bitrate de video (`vbr`) y un bitrate de audio (`abr`).
+ * Cada calidad tiene una altura (`h`), un bitrate de video (`vbr`) y un bitrate de audio (`abr`).
  */
 const baseQualities = [
   { h: 480, vbr: 1400, abr: 128 }, // 480p
@@ -21,22 +21,24 @@ const baseQualities = [
 ];
 
 /**
- * Función para calcular nuevas resoluciones basadas en la proporción de aspecto original:
- * - Ajusta el ancho (`w`) para mantener la proporción de aspecto del video original.
+ * Calcula nuevas resoluciones basadas en la proporción de aspecto original.
+ * Ajusta el ancho (`w`) para mantener la proporción del video.
  */
 const calculateResolutions = (originalWidth, originalHeight) => {
-  const aspectRatio = originalWidth / originalHeight; // Calcula la proporción de aspecto.
+  const aspectRatio = originalWidth / originalHeight;
   return baseQualities.map((q) => {
-    const newHeight = q.h; // Altura deseada para esta calidad.
-    let newWidth = Math.round(newHeight * aspectRatio); // Calcula el nuevo ancho basado en la proporción.
-    newWidth = newWidth % 2 === 0 ? newWidth : newWidth + 1; // Asegura que el ancho sea múltiplo de 2.
+    const newHeight = q.h;
+    let newWidth = Math.round(newHeight * aspectRatio);
+    if (newWidth % 2 !== 0) {
+      newWidth += 1;
+    }
     return { w: newWidth, h: newHeight, vbr: q.vbr, abr: q.abr };
   });
 };
 
 /**
  * Detecta todas las pistas de audio compatibles con el contenedor MP4.
- * Se han incluido los codecs más usados: aac, mp3, opus y ac3.
+ * Se incluyen los codecs más usados: aac, mp3, opus y ac3.
  */
 const detectCompatibleAudioStreams = async (filePath) => {
   return new Promise((resolve, reject) => {
@@ -48,7 +50,7 @@ const detectCompatibleAudioStreams = async (filePath) => {
       const audioStreams = data.streams.filter(
         (stream) =>
           stream.codec_type === 'audio' &&
-          ['aac', 'mp3', 'opus', 'ac3'].includes(stream.codec_name) // Incluye AC3.
+          ['aac', 'mp3', 'opus', 'ac3'].indexOf(stream.codec_name) !== -1
       );
       resolve(audioStreams);
     });
@@ -56,40 +58,45 @@ const detectCompatibleAudioStreams = async (filePath) => {
 };
 
 /**
- * Función para generar las opciones de salida de FFmpeg para cada calidad:
- * - Se mapea únicamente el stream de video principal (no MJPEG) usando su índice.
- * - Se aplican opciones de audio de forma global (si existen pistas de audio).
- * - Se incluyen las pistas de subtítulos (si existen), convirtiéndolas a 'mov_text' para compatibilidad con MP4.
+ * Genera las opciones de salida de FFmpeg para cada calidad.
+ * En este ejemplo, se arma un array de opciones sin utilizar spread operators inline.
  */
-const generateOutputOptions = (qualities, audioStreams, subtitleStreams, primaryVideoIndex) => {
+const generateOutputOptions = (
+  qualities,
+  audioStreams,
+  subtitleStreams,
+  primaryVideoIndex
+) => {
   return qualities.map((q) => {
-    // Mapea todas las pistas de audio si existen.
-    const audioMapping = audioStreams.length > 0 ? ['-map', '0:a'] : [];
-    // Mapea todas las pistas de subtítulos si existen.
-    const subtitleMapping = subtitleStreams.length > 0 ? ['-map', '0:s'] : [];
-    return [
-      '-c:v', 'h264',                   // Códec de video H.264.
-      '-profile:v', 'main',              // Perfil "main" para compatibilidad.
-      '-map', `0:v:${primaryVideoIndex}`, // Mapea el stream de video principal.
-      ...audioMapping,                   // Mapea todas las pistas de audio (si existen).
-      ...subtitleMapping,                // Mapea todas las pistas de subtítulos (si existen).
-      // Si no hay subtítulos, se desactivan con '-sn'.
-      ...(subtitleStreams.length === 0 ? ['-sn'] : []),
-      '-vf', `scale=${q.w}:${q.h}`,       // Escala el video a la resolución deseada.
-      '-pix_fmt', 'yuv420p',              // Formato de píxeles.
-      '-maxrate', `${q.vbr}k`,            // Bitrate máximo de video.
-      '-bufsize', `${q.vbr}k`,            // Tamaño del buffer de video.
-      '-crf', '24',                      // Factor de calidad constante.
-      // Opciones de audio global (si hay audio)
-      ...(audioStreams.length > 0 ? ['-c:a', 'aac', '-ac', '2', '-b:a', `${q.abr}k`] : []),
-      // Convertir subtítulos a 'mov_text' para que sean compatibles con MP4.
-      ...(subtitleStreams.length > 0 ? ['-c:s', 'mov_text'] : [])
-    ];
+    let opts = [];
+    opts.push('-c:v', 'h264');
+    opts.push('-profile:v', 'main');
+    opts.push('-map', `0:v:${primaryVideoIndex}`);
+    if (audioStreams.length > 0) {
+      opts.push('-map', '0:a');
+    }
+    if (subtitleStreams.length > 0) {
+      opts.push('-map', '0:s');
+    } else {
+      opts.push('-sn');
+    }
+    opts.push('-vf', `scale=${q.w}:${q.h}`);
+    opts.push('-pix_fmt', 'yuv420p');
+    opts.push('-maxrate', `${q.vbr}k`);
+    opts.push('-bufsize', `${q.vbr}k`);
+    opts.push('-crf', '24');
+    if (audioStreams.length > 0) {
+      opts.push('-c:a', 'aac', '-ac', '2', '-b:a', `${q.abr}k`);
+    }
+    if (subtitleStreams.length > 0) {
+      opts.push('-c:s', 'mov_text');
+    }
+    return opts;
   });
 };
 
 /**
- * Función para crear directorios si no existen.
+ * Crea un directorio si no existe.
  */
 const makeDir = (dir) => {
   if (!fs.existsSync(dir)) {
@@ -101,7 +108,7 @@ const makeDir = (dir) => {
 };
 
 /**
- * Función para borrar el directorio `vod`.
+ * Elimina el directorio 'vod'.
  */
 const deleteVodDirectory = () => {
   const dir = 'vod';
@@ -127,26 +134,29 @@ const calculateFileHash = (filePath) => {
 };
 
 /**
- * Función para extraer una pista de subtítulos en formato WebVTT.
- * - Se extrae la pista indicada (según su orden en el contenedor) y se guarda en un archivo.
+ * Extrae una pista de subtítulos en formato WebVTT.
+ * Se extrae la pista indicada (según su índice en el contenedor) y se guarda en un archivo.
  */
 const extractSubtitleTrack = (filePath, subtitleOrder, outputSubPath) => {
   return new Promise((resolve, reject) => {
     ffmpeg(filePath)
       .output(outputSubPath)
-      .outputOptions([
-        '-map', `0:s:${subtitleOrder}`, // Mapea la pista de subtítulos según su orden.
-        '-c:s', 'webvtt'               // Convierte la pista a formato WebVTT.
-      ])
+      .outputOptions(['-map', `0:s:${subtitleOrder}?`, '-c:s', 'webvtt'])
       .on('start', (commandLine) => {
-        console.log(`Extrayendo subtítulos (track ${subtitleOrder}) con comando: ${commandLine}`);
+        console.log(
+          `Extrayendo subtítulos (track ${subtitleOrder}) con comando: ${commandLine}`
+        );
       })
       .on('end', () => {
-        console.log(`Subtítulos (track ${subtitleOrder}) extraídos correctamente: ${outputSubPath}`);
+        console.log(
+          `Subtítulos (track ${subtitleOrder}) extraídos correctamente: ${outputSubPath}`
+        );
         resolve();
       })
       .on('error', (err) => {
-        console.error(`Error al extraer subtítulos (track ${subtitleOrder}): ${err.message}`);
+        console.error(
+          `Error al extraer subtítulos (track ${subtitleOrder}): ${err.message}`
+        );
         reject(err);
       })
       .run();
@@ -155,11 +165,11 @@ const extractSubtitleTrack = (filePath, subtitleOrder, outputSubPath) => {
 
 /**
  * Función principal de transcodificación:
- * - Transcodifica un archivo de video en varias calidades y lo sube a MinIO.
- * - Se omiten los streams MJPEG y se utiliza solo el stream de video principal.
- * - Soporta múltiples pistas de audio y subtítulos usando opciones globales.
- * - Extrae todas las pistas de subtítulos a archivos WebVTT externos (si existen).
- * - Acepta un callback `onProgress` para notificar el progreso.
+ * - Transcodifica un video en varias calidades y lo sube a MinIO.
+ * - Se selecciona el stream de video principal (excluyendo MJPEG).
+ * - Soporta múltiples pistas de audio y subtítulos.
+ * - Extrae las pistas de subtítulos (no forzadas) a archivos WebVTT externos y los sube a MinIO.
+ * - Informa el progreso mediante un callback `onProgress`.
  */
 const transcode = async (filePath, fileHash, onProgress) => {
   return new Promise(async (resolve, reject) => {
@@ -167,7 +177,6 @@ const transcode = async (filePath, fileHash, onProgress) => {
     const localDir = `vod/${fileName}`;
     makeDir(localDir);
 
-    // Analiza el video para obtener metadatos.
     ffmpeg.ffprobe(filePath, async (err, data) => {
       if (err) {
         console.error(`Error al analizar el video: ${err.message}`);
@@ -179,8 +188,14 @@ const transcode = async (filePath, fileHash, onProgress) => {
         (item) => item.codec_type === 'video' && item.codec_name !== 'mjpeg'
       );
       if (!primaryVideoStream) {
-        console.error('No se encontró un stream de video principal (no MJPEG) en el archivo.');
-        return reject(new Error('No se encontró un stream de video principal en el archivo.'));
+        console.error(
+          'No se encontró un stream de video principal (no MJPEG) en el archivo.'
+        );
+        return reject(
+          new Error(
+            'No se encontró un stream de video principal en el archivo.'
+          )
+        );
       }
       const primaryVideoIndex = primaryVideoStream.index;
       const originalWidth = primaryVideoStream.width;
@@ -189,23 +204,26 @@ const transcode = async (filePath, fileHash, onProgress) => {
       // Detecta las pistas de audio compatibles.
       const audioStreams = await detectCompatibleAudioStreams(filePath);
       if (audioStreams.length === 0) {
-        console.warn('No se encontraron pistas de audio compatibles. El video no tendrá audio.');
+        console.warn(
+          'No se encontraron pistas de audio compatibles. El video no tendrá audio.'
+        );
       }
 
-      // Detecta las pistas de subtítulos del video.
+      // Detecta las pistas de subtítulos.
       const subtitleStreams = data.streams.filter(
         (stream) => stream.codec_type === 'subtitle'
       );
       if (subtitleStreams.length > 0) {
-        console.log('Pistas de subtítulos encontradas:', subtitleStreams.length);
+        console.log(
+          'Pistas de subtítulos encontradas:',
+          subtitleStreams.length
+        );
       } else {
         console.warn('No se encontraron pistas de subtítulos.');
       }
 
       // Calcula las resoluciones para cada calidad basada en la proporción del video original.
       let qualities = calculateResolutions(originalWidth, originalHeight);
-
-      // Define cuántas calidades generar según la altura original.
       let maxQuality;
       if (originalHeight >= 2160) {
         maxQuality = 5;
@@ -219,34 +237,68 @@ const transcode = async (filePath, fileHash, onProgress) => {
         maxQuality = 1;
       }
 
-      // Ajusta la última calidad para que preserve la resolución original.
+      // Para la máxima calidad se preserva la resolución original.
       qualities[maxQuality - 1] = {
         w: originalWidth,
         h: originalHeight,
         vbr: qualities[maxQuality - 1].vbr,
-        abr: qualities[maxQuality - 1].abr
+        abr: qualities[maxQuality - 1].abr,
       };
 
-      // Genera las opciones de salida utilizando las calidades modificadas,
-      // incluyendo audio y subtítulos (convertidos a mov_text).
-      const outputOptions = generateOutputOptions(qualities, audioStreams, subtitleStreams, primaryVideoIndex);
+      // Genera las opciones de salida para cada calidad.
+      const outputOptions = generateOutputOptions(
+        qualities,
+        audioStreams,
+        subtitleStreams,
+        primaryVideoIndex
+      );
 
       console.log(`Generando ${maxQuality} calidades para el video.`);
 
-      // Procesa cada calidad.
-      for (const [index, q] of qualities.slice(0, maxQuality).entries()) {
+      // Procesa cada calidad generada (ahora todas se re-encodean)
+      for (let [index, q] of qualities.slice(0, maxQuality).entries()) {
         const outputFile = `${localDir}/_${q.h}p.mp4`;
         const remotePath = `vod/${fileName}/_${q.h}p.mp4`;
+
+        // Configuramos las opciones de salida
+        let opts = [];
+        opts.push('-c:v', 'h264');
+        // Usamos el perfil "high" para la máxima calidad y "main" para las demás
+        opts.push('-profile:v', index === maxQuality - 1 ? 'high' : 'main');
+        opts.push('-map', `0:v:${primaryVideoIndex}`);
+        if (audioStreams.length > 0) {
+          opts.push('-map', '0:a');
+        }
+        if (subtitleStreams.length > 0) {
+          opts.push('-map', '0:s');
+        } else {
+          opts.push('-sn');
+        }
+        // Para la calidad, aplicamos el escalado según las dimensiones calculadas
+        opts.push('-vf', `scale=${q.w}:${q.h}`);
+        opts.push('-pix_fmt', 'yuv420p');
+        // Para la máxima calidad usamos un CRF menor (más calidad), y para el resto, CRF 24
+        opts.push('-crf', index === maxQuality - 1 ? '18' : '24');
+        opts.push('-maxrate', `${q.vbr}k`);
+        opts.push('-bufsize', `${q.vbr}k`);
+        if (audioStreams.length > 0) {
+          opts.push('-c:a', 'aac', '-ac', '2', '-b:a', `${q.abr}k`);
+        }
+        if (subtitleStreams.length > 0) {
+          opts.push('-c:s', 'mov_text');
+        }
 
         await new Promise((resolveTranscode, rejectTranscode) => {
           ffmpeg(filePath)
             .output(outputFile)
-            .outputOptions(outputOptions[index])
+            .outputOptions(opts)
             .on('start', (commandLine) => {
               console.log(`Comando FFmpeg ejecutado: ${commandLine}`);
             })
             .on('progress', (progress) => {
-              const overallProgress = ((index + progress.percent / 100) / maxQuality) * 100;
+              // Calcula el progreso global teniendo en cuenta todas las calidades
+              const overallProgress =
+                ((index + progress.percent / 100) / maxQuality) * 100;
               onProgress(Math.round(overallProgress));
             })
             .on('end', () => {
@@ -260,19 +312,21 @@ const transcode = async (filePath, fileHash, onProgress) => {
             .run();
         });
 
-        // Verifica si el archivo ya existe en MinIO.
+        // Verifica si el archivo ya existe en MinIO y, de no existir, lo sube.
         const fileExists = await checkIfFileExistsInMinIO(remotePath);
         if (fileExists) {
-          console.log(`El archivo ${outputFile} ya existe en MinIO. Saltando...`);
+          console.log(
+            `El archivo ${outputFile} ya existe en MinIO. Saltando...`
+          );
         } else {
-          // Calcula el hash del archivo transcodificado.
           const transcodedFileHash = await calculateFileHash(outputFile);
-
-          // Sube el archivo a MinIO.
           await new Promise((resolveUpload, rejectUpload) => {
             uploadToMinIO(outputFile, remotePath, (error) => {
               if (error) {
-                console.error(`Error al subir el archivo a MinIO: ${remotePath}`, error);
+                console.error(
+                  `Error al subir el archivo a MinIO: ${remotePath}`,
+                  error
+                );
                 return rejectUpload(error);
               }
               console.log(`Archivo subido a MinIO: ${remotePath}`);
@@ -282,22 +336,61 @@ const transcode = async (filePath, fileHash, onProgress) => {
         }
       }
 
-      // Si existen pistas de subtítulos, se extraen todas a archivos WebVTT y se suben a MinIO.
+      // --- Extracción y subida de pistas de subtítulos ---
       if (subtitleStreams.length > 0) {
-        for (let i = 0; i < subtitleStreams.length; i++) {
-          const outputSubtitle = `${localDir}/subtitles_track${i}.vtt`;
+        console.log(
+          'Extrayendo pistas de subtítulos:',
+          subtitleStreams.length
+        );
+        // Se crean dos contadores separados: uno para pistas forzadas y otro para las no forzadas.
+        let normalLangCount = {};
+        let forcedLangCount = {};
+        for (let stream of subtitleStreams) {
+          // Se obtiene el idioma del stream, o 'und' (indefinido) si no se especifica.
+          const language = (stream.tags && stream.tags.language) || 'und';
+          // Se verifica si el stream de subtítulos está marcado como forzado.
+          const isForced = stream.disposition && stream.disposition.forced === 1;
+          let fileNameSubtitle;
+          if (isForced) {
+            // Se incrementa el contador para pistas forzadas de ese idioma.
+            forcedLangCount[language] = (forcedLangCount[language] || 0) + 1;
+            // Si hay más de una pista forzada en el mismo idioma se añade un sufijo numérico.
+            fileNameSubtitle =
+              forcedLangCount[language] > 1
+                ? `forced-${language}_${forcedLangCount[language]}.vtt`
+                : `forced-${language}.vtt`;
+          } else {
+            // Se incrementa el contador para pistas no forzadas de ese idioma.
+            normalLangCount[language] = (normalLangCount[language] || 0) + 1;
+            // Se construye el nombre del archivo según si es la primera o hay varias pistas.
+            fileNameSubtitle =
+              normalLangCount[language] > 1
+                ? `${language}_${normalLangCount[language]}.vtt`
+                : `${language}.vtt`;
+          }
+          // Ruta local donde se guardará el archivo de subtítulos extraído.
+          const outputSubtitle = `${localDir}/${fileNameSubtitle}`;
           try {
-            await extractSubtitleTrack(filePath, i, outputSubtitle);
-            const remoteSubtitlePath = `vod/${fileName}/subtitles_track${i}.vtt`;
-            const subsExist = await checkIfFileExistsInMinIO(remoteSubtitlePath);
+            // Se extrae la pista de subtítulos utilizando su índice en el contenedor.
+            await extractSubtitleTrack(filePath, stream.index, outputSubtitle);
+            // Se define la ruta remota para el archivo en MinIO.
+            const remoteSubtitlePath = `vod/${fileName}/${fileNameSubtitle}`;
+            const subsExist = await checkIfFileExistsInMinIO(
+              remoteSubtitlePath
+            );
             if (subsExist) {
-              console.log(`El archivo ${outputSubtitle} ya existe en MinIO. Saltando...`);
+              console.log(
+                `El archivo ${outputSubtitle} ya existe en MinIO. Saltando...`
+              );
             } else {
               const subHash = await calculateFileHash(outputSubtitle);
               await new Promise((resolveUpload, rejectUpload) => {
                 uploadToMinIO(outputSubtitle, remoteSubtitlePath, (error) => {
                   if (error) {
-                    console.error(`Error al subir el archivo a MinIO: ${remoteSubtitlePath}`, error);
+                    console.error(
+                      `Error al subir el archivo a MinIO: ${remoteSubtitlePath}`,
+                      error
+                    );
                     return rejectUpload(error);
                   }
                   console.log(`Archivo subido a MinIO: ${remoteSubtitlePath}`);
@@ -306,12 +399,20 @@ const transcode = async (filePath, fileHash, onProgress) => {
               });
             }
           } catch (err) {
-            console.error(`Error durante la extracción y subida de subtítulos (track ${i}):`, err);
+            console.error(
+              `Error durante la extracción y subida de subtítulos (pista ${stream.index}):`,
+              err
+            );
+            throw err;
           }
         }
+      } else {
+        console.warn(
+          'No se encontraron pistas de subtítulos para extraer.'
+        );
       }
 
-      // Una vez procesados todos los archivos, se elimina el directorio temporal y se resuelve la promesa.
+      // Una vez procesados todos los archivos, elimina el directorio temporal.
       deleteVodDirectory();
       resolve();
     });

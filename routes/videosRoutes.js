@@ -48,6 +48,18 @@ router.get('/top', async (req, res, next) => {
  */
 router.post('/upload', multiUpload, async (req, res, next) => {
   try {
+    // Obtener la IP del cliente
+    let clientIp =
+      req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress;
+    // Si X-Forwarded-For contiene múltiples IPs, tomar la primera
+    if (Array.isArray(clientIp)) {
+      clientIp = clientIp[0];
+    } else if (typeof clientIp === 'string') {
+      clientIp = clientIp.split(',')[0].trim();
+    }
+    // Normalizar la IP (eliminar ::ffff: para IPv6)
+    clientIp = clientIp.replace(/^::ffff:/, '');
+
     // Verificar si se recibieron los archivos
     if (!req.files || !req.files['video'] || !req.files['coverImage']) {
       throw new Error('Faltan archivos obligatorios.');
@@ -63,12 +75,14 @@ router.post('/upload', multiUpload, async (req, res, next) => {
     // Generar un ID único para la tarea
     const taskId = Date.now().toString();
     progressMap[taskId] = { status: 'processing', progress: 0 };
-
+    const user = { id: 1 };
     // Extraer datos adicionales del cuerpo de la solicitud
     const fileInfo = {
       body: req.body,
       videoFilePath: videoFilePath,
-      coverImagePath: coverImagePath
+      coverImagePath: coverImagePath,
+      ip: clientIp,
+      user: user,
     };
 
     // Procesar el archivo en segundo plano
@@ -120,12 +134,40 @@ router.get('/search', async (req, res, next) => {
   try {
     const { name, contentType } = req.query; // Obtener el nombre y el tipo de contenido
     if (!name || name.length < 3) {
-      return res.status(400).json({ error: 'La consulta debe tener al menos 3 caracteres.' });
+      return res
+        .status(400)
+        .json({ error: 'La consulta debe tener al menos 3 caracteres.' });
     }
 
     // Llamar al servicio con el tipo de contenido
     const results = await service.searchVideosByName(name, contentType);
     res.json(results); // Responder con los resultados de la búsqueda
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * Endpoint para solicitar (listar) películas:
+ * - Se espera que en VideoService implementes el método getMovies() que realice la consulta correspondiente.
+ */
+router.get('/movies', async (req, res, next) => {
+  try {
+    const movies = await service.getMovies(); // Método a implementar en VideoService
+    res.json(movies);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * Endpoint para solicitar (listar) series:
+ * - Se espera que en VideoService implementes el método getSeries() que realice la consulta correspondiente.
+ */
+router.get('/series', async (req, res, next) => {
+  try {
+    const series = await service.getSeries(); // Método a implementar en VideoService
+    res.json(series);
   } catch (error) {
     next(error);
   }

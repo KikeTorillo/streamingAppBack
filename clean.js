@@ -39,7 +39,8 @@ const localFolders = [
   './servers/transcoderServers/transcoder2/nginx_cache',
   './servers/minio/aws3DataMinio',
   './servers/postgresQl/postgres_data',
-  './uploads'
+  './uploads',
+  './vod'
 ];
 
 // Ejecutar el proceso

@@ -104,6 +104,20 @@ http {
             gzip_vary on; # Agrega el encabezado Vary: Accept-Encoding.
             gzip_types application/vnd.apple.mpegurl video/f4m application/dash+xml text/xml text/vtt; # Tipos MIME para comprimir.
         }
+
+        location /subs {
+            if ($uri ~ ^/subs/(.+\.vtt)$) {
+                set $sub_path $1; # Captura todo después de /subs/ (incluyendo subdirectorios)
+                set $file_uri /videos/vod/$sub_path; # Ruta completa en MinIO
+            }
+            proxy_pass http://internal_minio$file_uri; # Redirige las solicitudes al servidor MinIO.
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Amz-Date $aws_auth_date;
+            proxy_set_header X-Amz-Content-SHA256 e3b0c43288fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855;
+            proxy_set_header Authorization $aws_token;
+        }
+
     }
 
     # Segundo bloque de servidor (escucha en el puerto 81)
@@ -134,6 +148,3 @@ http {
         }
     }
 }
-
-
-

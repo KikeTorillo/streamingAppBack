@@ -113,6 +113,12 @@ services:
         ipv4_address: ${IP_ADDRESS_POSTGRESQL} # Asigna una dirección IP estática dentro de la red "lan".
     ports:
       - "5432:5432"
+    command: >  # <--- Esto es clave
+      bash -c "
+        apt-get update &&
+        apt-get install -y postgresql-contrib &&
+        docker-entrypoint.sh postgres
+      "
 
   # Servicio pgAdmin: Herramienta de administración gráfica para PostgreSQL.
   pgadmin:
