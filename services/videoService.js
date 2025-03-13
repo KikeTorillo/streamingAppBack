@@ -2,14 +2,11 @@
 
 // Importamos los módulos necesarios para el manejo de archivos, rutas y operaciones en PostgreSQL
 const fs = require('fs'); // Para interactuar con el sistema de archivos
-const path = require('path'); // Para manejar rutas de archivos
 const pool = require('../libs/postgresPool'); // Pool de conexiones a PostgreSQL
 const { transcode } = require('../utils/mp4-transcoder'); // Función para transcodificar videos
-const { getUrl } = require('../utils/vod-unique-url'); // Función para generar URLs únicas
-const { getPresignedUrl } = require('../utils/getPresignedUrl'); // Función para generar URLs prefirmadas
 const crypto = require('crypto'); // Para calcular hashes de archivos
 const { uploadToMinIO } = require('../utils/aws'); // Función para subir archivos a MinIO
-const ffmpeg = require('fluent-ffmpeg'); // Librería para obtener metadatos del video mediante ffprobe
+const { configureAuditContext } = require('../utils/configureAuditContext');
 
 /**
  * Clase que gestiona las operaciones relacionadas con videos.
@@ -70,18 +67,6 @@ class VideoService {
     return result.rows.length > 0; // Retorna true si se encontró al menos un registro
   }
 
-  formatSubtitles(subtitles, videoHash) {
-    return subtitles.map((sub) => {
-      const [type, lang] = sub.replace('.vtt', '').split('-');
-      return {
-        language: lang || type,
-        kind: type === 'forced' ? 'forced' : 'standard',
-        url: `${videoHash}/subtitles/${sub}`,
-        default: false,
-      };
-    });
-  }
-
   /**
    * Sube un video, lo transcodifica y lo guarda en MinIO.
    * También sube la imagen de portada y actualiza el registro del video
@@ -94,15 +79,6 @@ class VideoService {
     // Se obtiene una conexión individual del pool para realizar la transacción
     const client = await this.pool.connect();
     try {
-      // Validación extrema de parámetros
-      const requiredFields = [
-        'name',
-        'category',
-        'contentType',
-        'releaseYear',
-        'videoFilePath',
-        'coverImagePath',
-      ];
 
       // Desestructuramos la información necesaria del objeto fileInfo
       const {
@@ -112,35 +88,12 @@ class VideoService {
         season,
         episodeNumber,
         releaseYear,
-        description = '',
-      } = fileInfo.body;
-
-      const { videoFilePath, coverImagePath, user = {}, ip = '' } = fileInfo;
-
-      // Validación específica para series
-      if (contentType === 'series') {
-        if (!season || !episodeNumber) {
-          throw new Error(
-            'Para series se requiere: temporada y número de episodio'
-          );
-        }
-
-        if (season < 1) {
-          throw new Error('Temporada debe ser un número entero positivo');
-        }
-
-        if (episodeNumber < 1) {
-          throw new Error('Número de episodio debe ser un entero positivo');
-        }
-      }
-
-      // Validación de año
-      const currentYear = new Date().getFullYear();
-      const parsedYear = parseInt(releaseYear, 10);
-      if (isNaN(parsedYear)) throw new Error('Año debe ser un número');
-      if (parsedYear < 1900 || parsedYear > currentYear) {
-        throw new Error(`Año inválido. Rango permitido: 1900-${currentYear}`);
-      }
+        description,
+        videoFilePath,
+        coverImagePath,
+        user,
+        ip,
+      } = fileInfo;
 
       // Verificamos que los archivos de video y portada existan en el sistema
       if (!fs.existsSync(videoFilePath))
@@ -151,136 +104,14 @@ class VideoService {
       // Se calcula el hash del archivo de video para identificarlo de forma única
       const videoFileHash = await this.calculateFileHash(videoFilePath);
       if (await this.checkIfFileExistsInDatabase(videoFileHash)) {
-        [videoFilePath, coverImagePath].forEach(
-          (f) => fs.existsSync(f) && fs.unlinkSync(f)
-        );
+        await fs.promises.unlink(videoFilePath);
+        await fs.promises.unlink(coverImagePath);
+        console.log('Archivo eliminado correctamente');
+
         throw new Error('Contenido duplicado Hash de video ya existe en la BD');
       }
 
-      const userId = user.id ? user.id.toString() : 'anonymous';
-      const clientIp = ip || 'unknown';
-
-      await client.query(
-        `SELECT 
-        set_config('app.current_user_id', $1, false),
-        set_config('app.client_ip', $2, false)`,
-        [userId, clientIp]
-      );
-
-      // Verificación (opcional)
-      const { rows } = await client.query(`SELECT 
-        current_setting('app.current_user_id') AS user_id,
-        current_setting('app.client_ip') AS ip`);
-
-      console.log('Auditoría configurada:', rows[0]);
-
-      // Se obtienen los metadatos del video utilizando ffprobe (vía ffmpeg)
-      const videoMetadata = await new Promise((resolve, reject) => {
-        ffmpeg.ffprobe(videoFilePath, (err, data) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(data);
-        });
-      });
-
-      // Se extrae el stream de video principal para obtener dimensiones y duración
-      const primaryVideoStream = videoMetadata.streams.find(
-        (s) => s.codec_type === 'video'
-      );
-      if (!primaryVideoStream) {
-        throw new Error('No se encontró stream de video en el archivo.');
-      }
-      const originalWidth = primaryVideoStream.width;
-      const originalHeight = primaryVideoStream.height;
-
-      // Definición de calidades base según altura (en píxeles)
-      const baseQualities = [
-        { h: 480 },
-        { h: 720 },
-        { h: 1080 },
-        { h: 1440 },
-        { h: 2160 },
-      ];
-      // Se calcula la relación de aspecto original
-      const aspectRatio = originalWidth / originalHeight;
-
-      // Se generan las resoluciones basadas en la altura y relación de aspecto
-      const qualities = baseQualities.map((q) => {
-        // Calcula el ancho proporcional
-        let newWidth = Math.round(q.h * aspectRatio);
-        // Ajusta el ancho para que sea par (requisito de algunos codecs)
-        newWidth = newWidth % 2 === 0 ? newWidth : newWidth + 1;
-        return { quality: `${q.h}p`, width: newWidth, height: q.h };
-      });
-
-      // Se determina la cantidad máxima de calidades a generar en función de la altura original
-      let maxQuality;
-      if (originalHeight >= 2160) {
-        maxQuality = 5;
-      } else if (originalHeight >= 1440) {
-        maxQuality = 4;
-      } else if (originalHeight >= 1080) {
-        maxQuality = 3;
-      } else if (originalHeight >= 720) {
-        maxQuality = 2;
-      } else {
-        maxQuality = 1;
-      }
-
-      // Se seleccionan las calidades definidas
-      const selectedQualities = qualities.slice(0, maxQuality);
-      // Se ajusta la última calidad para que use la resolución original del video
-      selectedQualities[maxQuality - 1] = {
-        quality: `${originalHeight}p`,
-        width: originalWidth,
-        height: originalHeight,
-      };
-
-      // Se arma un array solo con las alturas disponibles para las resoluciones
-      const availableResolutions = selectedQualities.map((q) => q.height);
-      console.log('Resoluciones disponibles:', availableResolutions);
-
-      // Se extraen los streams de subtítulos (no forzados) del metadata del video
-      const subtitleStreams = videoMetadata.streams.filter(
-        (s) => s.codec_type === 'subtitle'
-      );
-      // Arrays y objetos para manejar la nomenclatura de los archivos de subtítulos
-      const availableSubtitles = [];
-      const forcedLangCount = {}; // Contador para pistas forzadas por idioma
-      const normalLangCount = {}; // Contador para pistas no forzadas por idioma
-
-      // Se procesa cada stream de subtítulo para generar nombres de archivo únicos
-      subtitleStreams.forEach((stream) => {
-        // Se obtiene el lenguaje, o se asigna 'und' (indefinido) si no existe
-        const language = (stream.tags && stream.tags.language) || 'und';
-        // Se verifica si el subtítulo está marcado como forzado
-        const isForced = stream.disposition && stream.disposition.forced === 1;
-        let fileNameSubtitle;
-        let fileNameWithOutExtension;
-        if (isForced) {
-          // Incrementa el contador para pistas forzadas de ese idioma
-          forcedLangCount[language] = (forcedLangCount[language] || 0) + 1;
-          // Si hay más de una pista forzada, se añade un sufijo numérico
-          fileNameSubtitle =
-            forcedLangCount[language] > 1
-              ? `forced-${language}_${forcedLangCount[language]}.vtt`
-              : `forced-${language}.vtt`;
-          fileNameWithOutExtension = fileNameSubtitle.replace('.vtt', '');
-          availableSubtitles.push(fileNameWithOutExtension);
-        } else {
-          // Incrementa el contador para pistas no forzadas de ese idioma
-          normalLangCount[language] = (normalLangCount[language] || 0) + 1;
-          // Se asigna el nombre según si es la primera pista o hay varias
-          fileNameSubtitle =
-            normalLangCount[language] > 1
-              ? `${language}_${normalLangCount[language]}.vtt`
-              : `${language}.vtt`;
-          fileNameWithOutExtension = fileNameSubtitle.replace('.vtt', '');
-          availableSubtitles.push(fileNameWithOutExtension);
-        }
-      });
-      console.log('Subtítulos disponibles:', availableSubtitles);
+      configureAuditContext(client, user.id, ip);
 
       // Se inicia una transacción para asegurar la integridad de las operaciones en la base de datos
       await client.query('BEGIN');
@@ -290,8 +121,17 @@ class VideoService {
       await uploadToMinIO(coverImagePath, coverImageRemotePath);
       console.log(`Imagen de portada subida a MinIO: ${coverImageRemotePath}`);
 
+      // Se inicia el proceso de transcodificación del video, el cual genera las distintas resoluciones y extrae subtítulos
+      console.log(`Transcodificando el archivo: ${videoFilePath}`);
+      const { 
+        availableResolutions, 
+        availableSubtitles, 
+        duration 
+      } = await transcode(videoFilePath, videoFileHash, onProgress);
+      console.log('Resoluciones creadas:', availableResolutions);
+      console.log('Subtítulos creados:', availableSubtitles);
+
       // Se inserta un registro en la tabla videos con la información obtenida, retornando solo el id para reducir datos transferidos
-      const duration = primaryVideoStream.duration; // Duración extraída del stream de video
       // Inserción del video (se asume que el hash es único, y se inserta sin ON CONFLICT)
       const insertVideoQuery = `
         INSERT INTO videos (
@@ -327,7 +167,7 @@ class VideoService {
           ) VALUES ($1, $2, $3, $4, $5)
           ON CONFLICT (title_normalized, release_year) DO NOTHING
           RETURNING id`,
-          [name, description, categoryId, videoId, parsedYear]
+          [name, description, categoryId, videoId, releaseYear]
         );
 
         // Si ya existe una película con ese título y año, rowCount será 0
@@ -345,7 +185,7 @@ class VideoService {
           ) VALUES ($1, $2, $3, $4)
           ON CONFLICT (title_normalized, release_year) DO NOTHING
           RETURNING id`,
-          [name, description, categoryId, parsedYear]
+          [name, description, categoryId, releaseYear]
         );
 
         // Si la serie ya existe, abortamos la operación
@@ -371,21 +211,16 @@ class VideoService {
           throw new Error('El episodio ya existe. Operación abortada.');
         }
       }
-      // Se inicia el proceso de transcodificación del video, el cual genera las distintas resoluciones y extrae subtítulos
-      console.log(`Transcodificando el archivo: ${videoFilePath}`);
-      const minioFolder = `${videoFileHash}`; // Carpeta en MinIO basada en el hash del video
-      await transcode(videoFilePath, videoFileHash, onProgress);
-
       // Se confirma la transacción, asegurando que todas las operaciones anteriores se hayan ejecutado correctamente
       await client.query('COMMIT');
 
       // Se eliminan los archivos originales para liberar espacio en el servidor
       console.log(`Eliminando el archivo original de video: ${videoFilePath}`);
-      fs.unlinkSync(videoFilePath);
+      fs.unlink(videoFilePath);
       console.log(
         `Eliminando el archivo original de portada: ${coverImagePath}`
       );
-      fs.unlinkSync(coverImagePath);
+      fs.unlink(coverImagePath);
 
       // Se retorna un mensaje confirmando que el proceso se completó correctamente
       return {

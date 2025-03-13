@@ -3,7 +3,8 @@ const express = require('express'); // Framework Express para manejar rutas y so
 const multiUpload = require('../middleware/upload'); // Middleware para manejar la subida de archivos
 const VideoService = require('../services/videoService'); // Servicio para gestionar la lógica de los videos
 const service = new VideoService(); // Instancia del servicio de videos
-const path = require('path'); // Módulo de Node.js para manejar rutas de archivos
+const { validatorHandler } = require('./../middleware/validatorHandler'); // Middleware para validación de datos
+const { uploadVideoSchema } = require('./../schemas/videosSchemas'); // Esquemas de validación Joi
 const router = express.Router(); // Enrutador de Express para definir las rutas
 
 /**
@@ -14,87 +15,34 @@ const router = express.Router(); // Enrutador de Express para definir las rutas
 const progressMap = {};
 
 /**
- * Obtener los 10 videos más vistos:
- * - Esta ruta maneja una solicitud GET para obtener los videos más populares.
- * - Obtiene la IP del cliente y la pasa al servicio para generar datos específicos.
- */
-router.get('/top', async (req, res, next) => {
-  try {
-    // Obtener la IP del cliente
-    let clientIp =
-      req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress;
-    // Si X-Forwarded-For contiene múltiples IPs, tomar la primera
-    if (Array.isArray(clientIp)) {
-      clientIp = clientIp[0];
-    } else if (typeof clientIp === 'string') {
-      clientIp = clientIp.split(',')[0].trim();
-    }
-    // Normalizar la IP (eliminar ::ffff: para IPv6)
-    clientIp = clientIp.replace(/^::ffff:/, '');
-    // Llamar al servicio para obtener los videos más vistos
-    const videos = await service.getTopVideos(clientIp);
-    // Responder con los videos obtenidos
-    res.json(videos);
-  } catch (error) {
-    // Manejar errores pasándolos al middleware de errores
-    next(error);
-  }
-});
-
-/**
  * Subir un video:
  * - Esta ruta maneja una solicitud POST para subir un archivo de video y una imagen de portada.
  * - Usa el middleware `upload.fields()` para procesar ambos archivos.
  */
-router.post('/upload', multiUpload, async (req, res, next) => {
-  try {
-    // Obtener la IP del cliente
-    let clientIp =
-      req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress;
-    // Si X-Forwarded-For contiene múltiples IPs, tomar la primera
-    if (Array.isArray(clientIp)) {
-      clientIp = clientIp[0];
-    } else if (typeof clientIp === 'string') {
-      clientIp = clientIp.split(',')[0].trim();
+router.post(
+  '/upload',
+  multiUpload,
+  completeUploadInfo,
+  validatorHandler(uploadVideoSchema, 'body'), 
+  async (req, res, next) => {
+    try {
+      // Generar un ID único para la tarea
+      const taskId = Date.now().toString();
+      progressMap[taskId] = { status: 'processing', progress: 0 };
+
+      const fileInfo = req.body;
+
+      // Procesar el archivo en segundo plano
+      processFile(taskId, fileInfo);
+
+      // Responder con el ID de la tarea
+      res.json({ taskId });
+    } catch (error) {
+      // Manejar errores pasándolos al middleware de errores
+      next(error);
     }
-    // Normalizar la IP (eliminar ::ffff: para IPv6)
-    clientIp = clientIp.replace(/^::ffff:/, '');
-
-    // Verificar si se recibieron los archivos
-    if (!req.files || !req.files['video'] || !req.files['coverImage']) {
-      throw new Error('Faltan archivos obligatorios.');
-    }
-
-    console.log('Archivo de video recibido:', req.files['video'][0]); // Registro del archivo de video
-    console.log('Imagen de portada recibida:', req.files['coverImage'][0]); // Registro de la imagen de portada
-
-    // Rutas temporales de los archivos subidos
-    const videoFilePath = req.files['video'][0].path; // Ruta temporal del archivo de video
-    const coverImagePath = req.files['coverImage'][0].path; // Ruta temporal de la imagen de portada
-
-    // Generar un ID único para la tarea
-    const taskId = Date.now().toString();
-    progressMap[taskId] = { status: 'processing', progress: 0 };
-    const user = { id: 1 };
-    // Extraer datos adicionales del cuerpo de la solicitud
-    const fileInfo = {
-      body: req.body,
-      videoFilePath: videoFilePath,
-      coverImagePath: coverImagePath,
-      ip: clientIp,
-      user: user,
-    };
-
-    // Procesar el archivo en segundo plano
-    processFile(taskId, fileInfo);
-
-    // Responder con el ID de la tarea
-    res.json({ taskId });
-  } catch (error) {
-    // Manejar errores pasándolos al middleware de errores
-    next(error);
   }
-});
+);
 
 /**
  * Obtener categorías disponibles:
@@ -197,6 +145,37 @@ async function processFile(taskId, fileInfo) {
     progressMap[taskId].status = 'failed'; // Estado: "fallido"
     progressMap[taskId].error = error.message; // Mensaje de error
   }
+}
+
+async function completeUploadInfo(req, res, next) {
+  // Extraer datos adicionales del cuerpo de la solicitud
+  // Obtener la IP del cliente
+  let clientIp = req.socket.remoteAddress || '';
+  // Si X-Forwarded-For contiene múltiples IPs, tomar la primera
+  if (Array.isArray(clientIp)) {
+    clientIp = clientIp[0];
+  } else if (typeof clientIp === 'string') {
+    clientIp = clientIp.split(',')[0].trim();
+  }
+  // Normalizar la IP (eliminar ::ffff: para IPv6)
+  clientIp = clientIp.replace(/^::ffff:/, '');
+
+  const user = {
+    id:'anonymous'
+  };
+  const ip = clientIp || 'unknown';
+
+  let videoData;
+  videoData = req.body;
+  videoData.videoFilePath = req.files['video']
+    ? req.files['video'][0].path
+    : '';
+  videoData.coverImagePath = req.files['coverImage']
+    ? req.files['coverImage'][0].path
+    : '';
+  videoData.user = user;
+  videoData.ip = ip;
+  next();
 }
 
 module.exports = router;

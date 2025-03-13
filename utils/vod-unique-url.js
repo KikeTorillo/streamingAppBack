@@ -1,5 +1,5 @@
 // Importación del módulo personalizado para generar hashes
-const hashName = require('./hashName');
+//const hashName = require('./hashName');
 
 // Lista de servidores CDN disponibles
 const CDNS = [
@@ -14,7 +14,7 @@ function getRandomCdn() {
 
 // Función para generar un hash seguro basado en la expiración y la IP del cliente
 function generateSecurePathHash(expires, client_ip) {
-    return hashName(`${expires} ${client_ip}`, true); // Genera un hash único
+    //return hashName(`${expires} ${client_ip}`, true); // Genera un hash único
 }
 
 // Función principal para generar la URL del video

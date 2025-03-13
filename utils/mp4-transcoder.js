@@ -1,8 +1,6 @@
 const ffmpegStatic = require('ffmpeg-static'); // Importa el binario estático de FFmpeg para usarlo en Node.js.
 const ffmpeg = require('fluent-ffmpeg'); // Importa la biblioteca fluent-ffmpeg para interactuar con FFmpeg.
 const fs = require('fs'); // Módulo de Node.js para interactuar con el sistema de archivos.
-const path = require('path'); // Módulo de Node.js para manejar rutas de archivos.
-const crypto = require('crypto'); // Módulo de Node.js para calcular hashes (SHA256).
 const { uploadToMinIO, checkIfFileExistsInMinIO } = require('./aws'); // Funciones para subir y verificar archivos en MinIO.
 
 // Configura la ruta del binario de FFmpeg usando el módulo `ffmpeg-static`.
@@ -121,19 +119,6 @@ const deleteVodDirectory = () => {
 };
 
 /**
- * Calcula el hash SHA256 de un archivo.
- */
-const calculateFileHash = (filePath) => {
-  return new Promise((resolve, reject) => {
-    const hash = crypto.createHash('sha256');
-    const stream = fs.createReadStream(filePath);
-    stream.on('data', (chunk) => hash.update(chunk));
-    stream.on('end', () => resolve(hash.digest('hex')));
-    stream.on('error', (err) => reject(err));
-  });
-};
-
-/**
  * Extrae una pista de subtítulos en formato WebVTT.
  * Se extrae la pista indicada (según su índice en el contenedor) y se guarda en un archivo.
  */
@@ -174,6 +159,9 @@ const extractSubtitleTrack = (filePath, subtitleOrder, outputSubPath) => {
 const transcode = async (filePath, fileHash, onProgress) => {
   return new Promise(async (resolve, reject) => {
     const fileName = fileHash;
+    // Arrays y objetos para manejar la nomenclatura de los archivos de subtítulos
+    const availableSubtitles = [];
+    let availableResolutions = [];
     const localDir = `vod/${fileName}`;
     makeDir(localDir);
 
@@ -183,10 +171,21 @@ const transcode = async (filePath, fileHash, onProgress) => {
         return reject(err);
       }
 
+      const validCodecs = [
+        'h264',
+        'hevc',
+        'vp9',
+        'av1', // Códecs de video modernos
+        'mpeg4',
+        'theora', // Códecs de video antiguos
+      ];
+
       // Selecciona el stream de video principal que no sea MJPEG.
       const primaryVideoStream = data.streams.find(
-        (item) => item.codec_type === 'video' && item.codec_name !== 'mjpeg'
+        (item) =>
+          item.codec_type === 'video' && validCodecs.includes(item.codec_name)
       );
+
       if (!primaryVideoStream) {
         console.error(
           'No se encontró un stream de video principal (no MJPEG) en el archivo.'
@@ -197,9 +196,11 @@ const transcode = async (filePath, fileHash, onProgress) => {
           )
         );
       }
+
       const primaryVideoIndex = primaryVideoStream.index;
       const originalWidth = primaryVideoStream.width;
       const originalHeight = primaryVideoStream.height;
+      const duration = primaryVideoStream.duration;
 
       // Detecta las pistas de audio compatibles.
       const audioStreams = await detectCompatibleAudioStreams(filePath);
@@ -245,13 +246,8 @@ const transcode = async (filePath, fileHash, onProgress) => {
         abr: qualities[maxQuality - 1].abr,
       };
 
-      // Genera las opciones de salida para cada calidad.
-      const outputOptions = generateOutputOptions(
-        qualities,
-        audioStreams,
-        subtitleStreams,
-        primaryVideoIndex
-      );
+      // Se arma un array solo con las alturas disponibles para las resoluciones
+      availableResolutions = qualities.map((q) => q.h);
 
       console.log(`Generando ${maxQuality} calidades para el video.`);
 
@@ -319,7 +315,6 @@ const transcode = async (filePath, fileHash, onProgress) => {
             `El archivo ${outputFile} ya existe en MinIO. Saltando...`
           );
         } else {
-          const transcodedFileHash = await calculateFileHash(outputFile);
           await new Promise((resolveUpload, rejectUpload) => {
             uploadToMinIO(outputFile, remotePath, (error) => {
               if (error) {
@@ -338,10 +333,7 @@ const transcode = async (filePath, fileHash, onProgress) => {
 
       // --- Extracción y subida de pistas de subtítulos ---
       if (subtitleStreams.length > 0) {
-        console.log(
-          'Extrayendo pistas de subtítulos:',
-          subtitleStreams.length
-        );
+        console.log('Extrayendo pistas de subtítulos:', subtitleStreams.length);
         // Se crean dos contadores separados: uno para pistas forzadas y otro para las no forzadas.
         let normalLangCount = {};
         let forcedLangCount = {};
@@ -349,8 +341,10 @@ const transcode = async (filePath, fileHash, onProgress) => {
           // Se obtiene el idioma del stream, o 'und' (indefinido) si no se especifica.
           const language = (stream.tags && stream.tags.language) || 'und';
           // Se verifica si el stream de subtítulos está marcado como forzado.
-          const isForced = stream.disposition && stream.disposition.forced === 1;
+          const isForced =
+            stream.disposition && stream.disposition.forced === 1;
           let fileNameSubtitle;
+          let fileNameWithOutExtension;
           if (isForced) {
             // Se incrementa el contador para pistas forzadas de ese idioma.
             forcedLangCount[language] = (forcedLangCount[language] || 0) + 1;
@@ -359,6 +353,8 @@ const transcode = async (filePath, fileHash, onProgress) => {
               forcedLangCount[language] > 1
                 ? `forced-${language}_${forcedLangCount[language]}.vtt`
                 : `forced-${language}.vtt`;
+            fileNameWithOutExtension = fileNameSubtitle.replace('.vtt', '');
+            availableSubtitles.push(fileNameWithOutExtension);
           } else {
             // Se incrementa el contador para pistas no forzadas de ese idioma.
             normalLangCount[language] = (normalLangCount[language] || 0) + 1;
@@ -367,9 +363,12 @@ const transcode = async (filePath, fileHash, onProgress) => {
               normalLangCount[language] > 1
                 ? `${language}_${normalLangCount[language]}.vtt`
                 : `${language}.vtt`;
+            fileNameWithOutExtension = fileNameSubtitle.replace('.vtt', '');
+            availableSubtitles.push(fileNameWithOutExtension);
           }
           // Ruta local donde se guardará el archivo de subtítulos extraído.
           const outputSubtitle = `${localDir}/${fileNameSubtitle}`;
+
           try {
             // Se extrae la pista de subtítulos utilizando su índice en el contenedor.
             await extractSubtitleTrack(filePath, stream.index, outputSubtitle);
@@ -383,7 +382,6 @@ const transcode = async (filePath, fileHash, onProgress) => {
                 `El archivo ${outputSubtitle} ya existe en MinIO. Saltando...`
               );
             } else {
-              const subHash = await calculateFileHash(outputSubtitle);
               await new Promise((resolveUpload, rejectUpload) => {
                 uploadToMinIO(outputSubtitle, remoteSubtitlePath, (error) => {
                   if (error) {
@@ -407,14 +405,17 @@ const transcode = async (filePath, fileHash, onProgress) => {
           }
         }
       } else {
-        console.warn(
-          'No se encontraron pistas de subtítulos para extraer.'
-        );
+        console.warn('No se encontraron pistas de subtítulos para extraer.');
       }
 
       // Una vez procesados todos los archivos, elimina el directorio temporal.
       deleteVodDirectory();
-      resolve();
+      const dataReturn = {
+        availableResolutions,
+        availableSubtitles,
+        duration,
+      };
+      resolve(dataReturn);
     });
   });
 };
