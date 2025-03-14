@@ -79,6 +79,15 @@ http {
             add_header Cache-Control no-cache;
 
         }
+
+        location ~* \.(jpg|jpeg|png|webp|gif|svg)$ {
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_pass http://${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}$request_uri;
+            proxy_cache off;
+            add_header Access-Control-Allow-Origin *;
+            add_header Access-Control-Allow-Methods "GET, HEAD, OPTIONS";
+        }
+
     }
 
     # vod media server upstream

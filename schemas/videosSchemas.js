@@ -67,7 +67,20 @@ const uploadVideoSchema = Joi.object({
   ip: Joi.string().optional(),
 });
 
+// Esquema base para el cuerpo de la solicitud
+const searchVideoSchema = Joi.object({
+  name: Joi.string().required().messages({
+    'any.required': 'El nombre del video es obligatorio',
+    'string.empty': 'El nombre no puede estar vacío',
+  }),
+  contentType: Joi.string().valid('movie', 'series').required().messages({
+    'any.required': 'El tipo de contenido es obligatorio',
+    'any.only': 'Tipo de contenido inválido (debe ser "movie" o "series")',
+  }),
+});
+
 // Exportación de los esquemas para su uso en validaciones
 module.exports = {
   uploadVideoSchema,
+  searchVideoSchema
 };

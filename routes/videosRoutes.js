@@ -4,7 +4,7 @@ const multiUpload = require('../middleware/upload'); // Middleware para manejar 
 const VideoService = require('../services/videoService'); // Servicio para gestionar la lógica de los videos
 const service = new VideoService(); // Instancia del servicio de videos
 const { validatorHandler } = require('./../middleware/validatorHandler'); // Middleware para validación de datos
-const { uploadVideoSchema } = require('./../schemas/videosSchemas'); // Esquemas de validación Joi
+const { uploadVideoSchema, searchVideoSchema } = require('./../schemas/videosSchemas'); // Esquemas de validación Joi
 const router = express.Router(); // Enrutador de Express para definir las rutas
 
 /**
@@ -78,7 +78,9 @@ router.get('/progress/:taskId', (req, res) => {
  * - Esta ruta maneja una solicitud GET para buscar videos cuyos nombres coincidan con una consulta.
  * - La consulta debe ser proporcionada como un parámetro de consulta (`name`).
  */
-router.get('/search', async (req, res, next) => {
+router.get('/search', 
+  validatorHandler(searchVideoSchema, 'query'),
+  async (req, res, next) => {
   try {
     const { name, contentType } = req.query; // Obtener el nombre y el tipo de contenido
     if (!name || name.length < 3) {

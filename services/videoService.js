@@ -5,9 +5,10 @@ const fs = require('fs'); // Para interactuar con el sistema de archivos
 const pool = require('../libs/postgresPool'); // Pool de conexiones a PostgreSQL
 const { transcode } = require('../utils/mp4-transcoder'); // Función para transcodificar videos
 const crypto = require('crypto'); // Para calcular hashes de archivos
-const { uploadToMinIO } = require('../utils/aws'); // Función para subir archivos a MinIO
+const { processCoverImage } = require('../utils/imageProcessor');
+const { uploadFileIfNotExists } = require('../utils/minioHelpers');
 const { configureAuditContext } = require('../utils/configureAuditContext');
-
+const { createTempDir, fileExists } = require('../utils/fileHelpers');
 /**
  * Clase que gestiona las operaciones relacionadas con videos.
  */
@@ -79,7 +80,6 @@ class VideoService {
     // Se obtiene una conexión individual del pool para realizar la transacción
     const client = await this.pool.connect();
     try {
-
       // Desestructuramos la información necesaria del objeto fileInfo
       const {
         name,
@@ -95,11 +95,13 @@ class VideoService {
         ip,
       } = fileInfo;
 
-      // Verificamos que los archivos de video y portada existan en el sistema
-      if (!fs.existsSync(videoFilePath))
+      if (!(await fileExists(videoFilePath))) {
         throw new Error('Archivo de video no encontrado');
-      if (!fs.existsSync(coverImagePath))
+      }
+
+      if (!(await fileExists(coverImagePath))) {
         throw new Error('Imagen de portada no encontrada');
+      }
 
       // Se calcula el hash del archivo de video para identificarlo de forma única
       const videoFileHash = await this.calculateFileHash(videoFilePath);
@@ -107,7 +109,6 @@ class VideoService {
         await fs.promises.unlink(videoFilePath);
         await fs.promises.unlink(coverImagePath);
         console.log('Archivo eliminado correctamente');
-
         throw new Error('Contenido duplicado Hash de video ya existe en la BD');
       }
 
@@ -116,18 +117,35 @@ class VideoService {
       // Se inicia una transacción para asegurar la integridad de las operaciones en la base de datos
       await client.query('BEGIN');
 
+      const localDir = `vod/${videoFileHash}`;
+      await createTempDir(localDir);
       // Se sube la imagen de portada a MinIO, construyendo la ruta remota usando el hash del video
-      const coverImageRemotePath = `vod/${videoFileHash}/cover.jpg`;
-      await uploadToMinIO(coverImagePath, coverImageRemotePath);
-      console.log(`Imagen de portada subida a MinIO: ${coverImageRemotePath}`);
+      if (coverImagePath) {
+        const processedCoverPath = `${localDir}/cover.jpg`;
+        try {
+          await processCoverImage(coverImagePath, processedCoverPath, {
+            width: 640, // Puedes ajustar estos valores según tus necesidades
+            height: 360,
+            format: 'jpeg',
+            quality: 80,
+          });
+
+          // Subir la imagen procesada a MinIO
+          const remoteCoverPath = `vod/${videoFileHash}/cover.jpg`;
+          await uploadFileIfNotExists(processedCoverPath, remoteCoverPath);
+        } catch (err) {
+          console.error(
+            'Error en el procesamiento de la imagen de portada:',
+            err
+          );
+          // Dependiendo del caso, puedes optar por continuar o abortar
+        }
+      }
 
       // Se inicia el proceso de transcodificación del video, el cual genera las distintas resoluciones y extrae subtítulos
       console.log(`Transcodificando el archivo: ${videoFilePath}`);
-      const { 
-        availableResolutions, 
-        availableSubtitles, 
-        duration 
-      } = await transcode(videoFilePath, videoFileHash, onProgress);
+      const { availableResolutions, availableSubtitles, duration } =
+        await transcode(videoFilePath, videoFileHash, onProgress);
       console.log('Resoluciones creadas:', availableResolutions);
       console.log('Subtítulos creados:', availableSubtitles);
 
@@ -151,6 +169,7 @@ class VideoService {
       if (videoResult.rows.length === 0) {
         throw new Error('No se pudo insertar el video.');
       }
+
       const videoId = videoResult.rows[0].id;
 
       // Se registra el contenido en la tabla correspondiente según el tipo de contenido
@@ -216,11 +235,11 @@ class VideoService {
 
       // Se eliminan los archivos originales para liberar espacio en el servidor
       console.log(`Eliminando el archivo original de video: ${videoFilePath}`);
-      fs.unlink(videoFilePath);
+      await fs.promises.unlink(videoFilePath);
       console.log(
         `Eliminando el archivo original de portada: ${coverImagePath}`
       );
-      fs.unlink(coverImagePath);
+      await fs.promises.unlink(coverImagePath);
 
       // Se retorna un mensaje confirmando que el proceso se completó correctamente
       return {
@@ -247,12 +266,6 @@ class VideoService {
    */
   async searchVideosByName(name, contentType) {
     try {
-      // Validación del parámetro name para asegurarse que sea una cadena de texto no vacía
-      if (!name || typeof name !== 'string' || name.trim() === '') {
-        throw new Error(
-          'El nombre del video es requerido y debe ser una cadena de texto válida.'
-        );
-      }
       let query;
       // Se construye la consulta según el tipo de contenido especificado
       if (contentType === 'movie') {
@@ -282,8 +295,12 @@ class VideoService {
 
   async getMovies() {
     try {
-      const query = 'SELECT * FROM movies ORDER BY release_year DESC';
+      const query = `
+      SELECT vi.file_hash, vi.available_resolutions ,m.* FROM movies m
+      LEFT JOIN videos vi on vi.id = m.video_id
+      ORDER BY m.release_year DESC`;
       const result = await this.pool.query(query);
+      console.log(result.rows);
       return result.rows;
     } catch (error) {
       throw new Error('Error al obtener las películas: ' + error.message);
@@ -292,7 +309,10 @@ class VideoService {
 
   async getSeries() {
     try {
-      const query = 'SELECT * FROM series ORDER BY release_year DESC';
+      const query = `
+       SELECT se.title, vi.file_hash from series se
+	      JOIN episodes ep on se.id=ep.series_id
+        JOIN videos vi on vi.id=ep.video_id;`;
       const result = await this.pool.query(query);
       return result.rows;
     } catch (error) {

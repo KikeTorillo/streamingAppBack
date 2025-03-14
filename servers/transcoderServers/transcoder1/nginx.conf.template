@@ -55,7 +55,6 @@ http {
         # Manejo de solicitudes al endpoint /minio/
         location /minio/ {
             add_header Access-Control-Allow-Headers '*'; # Permite cualquier encabezado en solicitudes CORS.
-            add_header Access-Control-Allow-Origin '*'; # Permite solicitudes desde cualquier origen.
             add_header Access-Control-Expose-Headers 'Server,range,Content-Length,Content-Range'; # Encabezados expuestos en las respuestas CORS.
             add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS'; # Métodos HTTP permitidos en CORS.
             proxy_pass http://${NGINX_MINIO_SERVER}/; # Redirige las solicitudes al servidor MinIO.
@@ -116,6 +115,21 @@ http {
             proxy_set_header X-Amz-Date $aws_auth_date;
             proxy_set_header X-Amz-Content-SHA256 e3b0c43288fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855;
             proxy_set_header Authorization $aws_token;
+        }
+
+        location /covers {
+            if ($uri ~ ^/covers/(.+)$) {
+                set $sub_path $1; # Captura todo después de /covers/ (incluyendo subdirectorios)
+                set $file_uri /videos/vod/$sub_path; # Ruta completa en MinIO
+            }
+            proxy_pass http://internal_minio$file_uri; # Redirige las solicitudes al servidor MinIO.
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Amz-Date $aws_auth_date;
+            proxy_set_header X-Amz-Content-SHA256 e3b0c43288fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855;
+            proxy_set_header Authorization $aws_token;
+            proxy_hide_header Content-Type;
+            add_header Content-Type "image/jpeg"; # Asegura que el tipo MIME es correcto
         }
 
     }
