@@ -7,9 +7,9 @@ const {
   calculateResolutions,
   determineMaxQuality,
 } = require('../utils/transcodeSettings');
-const config = require('../utils/configVideoQualities');
 const { generateOutputOptions } = require('../utils/ffmpegOptions');
 const { processSubtitles } = require('../utils/subtitleProcessor');
+const { config } = require('../config/config');
 // Configura la ruta del binario de FFmpeg usando el módulo `ffmpeg-static`.
 ffmpeg.setFfmpegPath(ffmpegStatic);
 
@@ -43,36 +43,6 @@ const detectCompatibleAudioStreams = async (filePath) => {
 };
 
 /**
- * Extrae una pista de subtítulos en formato WebVTT.
- * Se extrae la pista indicada (según su índice en el contenedor) y se guarda en un archivo.
- */
-const extractSubtitleTrack = (filePath, subtitleOrder, outputSubPath) => {
-  return new Promise((resolve, reject) => {
-    ffmpeg(filePath)
-      .output(outputSubPath)
-      .outputOptions(['-map', `0:s:${subtitleOrder}?`, '-c:s', 'webvtt'])
-      .on('start', (commandLine) => {
-        console.log(
-          `Extrayendo subtítulos (track ${subtitleOrder}) con comando: ${commandLine}`
-        );
-      })
-      .on('end', () => {
-        console.log(
-          `Subtítulos (track ${subtitleOrder}) extraídos correctamente: ${outputSubPath}`
-        );
-        resolve();
-      })
-      .on('error', (err) => {
-        console.error(
-          `Error al extraer subtítulos (track ${subtitleOrder}): ${err.message}`
-        );
-        reject(err);
-      })
-      .run();
-  });
-};
-
-/**
  * Función principal de transcodificación:
  * - Transcodifica un video en varias calidades y lo sube a MinIO.
  * - Se selecciona el stream de video principal (excluyendo MJPEG).
@@ -85,7 +55,7 @@ const transcode = async (filePath, fileHash, onProgress) => {
   // Arrays y objetos para manejar la nomenclatura de los archivos de subtítulos
   const availableSubtitles = [];
   let availableResolutions = [];
-  const localDir = `vod/${fileName}`;
+  const localDir = `${config.tempProcessingDir}/${fileName}`;
   try {
     await createTempDir(localDir);
 
@@ -164,7 +134,7 @@ const transcode = async (filePath, fileHash, onProgress) => {
     // Procesa cada calidad generada (ahora todas se re-encodean)
     for (let [index, q] of qualities.slice(0, maxQuality).entries()) {
       const outputFile = `${localDir}/_${q.h}p.mp4`;
-      const remotePath = `vod/${fileName}/_${q.h}p.mp4`;
+      const remotePath = `${config.videoDir}/${fileName}/_${q.h}p.mp4`;
 
       // Usar generateOutputOptions para obtener las opciones de salida
       const opts = generateOutputOptions(
@@ -227,15 +197,9 @@ const transcode = async (filePath, fileHash, onProgress) => {
     };
     return dataReturn;
   } catch (error) {
-    console.error('Error en el proceso de transcodificación:', error);
-    throw error;
+    throw new Error('Error en el proceso de transcodificación: '+ error);
   } finally {
-    try {
-      await deleteTempDir(localDir);
-      console.log(`Directorio temporal ${localDir} eliminado correctamente.`);
-    } catch (cleanupError) {
-      console.error('Error al eliminar el directorio temporal:', cleanupError);
-    }
+    deleteTempDir(localDir);
   }
 };
 

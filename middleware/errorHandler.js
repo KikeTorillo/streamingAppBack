@@ -29,7 +29,6 @@ function boomErrorHandler(err, req, res, next) {
     if (err.isBoom) {
         // Si el error es de tipo Boom, extrae su información estructurada.
         const { output } = err;
-        console.log('[Boom Error Output]:', output); // Registro del error Boom.
         res.status(output.statusCode).json(output.payload); // Responde con el código de estado y mensaje de Boom.
     } else {
         // Si no es un error Boom, pasa el error al siguiente middleware.
@@ -46,6 +45,7 @@ function boomErrorHandler(err, req, res, next) {
  * @param {Function} next - Función para pasar el control al siguiente middleware.
  */
 function errorHandler(err, req, res, next) {
+    //console.log(err);
     // Responde con un código de estado 500 (Internal Server Error) y detalles del error.
     res.status(500).json({
         message: err.message || 'Internal Server Error', // Mensaje descriptivo del error.

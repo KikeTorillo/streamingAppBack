@@ -69,7 +69,7 @@ http {
         location ^~ /storage {
             internal; # Restringe el acceso directo a esta ubicación desde el exterior.
             if ($uri ~ ^/storage/hls/(.*\.mp4)(/.*)?$) {
-                set $file_uri /videos/vod/$1; # Extrae el nombre del archivo MP4 y lo asigna a $file_uri.
+                set $file_uri /${NGINX_MINIO_BUCKET}/${NGINX_MINIO_VIDEO_DIR}/$1; # Extrae el nombre del archivo MP4 y lo asigna a $file_uri.
             }
             proxy_pass http://internal_minio$file_uri; # Redirige las solicitudes al servidor MinIO.
             proxy_set_header Host $host;
@@ -107,7 +107,7 @@ http {
         location /subs {
             if ($uri ~ ^/subs/(.+\.vtt)$) {
                 set $sub_path $1; # Captura todo después de /subs/ (incluyendo subdirectorios)
-                set $file_uri /videos/vod/$sub_path; # Ruta completa en MinIO
+                set $file_uri /${NGINX_MINIO_BUCKET}/${NGINX_MINIO_VIDEO_DIR}/$sub_path; # Ruta completa en MinIO
             }
             proxy_pass http://internal_minio$file_uri; # Redirige las solicitudes al servidor MinIO.
             proxy_set_header Host $host;
@@ -120,7 +120,7 @@ http {
         location /covers {
             if ($uri ~ ^/covers/(.+)$) {
                 set $sub_path $1; # Captura todo después de /covers/ (incluyendo subdirectorios)
-                set $file_uri /videos/vod/$sub_path; # Ruta completa en MinIO
+                set $file_uri /${NGINX_MINIO_BUCKET}/${NGINX_MINIO_COVERS_DIR}/$sub_path; # Ruta completa en MinIO
             }
             proxy_pass http://internal_minio$file_uri; # Redirige las solicitudes al servidor MinIO.
             proxy_set_header Host $host;

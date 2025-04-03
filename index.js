@@ -16,10 +16,13 @@ app.use(cookieParser());
 const whiteList = config.whiteList.split(',');
 const options = {
   origin: (origin, callback)=>{
+    if (!origin) {
+      return callback(null, true);
+    }
     if (whiteList.includes(origin)) {
-      callback(null,true);
-    }else{
-      callback(new Error('Error cors origen no permitido'));
+      callback(null, true);
+    } else {
+      callback(new Error('Error CORS: origen no permitido'));
     }
   },
   credentials: true

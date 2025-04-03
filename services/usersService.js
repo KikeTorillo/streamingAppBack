@@ -49,7 +49,7 @@ class UsersService {
    * @returns {Object} Datos del usuario encontrado.
    */
   async findByEmail(email) {
-    const query = `SELECT * FROM users WHERE email='${email}';`;
+    const query = `SELECT us.*,ro.name role FROM users us join roles ro on us.role_id=ro.id WHERE email='${email}';`;
     const rta = await this.pool.query(query);
     return rta.rows[0]; // Retorna el primer resultado
   }
@@ -69,7 +69,7 @@ class UsersService {
     // Encripta la contraseña
     const hash = await bcrypt.hash(body.password, 10);
     // Inserta el nuevo usuario en la base de datos
-    const query = `INSERT INTO users (email, password, role) VALUES ('${body.email}', '${hash}', '${body.role}');`;
+    const query = `INSERT INTO users (email, password, role_id) VALUES ('${body.email}', '${hash}', ${body.role});`;
     const rta = await this.pool.query(query);
     return rta.rows[0]; // Retorna el resultado de la inserción
   }

@@ -19,15 +19,15 @@ echo "MinIO está listo."
 mc alias set myminio http://${MINIO_HOST}:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}
 
 # Crear el bucket 'videos'
-if mc ls myminio/videos > /dev/null 2>&1; then
-  echo "El bucket 'videos' ya existe."
+if mc ls myminio/${MINIO_BUCKET} > /dev/null 2>&1; then
+  echo "El bucket ${MINIO_BUCKET} ya existe."
 else
-  echo "Creando el bucket 'videos'..."
-  mc mb myminio/videos
+  echo "Creando el bucket..."
+  mc mb myminio/${MINIO_BUCKET}
 fi
 
 # Crear un objeto vacío para la subcarpeta 'vod'
-echo "Creando la subcarpeta 'vod' dentro del bucket 'videos'..."
-mc cp /dev/null myminio/videos/vod/
+#echo "Creando la subcarpeta 'vod' dentro del bucket 'videos'..."
+#mc cp /dev/null myminio/${MINIO_BUCKET}/vod/
 
 echo "Inicialización completada."

@@ -17,7 +17,6 @@ function validatorHandler(schema, property) {
         
         // Valida los datos utilizando el esquema Joi
         const { error } = schema.validate(data, { abortEarly: false }); // abortEarly: false permite capturar todos los errores
-        
         if (error) {
             // Si hay errores de validación, pasa un error 400 (Bad Request) con detalles
             next(boom.badRequest('Validation error', error)); // Envía el error al siguiente middleware de error

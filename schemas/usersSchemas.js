@@ -9,7 +9,7 @@ const Joi = require('joi');
 const id = Joi.number().id(); // ID numérico (puede ser personalizado con .id() si se usa una extensión)
 const email = Joi.string().email(); // Email válido según formato estándar
 const password = Joi.string().alphanum(); // Contraseña alfanumérica
-const role = Joi.string(); // Rol del usuario (cadena de texto)
+const role = Joi.number(); // Rol del usuario (cadena de texto)
 const token = Joi.string(); // Token de autenticación o recuperación
 
 /**
@@ -29,7 +29,7 @@ const createUserSchema = Joi.object({
 const updateUserSchema = Joi.object({
     email: email, // Email opcional (se valida si se proporciona)
     password: password, // Contraseña opcional (se valida si se proporciona)
-    role: role, // Rol opcional (se valida si se proporciona)
+    role_id: role, // Rol opcional (se valida si se proporciona)
 });
 
 /**

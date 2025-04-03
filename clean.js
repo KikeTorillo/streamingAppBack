@@ -40,7 +40,7 @@ const localFolders = [
   './servers/minio/aws3DataMinio',
   './servers/postgresQl/postgres_data',
   './uploads',
-  './vod'
+  './tempProcessinDir'
 ];
 
 // Ejecutar el proceso

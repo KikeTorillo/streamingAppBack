@@ -14,8 +14,11 @@ const config = {
     email: process.env.EMAIL,
     passEmail: process.env.PASSEMAIL,
     urlFront: process.env.NODE_ENV === 'produccion' ? process.env.FRONT_URL_PROD : process.env.FRONT_URL_LOCAL,
-    whiteList: process.env.WHITE_lIST
-
+    whiteList: process.env.WHITE_lIST,
+    bucket: process.env.MINIO_BUCKET,
+    videoDir: process.env.MINIO_VIDEO_DIR,
+    coversDir: process.env.MINIO_COVERS_DIR,
+    tempProcessingDir: process.env.TEMP_PROCESSING_DIR
 }
 
 module.exports = {config};

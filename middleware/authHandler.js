@@ -27,7 +27,6 @@ function checkApiKey(req, res, next) {
  */
 function authenticateJwt(req, res, next) {
     const token = req.cookies.access_token; // Obtener token de las cookies
-    
     if (!token) {
         throw boom.unauthorized('Session expired or invalid'); // Error si no hay token
     }
@@ -50,7 +49,6 @@ function authenticateJwt(req, res, next) {
 function checkRoles(roles) {
     return (req, res, next) => {
         const userRole = req.user?.role; // Obtener rol del usuario
-        
         if (roles.includes(userRole)) {
             next(); // Rol autorizado - continuar
         } else {

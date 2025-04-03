@@ -1,5 +1,5 @@
 // utils/ffmpegOptions.js
-const config = require('../utils/configVideoQualities');
+const { videoConfig } = require('./configMediaQualities');
 
 /**
  * Genera las opciones de FFmpeg para la parte de video.
@@ -10,8 +10,8 @@ const generateVideoOptions = (q, index, maxQuality, primaryVideoIndex) => {
   opts.push(
     '-profile:v',
     index === maxQuality - 1
-      ? config.transcode.profile.high
-      : config.transcode.profile.standard
+      ? videoConfig.transcode.profile.high
+      : videoConfig.transcode.profile.standard
   );
   opts.push('-map', `0:v:${primaryVideoIndex}`);
   opts.push('-vf', `scale=${q.w}:${q.h}`);
@@ -19,8 +19,8 @@ const generateVideoOptions = (q, index, maxQuality, primaryVideoIndex) => {
   opts.push(
     '-crf',
     index === maxQuality - 1
-      ? config.transcode.crf.high
-      : config.transcode.crf.standard
+      ? videoConfig.transcode.crf.high
+      : videoConfig.transcode.crf.standard
   );
   opts.push('-maxrate', `${q.vbr}k`);
   opts.push('-bufsize', `${q.vbr}k`);
@@ -56,13 +56,25 @@ const generateSubtitleOptions = (subtitleStreams) => {
 /**
  * Combina las opciones de video, audio y subtítulos.
  */
-const generateOutputOptions = (q, index, maxQuality, primaryVideoIndex, audioStreams, subtitleStreams) => {
-  const videoOpts = generateVideoOptions(q, index, maxQuality, primaryVideoIndex);
+const generateOutputOptions = (
+  q,
+  index,
+  maxQuality,
+  primaryVideoIndex,
+  audioStreams,
+  subtitleStreams
+) => {
+  const videoOpts = generateVideoOptions(
+    q,
+    index,
+    maxQuality,
+    primaryVideoIndex
+  );
   const audioOpts = generateAudioOptions(audioStreams, q);
   const subtitleOpts = generateSubtitleOptions(subtitleStreams);
   return [...videoOpts, ...audioOpts, ...subtitleOpts];
 };
 
 module.exports = {
-  generateOutputOptions
+  generateOutputOptions,
 };

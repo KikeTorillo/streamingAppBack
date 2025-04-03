@@ -48,7 +48,6 @@ CREATE INDEX ON users (recovery_token) WHERE recovery_token IS NOT NULL; -- Bús
 ----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS videos (
     id SERIAL PRIMARY KEY,
-    description TEXT,                      -- Descripción opcional
     file_hash VARCHAR(64) UNIQUE NOT NULL, -- Hash único del archivo de video
     available_resolutions JSONB,           -- Resoluciones disponibles (puede considerarse una tabla separada si se requieren búsquedas complejas)
     available_subtitles JSONB,             -- Subtítulos disponibles
@@ -69,6 +68,7 @@ CREATE INDEX IF NOT EXISTS idx_videos_subtitles ON videos USING GIN (available_s
 ----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS series (
     id SERIAL PRIMARY KEY,
+    title_hash VARCHAR(64) UNIQUE NOT NULL,
     title VARCHAR(255) NOT NULL,         -- Título de la serie
     title_normalized VARCHAR(255) GENERATED ALWAYS AS (LOWER(title)) STORED,
     description TEXT,                      -- Descripción opcional
@@ -90,7 +90,6 @@ CREATE INDEX IF NOT EXISTS idx_series_title_trgm ON series USING GIN (title gin_
 CREATE TABLE IF NOT EXISTS episodes (
     id SERIAL PRIMARY KEY,
     series_id INT NOT NULL REFERENCES series(id) ON DELETE CASCADE,  -- Relación con la serie
-    title VARCHAR(255) NOT NULL,           -- Título del episodio
     season INT NOT NULL,                   -- Temporada del episodio
     episode_number INT NOT NULL,           -- Número del episodio
     video_id INT NOT NULL REFERENCES videos(id) ON DELETE CASCADE,    -- Relación con el video correspondiente
@@ -101,7 +100,6 @@ CREATE TABLE IF NOT EXISTS episodes (
     CONSTRAINT chk_season_episode_positive CHECK (season > 0 AND episode_number > 0)
 );
 
-CREATE INDEX IF NOT EXISTS idx_episodes_title ON episodes(title);
 CREATE INDEX IF NOT EXISTS idx_episodes_series ON episodes(series_id);
 CREATE INDEX IF NOT EXISTS idx_episodes_video ON episodes(video_id);
 
@@ -112,6 +110,7 @@ CREATE INDEX IF NOT EXISTS idx_episodes_video ON episodes(video_id);
 ----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS movies (
     id SERIAL PRIMARY KEY,
+    title_hash VARCHAR(64) UNIQUE NOT NULL,
     title VARCHAR(255) NOT NULL,         -- Título de la película
     title_normalized VARCHAR(255) GENERATED ALWAYS AS (LOWER(title)) STORED,
     description TEXT,                      -- Descripción opcional

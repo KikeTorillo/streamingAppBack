@@ -2,8 +2,10 @@
 
 // Importación de las rutas que se utilizarán en la aplicación
 const authRouter = require('./authRouter'); // Rutas relacionadas con autenticación
-const videosRoutes = require('./videosRoutes'); // Rutas relacionadas con videos
-
+const moviesRoutes = require('./moviesRoutes');
+const seriesRoutes = require('./seriesRoutes');
+const categoryRoutes = require('./categoryRoutes');
+const usersRoutes = require('./usersRoutes');
 // Importación de Express para manejo de rutas
 const express = require('express');
 
@@ -32,9 +34,11 @@ function routerApi(app) {
    * Registro de las rutas específicas dentro de la versión '/api/v1'.
    * Cada conjunto de rutas se asocia con un recurso específico.
    */
-  router.use('/videos', videosRoutes); // Rutas relacionadas con videos
   router.use('/auth', authRouter); // Rutas relacionadas con autenticación
-  // router.use('/users', usersRouter); // Rutas relacionadas con usuarios (comentado por ahora)
+  router.use('/movies', moviesRoutes);
+  router.use('/series', seriesRoutes);
+  router.use('/category', categoryRoutes);
+  router.use('/users', usersRoutes); // Rutas relacionadas con usuarios (comentado por ahora)
 }
 
 // Exportación de la función para ser utilizada en la aplicación principal

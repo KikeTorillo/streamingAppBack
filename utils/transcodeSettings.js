@@ -1,5 +1,5 @@
 // utils/transcodeSettings.js
-const config = require('./configVideoQualities');
+const { videoConfig } = require('./configMediaQualities');
 
 /**
  * Calcula las resoluciones basadas en la proporción del video original y
@@ -11,7 +11,7 @@ const config = require('./configVideoQualities');
  */
 const calculateResolutions = (originalWidth, originalHeight) => {
   const aspectRatio = originalWidth / originalHeight;
-  return config.transcode.baseQualities.map((q) => {
+  return videoConfig.transcode.baseQualities.map((q) => {
     let newWidth = Math.round(q.h * aspectRatio);
     if (newWidth % 2 !== 0) {
       newWidth += 1;
@@ -44,5 +44,5 @@ const determineMaxQuality = (originalHeight) => {
 
 module.exports = {
   calculateResolutions,
-  determineMaxQuality
+  determineMaxQuality,
 };

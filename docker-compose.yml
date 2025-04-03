@@ -37,6 +37,9 @@ services:
       - NGINX_MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
       - NGINX_SECRET_KEY=${MINIO_ROOT_PASSWORD}
       - NGINX_REGION=${MINIO_REGION}
+      - NGINX_MINIO_BUCKET=${MINIO_BUCKET}
+      - NGINX_MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
+      - NGINX_MINIO_COVERS_DIR=${MINIO_COVERS_DIR}
     volumes:
       - ./servers/transcoderServers/transcoder1/nginx_cache:/var/cache/nginx # Monta un volumen para almacenar la caché de NGINX.
       - ./servers/transcoderServers/transcoder1/index.html:/nginx-1.26.3/html/index.html # Monta un archivo HTML personalizado.
@@ -59,6 +62,9 @@ services:
       - NGINX_MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
       - NGINX_SECRET_KEY=${MINIO_ROOT_PASSWORD}
       - NGINX_REGION=${MINIO_REGION}
+      - NGINX_MINIO_BUCKET=${MINIO_BUCKET}
+      - NGINX_MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
+      - NGINX_MINIO_COVERS_DIR=${MINIO_COVERS_DIR}
     volumes:
       - ./servers/transcoderServers/transcoder2/nginx_cache:/var/cache/nginx # Monta un volumen para almacenar la caché de NGINX.
       - ./servers/transcoderServers/transcoder2/index.html:/nginx-1.26.3/html/index.html # Monta un archivo HTML personalizado.
@@ -92,6 +98,7 @@ services:
       - MINIO_HOST=${NGINX_IP_ADDRESS_MINIO} # Dirección IP o nombre del servicio MinIO
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET}
     volumes:
       - ./servers/minio/init-minio.sh:/init-minio.sh # Monta el script de inicialización
     entrypoint: [ "/bin/sh", "/init-minio.sh" ] # Ejecuta el script al iniciar el contenedor

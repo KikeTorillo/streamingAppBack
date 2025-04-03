@@ -60,7 +60,7 @@ async function updateTable(tableName, id, body) {
     }
 
     // Agrega la condición WHERE para identificar el registro a actualizar
-    queryUpdate += ` WHERE id=${id};`;
+    queryUpdate += ` WHERE id=${id} RETURNING id;`;
 
     // Ejecuta la consulta SQL de actualización
     const rta = await pool.query(queryUpdate);
