@@ -1,0 +1,20 @@
+meta {
+  name: Create Episode
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{BACKEND_URL}}/api/v1/episodes
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  serieId: 2
+  season: 1
+  episodeNumber: 3
+  video: @file(/home/kike/Vídeos/prueba4.mp4)
+  title: prueba
+  description: prueba
+}

@@ -1,0 +1,11 @@
+meta {
+  name: Get categories
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BACKEND_URL}}/api/v1/category
+  body: none
+  auth: inherit
+}

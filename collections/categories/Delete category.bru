@@ -1,0 +1,11 @@
+meta {
+  name: Delete category
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{BACKEND_URL}}/api/v1/category/16
+  body: json
+  auth: inherit
+}

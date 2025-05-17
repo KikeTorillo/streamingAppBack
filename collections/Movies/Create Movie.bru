@@ -1,0 +1,20 @@
+meta {
+  name: Create Movie
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{BACKEND_URL}}/api/v1/movies
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  title: prueba2
+  categoryId: 1
+  releaseYear: 2000
+  video: @file(/home/kike/Vídeos/prueba2.mp4)
+  coverImage: @file(/home/kike/Vídeos/mrRobot.jpg)
+  description: prueba2
+}

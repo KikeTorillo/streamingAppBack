@@ -1,0 +1,151 @@
+version: '3.8' # Versión del formato de Docker Compose (3.8 es compatible con características avanzadas).
+
+services:
+  # Servicio CDN1: Servidor web basado en NGINX.
+  cdn1:
+    build:
+      context: ./servers
+      args:
+        - TEMPLATE_FILE=./cdn/nginx.conf.template
+    environment:
+      - NGINX_IP_ADDRESS=${NGINX_IP_ADDRESS_CDN}
+      - NGINX_SERVER1_PORT=${NGINX_CDN_SERVER1_PORT}
+      - NGINX_SERVER2_PORT=${NGINX_CDN_SERVER2_PORT}
+      - NGINX_TRANSCODER1=${NGINX_IP_ADDRESS_TRANSCODER1}
+      - NGINX_TRANSCODER2=${NGINX_IP_ADDRESS_TRANSCODER2}
+    volumes:
+      - ./servers/cdn/nginx_cache:/var/cache/nginx # Monta un volumen para almacenar la caché de NGINX.
+      - ./servers/cdn/index.html:/nginx-1.26.3/html/index.html # Monta un archivo HTML personalizado.
+    networks:
+      lan:
+        ipv4_address: ${NGINX_IP_ADDRESS_CDN} # Asigna una dirección IP estática dentro de la red "lan".
+    restart: always # Garantiza que el contenedor siempre se reinicie si se detiene.
+    ports:
+      - "8082:80" # Mapea el puerto 80 del contenedor al puerto 8082 del host (accede en http://localhost:8082).
+
+  # Servicio Transcoder1: Servidor web para transcodificación o procesamiento multimedia.
+  transcoder1:
+    build:
+      context: ./servers
+      args:
+        - TEMPLATE_FILE=./transcoderServers/transcoder1/nginx.conf.template
+    environment:
+      - NGINX_IP_ADDRESS= ${NGINX_IP_ADDRESS_TRANSCODER1}
+      - NGINX_SERVER1_PORT=${NGINX_TRANSCODER1_SERVER1_PORT}
+      - NGINX_SERVER2_PORT=${NGINX_TRANSCODER1_SERVER2_PORT}
+      - NGINX_MINIO_SERVER=${NGINX_IP_ADDRESS_MINIO}:9000
+      - NGINX_MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - NGINX_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - NGINX_REGION=${MINIO_REGION}
+      - NGINX_MINIO_BUCKET=${MINIO_BUCKET}
+      - NGINX_MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
+      - NGINX_MINIO_COVERS_DIR=${MINIO_COVERS_DIR}
+    volumes:
+      - ./servers/transcoderServers/transcoder1/nginx_cache:/var/cache/nginx # Monta un volumen para almacenar la caché de NGINX.
+      - ./servers/transcoderServers/transcoder1/index.html:/nginx-1.26.3/html/index.html # Monta un archivo HTML personalizado.
+    networks:
+      lan:
+        ipv4_address: ${NGINX_IP_ADDRESS_TRANSCODER1} # Asigna una dirección IP estática dentro de la red "lan".
+    restart: always # Garantiza que el contenedor siempre se reinicie si se detiene.
+
+  # Servicio Transcoder2: Otro servidor web para transcodificación o procesamiento multimedia.
+  transcoder2:
+    build:
+      context: ./servers
+      args:
+        - TEMPLATE_FILE=./transcoderServers/transcoder2/nginx.conf.template
+    environment:
+      - NGINX_IP_ADDRESS=${NGINX_IP_ADDRESS_TRANSCODER2}
+      - NGINX_SERVER1_PORT=${NGINX_TRANSCODER2_SERVER1_PORT}
+      - NGINX_SERVER2_PORT=${NGINX_TRANSCODER2_SERVER2_PORT}
+      - NGINX_MINIO_SERVER=${NGINX_IP_ADDRESS_MINIO}:9000
+      - NGINX_MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - NGINX_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - NGINX_REGION=${MINIO_REGION}
+      - NGINX_MINIO_BUCKET=${MINIO_BUCKET}
+      - NGINX_MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
+      - NGINX_MINIO_COVERS_DIR=${MINIO_COVERS_DIR}
+    volumes:
+      - ./servers/transcoderServers/transcoder2/nginx_cache:/var/cache/nginx # Monta un volumen para almacenar la caché de NGINX.
+      - ./servers/transcoderServers/transcoder2/index.html:/nginx-1.26.3/html/index.html # Monta un archivo HTML personalizado.
+    networks:
+      lan:
+        ipv4_address: ${NGINX_IP_ADDRESS_TRANSCODER2} # Asigna una dirección IP estática dentro de la red "lan".
+    restart: always # Garantiza que el contenedor siempre se reinicie si se detiene.
+
+  # Servicio MinIO: Servidor de almacenamiento compatible con Amazon S3.
+  minio:
+    image: quay.io/minio/minio # Usa la imagen oficial de MinIO.
+    container_name: minio # Asigna un nombre específico al contenedor.
+    command: server /data --console-address ":9001" # Inicia el servidor MinIO en el directorio "/data" y habilita la consola en el puerto 9001.
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER} # Define el usuario administrador.
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD} # Establece la contraseña del usuario administrador.
+      - MINIO_REGION=${MINIO_REGION} # Configura la región del servidor.
+    ports:
+      - "9000:9000" # Puerto para acceder al API de MinIO.
+      - "9001:9001" # Puerto para acceder a la interfaz de administración web.
+    volumes:
+      - ./servers/minio/aws3DataMinio:/data # Monta un volumen local para almacenar los datos de MinIO.
+    networks:
+      lan:
+        ipv4_address: ${NGINX_IP_ADDRESS_MINIO} # Asigna una dirección IP estática dentro de la red "lan".
+  minio-init:
+    image: alpine:latest # Usa una imagen base que permita instalar herramientas adicionales
+    depends_on:
+      - minio # Asegura que el servicio MinIO esté iniciado antes de ejecutar este script
+    environment:
+      - MINIO_HOST=${NGINX_IP_ADDRESS_MINIO} # Dirección IP o nombre del servicio MinIO
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+    volumes:
+      - ./servers/minio/init-minio.sh:/init-minio.sh # Monta el script de inicialización
+    entrypoint: [ "/bin/sh", "/init-minio.sh" ] # Ejecuta el script al iniciar el contenedor
+    networks:
+      lan: 
+        ipv4_address: ${IP_ADDRESS_MINIO_INIT}
+  postgres:
+    image: postgres:17 # Usa la imagen oficial de PostgreSQL versión 17.
+    environment:
+      - POSTGRES_DB=${DB_NAME} # Crea una base de datos llamada "my_api".
+      - POSTGRES_USER=${DB_USER} # Define un usuario de PostgreSQL llamado "kike".
+      - POSTGRES_PASSWORD=${DB_PASSWORD} # Establece la contraseña para el usuario "kike".
+      - TZ=America/Mexico_City # Configura la zona horaria aquí
+    volumes:
+      - ./servers/postgresQl/postgres_data:/var/lib/postgresql/data
+      - ./servers/postgresQl/init.sql:/docker-entrypoint-initdb.d/init.sql # Script de inicialización
+    networks:
+      lan:
+        ipv4_address: ${IP_ADDRESS_POSTGRESQL} # Asigna una dirección IP estática dentro de la red "lan".
+    ports:
+      - 5432:5432
+    command: >  # <--- Esto es clave
+      bash -c "
+        apt-get update &&
+        apt-get install -y postgresql-contrib &&
+        docker-entrypoint.sh postgres
+      "
+
+  # Servicio pgAdmin: Herramienta de administración gráfica para PostgreSQL.
+  pgadmin:
+    image: dpage/pgadmin4 # Usa la imagen oficial de pgAdmin 4.
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PG_EMAIL} # Configura el correo electrónico del usuario administrador.
+      - PGADMIN_DEFAULT_PASSWORD=${PG_PASSWORD} # Establece la contraseña del usuario administrador.
+    networks:
+      lan:
+        ipv4_address: ${IP_ADDRESS_PGADMIN} # Asigna una dirección IP estática dentro de la red "lan".
+    ports:
+      - 5050:80 # Mapea el puerto 80 del contenedor al puerto 5050 del host (accede a pgAdmin en http://localhost:5050).
+
+# Definición de la red personalizada.
+networks:
+  lan:
+    name: lan # Nombre de la red personalizada.
+    driver: bridge # Usa el controlador de red "bridge" de Docker.
+    ipam:
+      # Configuración del administrador de direcciones IP.
+      config:
+        - subnet: ${SUBNET} # Define la subred para la red.
+          gateway: ${GATEWAY} # Establece la puerta de enlace para la red.

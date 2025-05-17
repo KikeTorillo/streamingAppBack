@@ -1,0 +1,11 @@
+meta {
+  name: Delete Movie
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{BACKEND_URL}}/api/v1/movies/1
+  body: multipartForm
+  auth: inherit
+}

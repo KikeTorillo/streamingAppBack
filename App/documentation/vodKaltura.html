@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación del Módulo NGINX VOD</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        section {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            color: #e74c3c;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .note {
+            background: #fffae6;
+            border-left: 4px solid #f1c40f;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Documentación del Módulo NGINX VOD</h1>
+
+    <section>
+        <h2>Introducción</h2>
+        <p>El módulo <strong>nginx-vod-module</strong> es un empaquetador de video bajo demanda (VOD) basado en NGINX. Permite la reempaquetación en tiempo real de archivos MP4 a formatos como DASH, HDS, HLS y MSS.</p>
+        <p>Para transmisión de video en vivo, por favor utiliza <a href="#">Media-Framework</a>.</p>
+    </section>
+
+    <section>
+        <h2>Características Principales</h2>
+        <ul>
+            <li><strong>Modos de funcionamiento:</strong>
+                <ul>
+                    <li><strong>Local:</strong> Sirve archivos accesibles localmente (disco local/montados NFS).</li>
+                    <li><strong>Remoto:</strong> Sirve archivos accesibles a través de HTTP utilizando solicitudes de rango.</li>
+                    <li><strong>Mapeado:</strong> Sirve archivos según una especificación codificada en formato JSON.</li>
+                </ul>
+            </li>
+            <li><strong>Soporte para bitrate adaptativo.</strong></li>
+            <li><strong>Soporte para listas de reproducción:</strong> Reproduce varios archivos de medios uno tras otro (solo modo mapeado).</li>
+            <li><strong>Simulación de transmisión en vivo:</strong> Genera una transmisión en vivo desde archivos MP4 (solo modo mapeado).</li>
+            <li><strong>Códecs de video:</strong> H264, H265 (DASH/HLS), AV1 (DASH/HLS), VP8 (DASH), VP9 (DASH).</li>
+            <li><strong>Códecs de audio:</strong> AAC, MP3 (HLS/HDS/MSS), AC-3 (DASH/HLS), E-AC-3 (DASH/HLS), VORBIS (DASH), OPUS (DASH), FLAC (HLS), DTS (HLS).</li>
+            <li><strong>Soporte para subtítulos:</strong>
+                <ul>
+                    <li><strong>Entrada:</strong> WebVTT, SRT, DFXP/TTML, CAP (Cheetah).</li>
+                    <li><strong>Salida:</strong> DASH (WebVTT o SMPTE-TT), HLS (segmentado WebVTT), MSS (convertido a TTML).</li>
+                </ul>
+            </li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Limitaciones</h2>
+        <ul>
+            <li>La selección de pistas y el cambio de velocidad de reproducción no están soportados en descarga progresiva.</li>
+            <li>La generación de listas de fotogramas I no está soportada cuando el cifrado está habilitado.</li>
+            <li>Probado solo en Linux.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Compilación</h2>
+        <h3>Dependencias</h3>
+        <p>En general, si tienes las dependencias necesarias para compilar NGINX, deberías poder compilar nginx-vod-module. Sin embargo, algunas características opcionales dependen de paquetes adicionales:</p>
+        <ul>
+            <li><strong>Captura de miniaturas y mapa de volumen:</strong> Dependencia de ffmpeg (3.0 o superior).</li>
+            <li><strong>Filtrado de audio (cambio de velocidad/ganancia):</strong> Dependencia de ffmpeg (3.0 o superior) y libfdk_aac.</li>
+            <li><strong>Cifrado/descifrado (DRM/HLS AES):</strong> Dependencia de openssl.</li>
+            <li><strong>Subtítulos DFXP:</strong> Dependencia de libxml2.</li>
+            <li><strong>Archivos SRT codificados en UTF-16:</strong> Dependencia de iconv.</li>
+        </ul>
+        <h3>Instrucciones de Compilación</h3>
+        <pre>
+# Para vincular estáticamente con NGINX:
+./configure --add-module=/ruta/al/nginx-vod-module
+make
+make install
+
+# Para compilar como un módulo dinámico (NGINX 1.9.11+):
+./configure --add-dynamic-module=/ruta/al/nginx-vod-module
+        </pre>
+    </section>
+
+    <section>
+        <h2>Instalación</h2>
+        <h3>RHEL/CentOS 6/7 RPM</h3>
+        <pre>
+# rpm -ihv http://installrepo.kaltura.org/releases/kaltura-release.noarch.rpm
+# yum install kaltura-nginx
+        </pre>
+        <h3>Debian/Ubuntu deb package</h3>
+        <pre>
+# apt-get update
+# apt-get install kaltura-nginx
+        </pre>
+    </section>
+
+    <section>
+        <h2>Estructura de URL</h2>
+        <p>La estructura básica de una URL de nginx-vod-module es:</p>
+        <code>http://dominio/ubicación/archivo</code>
+        <p>Donde:</p>
+        <ul>
+            <li><strong>dominio:</strong> El dominio del servidor nginx-vod-module.</li>
+            <li><strong>ubicación:</strong> La ubicación especificada en la configuración de NGINX.</li>
+            <li><strong>archivo:</strong> Una URI al archivo MP4.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Configuración de Directivas</h2>
+        <h3>Directivas Base</h3>
+        <table>
+            <tr>
+                <th>Directiva</th>
+                <th>Descripción</th>
+            </tr>
+            <tr>
+                <td><code>vod</code></td>
+                <td>Habilita el módulo en la ubicación especificada.</td>
+            </tr>
+            <tr>
+                <td><code>vod_mode</code></td>
+                <td>Establece el modo de acceso a archivos (local, remoto o mapeado).</td>
+            </tr>
+            <tr>
+                <td><code>vod_status</code></td>
+                <td>Habilita la página de estado de nginx-vod.</td>
+            </tr>
+        </table>
+        <h3>Directivas de Segmentación</h3>
+        <table>
+            <tr>
+                <th>Directiva</th>
+                <th>Descripción</th>
+            </tr>
+            <tr>
+                <td><code>vod_segment_duration</code></td>
+                <td>Establece la duración de los segmentos en milisegundos.</td>
+            </tr>
+            <tr>
+                <td><code>vod_live_window_duration</code></td>
+                <td>Define la duración total de los segmentos en un manifiesto en vivo.</td>
+            </tr>
+        </table>
+    </section>
+
+    <footer>
+        <p>&copy; Kaltura Inc. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

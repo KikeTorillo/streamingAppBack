@@ -1,0 +1,19 @@
+meta {
+  name: Update Movie
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{BACKEND_URL}}/api/v1/movies/2
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  title: cambio
+  description: cambio
+  categoryId: 2
+  releaseYear: 2001
+  coverImage: @file(/home/kike/Vídeos/prueba.jpg)
+}

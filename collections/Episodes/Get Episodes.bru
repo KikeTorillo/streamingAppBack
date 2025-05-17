@@ -1,0 +1,17 @@
+meta {
+  name: Get Episodes
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BACKEND_URL}}/api/v1/episodes?serieId=3
+  body: none
+  auth: inherit
+}
+
+params:query {
+  serieId: 3
+  ~season: 1
+  ~episodeNumber: 1
+}

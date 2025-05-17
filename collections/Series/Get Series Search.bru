@@ -1,0 +1,15 @@
+meta {
+  name: Get Series Search
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{BACKEND_URL}}/api/v1/series/search?title=ser
+  body: none
+  auth: inherit
+}
+
+params:query {
+  title: ser
+}

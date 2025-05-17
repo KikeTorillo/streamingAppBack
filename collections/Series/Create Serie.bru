@@ -1,0 +1,19 @@
+meta {
+  name: Create Serie
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{BACKEND_URL}}/api/v1/series
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  title: serie
+  categoryId: 1
+  releaseYear: 2000
+  description: sipnosis
+  coverImage: @file(/home/kike/Vídeos/mrRobot.jpg)
+}

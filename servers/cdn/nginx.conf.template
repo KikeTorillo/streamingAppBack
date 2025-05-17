@@ -1,0 +1,103 @@
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+    worker_connections 2048;
+    use epoll;
+    multi_accept on;
+}
+
+http {
+    access_log off;
+    error_log off;
+    log_not_found off;
+    server_tokens off;
+
+    upstream transcoders {
+        server ${NGINX_TRANSCODER1};
+        server ${NGINX_TRANSCODER2};
+    }
+
+    proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=hls_a:100m inactive=1h use_temp_path=off min_free=5g;
+
+    # vod media server cache
+    server {
+        listen ${NGINX_IP_ADDRESS}:${NGINX_SERVER1_PORT};
+
+        location / {
+            #root /nginx-1.26.3/html;
+            #index index.html;
+            # Desactivar caché para archivos estáticos
+            proxy_pass http://transcoders/;
+            add_header Cache-Control "no-cache, no-store, must-revalidate";
+            add_header Pragma "no-cache";
+            add_header Expires 0;
+        }
+
+        location ~* \.(ts)$ {
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_pass http://${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}$request_uri;
+            proxy_cache hls_a;
+            proxy_cache_key $uri;
+            proxy_http_version 1.1;
+            proxy_cache_valid 200 206 302 301 304 1h;
+            proxy_cache_valid 404 1m;
+            proxy_ignore_headers X-Accel-Expires Expires Cache-Control Set-Cookie;
+            proxy_hide_header Set-Cookie;
+            proxy_cache_background_update on;
+            proxy_cache_lock on;
+            proxy_cache_use_stale error updating timeout http_500 http_502 http_503 http_504;
+
+            add_header Access-Control-Allow-Origin *;
+            add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
+            add_header Access-Control-Allow-Headers 'Range';
+            add_header Cache-Control no-cache;
+        }
+
+        location ~* \.(m3u8)$ {
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_pass http://${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}$request_uri;
+            proxy_cache off;
+
+            add_header Access-Control-Allow-Origin *;
+            add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
+            add_header Access-Control-Allow-Headers 'Range';
+            add_header Cache-Control no-cache;
+
+        }
+
+        location ~* \.(vtt)$ {
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_pass http://${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}$request_uri;
+            proxy_cache off;
+
+            # Forzar tipo MIME y evitar caché del navegador
+            add_header Content-Type "text/vtt; charset=utf-8";
+            add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
+            add_header Access-Control-Allow-Headers 'Range';
+            add_header Cache-Control no-cache;
+
+        }
+
+        location ~* \.(jpg|jpeg|png|webp|gif|svg)$ {
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_pass http://${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}$request_uri;
+            proxy_cache off;
+            add_header Access-Control-Allow-Origin *;
+            add_header Access-Control-Allow-Methods "GET, HEAD, OPTIONS";
+        }
+
+    }
+
+    # vod media server upstream
+    server {
+        listen ${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT};
+        location / {
+            allow ${NGINX_IP_ADDRESS};
+            deny all;
+            proxy_set_header X-Real-IP $http_x_real_ip;
+            proxy_pass http://transcoders/;
+        }
+    }
+}
