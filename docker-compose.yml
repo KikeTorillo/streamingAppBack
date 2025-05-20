@@ -33,7 +33,7 @@ services:
       - NGINX_IP_ADDRESS= ${NGINX_IP_ADDRESS_TRANSCODER1}
       - NGINX_SERVER1_PORT=${NGINX_TRANSCODER1_SERVER1_PORT}
       - NGINX_SERVER2_PORT=${NGINX_TRANSCODER1_SERVER2_PORT}
-      - NGINX_MINIO_SERVER=${NGINX_IP_ADDRESS_MINIO}:9000
+      - NGINX_MINIO_SERVER=${IP_ADDRESS_MINIO}:9000
       - NGINX_MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
       - NGINX_SECRET_KEY=${MINIO_ROOT_PASSWORD}
       - NGINX_REGION=${MINIO_REGION}
@@ -58,7 +58,7 @@ services:
       - NGINX_IP_ADDRESS=${NGINX_IP_ADDRESS_TRANSCODER2}
       - NGINX_SERVER1_PORT=${NGINX_TRANSCODER2_SERVER1_PORT}
       - NGINX_SERVER2_PORT=${NGINX_TRANSCODER2_SERVER2_PORT}
-      - NGINX_MINIO_SERVER=${NGINX_IP_ADDRESS_MINIO}:9000
+      - NGINX_MINIO_SERVER=${IP_ADDRESS_MINIO}:9000
       - NGINX_MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
       - NGINX_SECRET_KEY=${MINIO_ROOT_PASSWORD}
       - NGINX_REGION=${MINIO_REGION}
@@ -89,13 +89,13 @@ services:
       - ./servers/minio/aws3DataMinio:/data # Monta un volumen local para almacenar los datos de MinIO.
     networks:
       lan:
-        ipv4_address: ${NGINX_IP_ADDRESS_MINIO} # Asigna una dirección IP estática dentro de la red "lan".
+        ipv4_address: ${IP_ADDRESS_MINIO} # Asigna una dirección IP estática dentro de la red "lan".
   minio-init:
     image: alpine:latest # Usa una imagen base que permita instalar herramientas adicionales
     depends_on:
       - minio # Asegura que el servicio MinIO esté iniciado antes de ejecutar este script
     environment:
-      - MINIO_HOST=${NGINX_IP_ADDRESS_MINIO} # Dirección IP o nombre del servicio MinIO
+      - MINIO_HOST=${IP_ADDRESS_MINIO} # Dirección IP o nombre del servicio MinIO
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
       - MINIO_BUCKET=${MINIO_BUCKET}

@@ -18,6 +18,7 @@ const config = {
     bucket: process.env.MINIO_BUCKET,
     minioUser: process.env.MINIO_ROOT_USER,
     minioPass: process.env.MINIO_ROOT_PASSWORD,
+    minioHost: process.env.IP_ADDRESS_MINIO,
     videoDir: process.env.MINIO_VIDEO_DIR,
     coversDir: process.env.MINIO_COVERS_DIR,
     tempProcessingDir: process.env.TEMP_PROCESSING_DIR

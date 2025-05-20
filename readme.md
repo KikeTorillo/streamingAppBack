@@ -32,31 +32,21 @@ El sistema está diseñado para ser modular, escalable y fácil de mantener. Uti
 
 ## **Estructura del Proyecto**
 
-streamingvideoappback/
-
-├── docker-compose.yml → Archivo de configuración de Docker Compose
-
-├── package.json → Dependencias y scripts del proyecto
-
-├── clean.js → Script para limpiar contenedores y carpetas locales
-
-├── index.js → Archivo principal del servidor Node.js
-
-├── aws.js → Configuración de MinIO
-
-├── servers/ → Carpetas para configuraciones específicas de servicios
-
-│ ├── cdn/ → Configuración de NGINX CDN
-
-│ ├── minio/ → Configuración de MinIO
-
-│ ├── postgresQl/ → Configuración de PostgreSQL
-
-│ └── transcoderServers/ → Configuración de servidores de transcodificación
-
-├── utils/ → Funciones auxiliares (transcodificación, URLs, etc.)
-
-└── README.md → 
+streamingAppBack/
+├── App/                 # Código fuente de la aplicación Node.js
+│   ├── Dockerfile       # Imagen de la app (ver sección Docker)
+│   ├── package.json     # Dependencias y scripts de la app
+│   ├── src/             # Lógica: controllers, routes, models, middleware
+│   └── .env.example     # Ejemplo de variables de entorno
+├── collections/         # Script o datos para poblar colecciones iniciales
+├── servers/             # Configuraciones de servicios (NGINX, MinIO, Postgres)
+├── .editorconfig        # Estándar de formato
+├── .gitignore           # Archivos ignorados en Git
+├── clean.js             # Limpieza de contenedores y volúmenes locales
+├── docker-compose.yml   # Orquestación de todos los contenedores
+├── package.json         # Dependencias de orquestación (si aplica)
+├── package-lock.json    # Lockfile de npm
+└── readme.md            # Documentación (tú estás aquí)
 
 Documentación del proyecto
 ---
@@ -85,7 +75,7 @@ Antes de ejecutar el proyecto, asegúrate de tener instaladas las siguientes her
 		   MINIO_ROOT_USER=minioadmin
 		   MINIO_ROOT_PASSWORD=minioadmin
 		   MINIO_REGION=us-east-1
-		   NGINX_IP_ADDRESS_MINIO=192.168.0.10
+		   IP_ADDRESS_MINIO=192.168.0.10
 
 		   # Configuración de NGINX
 		   NGINX_IP_ADDRESS_CDN=192.168.0.11
