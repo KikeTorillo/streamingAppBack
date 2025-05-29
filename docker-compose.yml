@@ -5,6 +5,7 @@ services:
   cdn1:
     build:
       context: ./servers
+      dockerfile: dockerfile
       args:
         - TEMPLATE_FILE=./cdn/nginx.conf.template
     environment:
@@ -27,10 +28,11 @@ services:
   transcoder1:
     build:
       context: ./servers
+      dockerfile: dockerfile
       args:
         - TEMPLATE_FILE=./transcoderServers/transcoder1/nginx.conf.template
     environment:
-      - NGINX_IP_ADDRESS= ${NGINX_IP_ADDRESS_TRANSCODER1}
+      - NGINX_IP_ADDRESS=${NGINX_IP_ADDRESS_TRANSCODER1}
       - NGINX_SERVER1_PORT=${NGINX_TRANSCODER1_SERVER1_PORT}
       - NGINX_SERVER2_PORT=${NGINX_TRANSCODER1_SERVER2_PORT}
       - NGINX_MINIO_SERVER=${IP_ADDRESS_MINIO}:9000
@@ -52,6 +54,7 @@ services:
   transcoder2:
     build:
       context: ./servers
+      dockerfile: dockerfile
       args:
         - TEMPLATE_FILE=./transcoderServers/transcoder2/nginx.conf.template
     environment:
@@ -82,14 +85,14 @@ services:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER} # Define el usuario administrador.
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD} # Establece la contraseña del usuario administrador.
       - MINIO_REGION=${MINIO_REGION} # Configura la región del servidor.
-    ports:
-      - "9000:9000" # Puerto para acceder al API de MinIO.
-      - "9001:9001" # Puerto para acceder a la interfaz de administración web.
     volumes:
       - ./servers/minio/aws3DataMinio:/data # Monta un volumen local para almacenar los datos de MinIO.
     networks:
       lan:
         ipv4_address: ${IP_ADDRESS_MINIO} # Asigna una dirección IP estática dentro de la red "lan".
+    ports:
+      - 9000:9000 # Puerto para acceder al API de MinIO.
+      - 9001:9001 # Puerto para acceder a la interfaz de administración web.
   minio-init:
     image: alpine:latest # Usa una imagen base que permita instalar herramientas adicionales
     depends_on:
@@ -138,6 +141,45 @@ services:
         ipv4_address: ${IP_ADDRESS_PGADMIN} # Asigna una dirección IP estática dentro de la red "lan".
     ports:
       - 5050:80 # Mapea el puerto 80 del contenedor al puerto 5050 del host (accede a pgAdmin en http://localhost:5050).
+
+  app:
+    build:
+      context: ./app          # ruta relativa desde donde está el compose.yaml
+      dockerfile: dockerfile.app #dockerfile.appdev #para desarrollo   # dockerfile.app  usar en produccion
+    image: streaming-app-back
+    container_name: streaming-app-back
+    environment:
+      - WHITE_LIST=${WHITE_LIST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - IP_ADDRESS_POSTGRESQL=${IP_ADDRESS_POSTGRESQL}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - API_KEY=${API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONT_URL_LOCAL=${FRONT_URL_LOCAL}
+      - EMAIL=${EMAIL}
+      - PASS_EMAIL=${PASS_EMAIL}
+      - MINIO_COVERS_DIR=${MINIO_COVERS_DIR}
+      - MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - IP_ADDRESS_MINIO=${IP_ADDRESS_MINIO}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      - TEMP_PROCESSING_DIR=${TEMP_PROCESSING_DIR}
+      - BACK_PORT=${BACK_PORT}
+    volumes:
+      - ./app:/usr/src/app      # Monta código host → solo para desarrollo
+      - /usr/src/app/node_modules  # Para que no sobreescribas node_modules solo para desarrollo
+    depends_on:
+      - postgres
+      - minio
+    networks:
+      lan:
+        ipv4_address: ${IP_ADDRESS_BACKEND} # Asigna una dirección IP estática dentro de la red "lan".
+    ports:
+      - "3000:3000"
+    restart: unless-stopped # mapea tu puerto interno al host
 
 # Definición de la red personalizada.
 networks:
