@@ -84,7 +84,6 @@ class AuthService {
   async changePassword(token, newPassword) {
     const payload = jwt.verify(token, config.jwtSecret); // Verifica el token
     const user = await service.findOne(payload.sub); // Busca al usuario por ID
-    console.log(user);
     if (user.recovery_token !== token) {
       throw boom.unauthorized('Token inválido o expirado'); // Lanza error 401 si no coincide
     }

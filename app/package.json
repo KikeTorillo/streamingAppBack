@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "docker-compose up -d --build && nodemon index.js",
+    "dev": "docker-compose up -d --build --force-recreate",
     "stop": "docker-compose down --volumes",
-    "clean": "node clean.js",
-    "start": "docker-compose up -d --build",
+    "clean": "node ../clean.js",
+    "start": "node index.js",
     "lint": "eslint"
   },
   "author": "",

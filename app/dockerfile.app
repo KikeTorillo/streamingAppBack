@@ -1,18 +1,28 @@
-# Usa la imagen oficial de Node.js basada en Debian
-FROM node:22
+# Etapa 1: build
+FROM node AS builder
 
-# Directorio de trabajo
+# Directorio de trabajo dentro del contenedor
 WORKDIR /usr/src/app
 
-# Copia package.json y package-lock.json (si existe) e instala dependencias
+# Copiamos solo package.json y package-lock.json para cachear dependencias
 COPY package*.json ./
-RUN npm install --production
 
-# Copia el código de la aplicación
+# Instalamos dependencias
+RUN npm ci
+
+# Copiamos el resto del código
 COPY . .
 
-# Expone el puerto que utiliza la app
+# Etapa 2: runtime
+FROM node
+
+WORKDIR /usr/src/app
+
+# Copiamos node_modules y el código compilado desde la etapa "builder"
+COPY --from=builder /usr/src/app ./
+
+# Exponemos el puerto en el que corre tu API
 EXPOSE 3000
 
-# Comando de arranque
+# Comando por defecto
 CMD ["node", "index.js"]

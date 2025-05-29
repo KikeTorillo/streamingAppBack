@@ -102,8 +102,9 @@ app.use(errorHandler);
 
 /**
  * Levanta el servidor en el puerto definido en la variable de entorno PORT.
- * @param {number|string} process.env.PORT - Puerto en el que escucha el servidor.
+ * @param {number|string} - Puerto en el que escucha el servidor.
  */
-app.listen(process.env.PORT, () => {
-  console.log(`http://localhost:${process.env.PORT}`);
+
+app.listen(config.backPort, () => {
+  console.log(`escuchando en el puerto: ${config.backPort}`);
 });

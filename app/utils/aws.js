@@ -5,11 +5,13 @@ const stream = require('stream');
 const { config } = require('../config/config'); // Configuración de la aplicación
 const mime = require('mime-types');
 
+let endpoint = `http://${config.minioHost}:9000`;
+
 const s3 = new AWS.S3({
   apiVersion: 'latest',
   accessKeyId: config.minioUser,
   secretAccessKey: config.minioPass,
-  endpoint: 'http://localhost:9000',
+  endpoint: endpoint,
   region: 'us-east-1',
   s3ForcePathStyle: true,
   signatureVersion: 'v4',
@@ -19,7 +21,7 @@ const s3 = new AWS.S3({
  * @param {string} remotePath - Ruta completa del archivo en MinIO (incluyendo subcarpeta).
  * @returns {Promise<boolean>} - Retorna `true` si el archivo existe, `false` si no.
  */ async function checkIfFileExistsInMinIO(remotePath) {
-  const params = { Bucket: config.bucket, Key: remotePath };
+  const params = { Bucket: config.bucket, Key: remotePath }; 
   try {
     await s3.headObject(params).promise();
     return true;

@@ -2,7 +2,6 @@
 const sharp = require('sharp');
 const { imageconfig } = require('./configMediaQualities');
 const { config } = require('../config/config');
-const crypto = require('crypto');
 const { uploadFileIfNotExists } = require('./aws');
 const { createTempDir, deleteTempDir } = require('../utils/fileHelpers');
 
@@ -13,8 +12,7 @@ const { createTempDir, deleteTempDir } = require('../utils/fileHelpers');
  * @param {Object} options - Opciones de procesamiento (ancho, alto, formato y calidad).
  */
 const processCoverImage = async (inputPath, outputPath) => {
-  const { width, height, format, quality } = imageconfig;
-  const prueba = JSON.stringify(imageconfig);
+  const { width, height, format } = imageconfig;
 
   try {
     await sharp(inputPath)

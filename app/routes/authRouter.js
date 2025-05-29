@@ -11,7 +11,6 @@ const {
   registrationSchema,
   recoverySchema,
 } = require('./../schemas/usersSchemas');
-const { config } = require('./../config/config');
 const router = express.Router();
 
 /**
@@ -41,8 +40,8 @@ router.post(
       res
         .cookie('access_token', token.token, {
           httpOnly: true,
-          secure: config.isProd === true,
-          sameSite: config.isProd ? 'none' : 'lax',
+          secure: false, //Solo se envía por HTTPS cuando es true
+          sameSite: 'lax',
         })
         .json(token.payload);
     } catch (error) {
@@ -50,6 +49,8 @@ router.post(
     }
   }
 );
+
+
 
 /**
  * @route POST /api/v1/auth/registration
