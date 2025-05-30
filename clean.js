@@ -15,7 +15,7 @@ function stopContainers() {
 }
 
 // Función para eliminar carpetas locales
-function deleteLocalFolders(folders) {
+/*function deleteLocalFolders(folders) {
   console.log('Eliminando carpetas locales...');
   folders.forEach((folder) => {
     const fullPath = path.resolve(folder); // Resuelve la ruta absoluta
@@ -28,6 +28,27 @@ function deleteLocalFolders(folders) {
       }
     } else {
       console.log(`La carpeta no existe: ${fullPath}`);
+    }
+  });
+}*/
+
+function deleteLocalFolders(folders) {
+  console.log('Eliminando contenido de carpetas locales...');
+  folders.forEach((folder) => {
+    const fullPath = path.resolve(folder);
+    if (fs.existsSync(fullPath)) {
+      try {
+        const items = fs.readdirSync(fullPath);
+        for (const item of items) {
+          const itemPath = path.join(fullPath, item);
+          fs.rmSync(itemPath, { recursive: true, force: true });
+        }
+        console.log(`Contenido eliminado en: ${fullPath}`);
+      } catch (error) {
+        console.error(`Error al limpiar la carpeta ${fullPath}:`, error.message);
+      }
+    } else {
+      console.log(`La carpeta no existe (se creará si es necesaria más adelante): ${fullPath}`);
     }
   });
 }

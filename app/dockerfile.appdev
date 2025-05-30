@@ -1,7 +1,12 @@
 # Etapa única para desarrollo
-FROM node:18-alpine
+FROM node
 
 WORKDIR /usr/src/app
+
+#RUN apk add --no-cache ffmpeg
+
+RUN apt-get update && apt-get install -y ffmpeg
+
 
 # Instala dependencias y nodemon global
 COPY package*.json ./

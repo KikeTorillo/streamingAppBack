@@ -140,7 +140,7 @@ http {
         listen ${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}; # Escucha en la dirección IP NGINX_IP_ADDRESS y el puerto NGINX_SERVER2_PORT.
 
         location / {
-            allow ${NGINX_IP_ADDRESS}; # Permite el acceso solo desde la dirección IP
+            allow 127.0.0.1; # Permite el acceso solo desde la dirección IP
             deny all;
             proxy_cache s3_a; # Usa la caché definida anteriormente ("s3_a").
             slice 1m; # Divide las respuestas en segmentos de 1 MB para mejorar la eficiencia.

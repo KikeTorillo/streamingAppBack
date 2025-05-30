@@ -94,7 +94,7 @@ http {
     server {
         listen ${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT};
         location / {
-            allow ${NGINX_IP_ADDRESS};
+            allow 127.0.0.1;
             deny all;
             proxy_set_header X-Real-IP $http_x_real_ip;
             proxy_pass http://transcoders/;

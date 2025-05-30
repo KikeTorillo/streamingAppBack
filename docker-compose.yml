@@ -1,4 +1,4 @@
-version: '3.8' # Versión del formato de Docker Compose (3.8 es compatible con características avanzadas).
+version: "3.8" # Versión del formato de Docker Compose (3.8 es compatible con características avanzadas).
 
 services:
   # Servicio CDN1: Servidor web basado en NGINX.
@@ -19,8 +19,10 @@ services:
       - ./servers/cdn/index.html:/nginx-1.26.3/html/index.html # Monta un archivo HTML personalizado.
     networks:
       lan:
-        ipv4_address: ${NGINX_IP_ADDRESS_CDN} # Asigna una dirección IP estática dentro de la red "lan".
     restart: always # Garantiza que el contenedor siempre se reinicie si se detiene.
+    depends_on:
+      - transcoder1
+      - transcoder2
     ports:
       - "8082:80" # Mapea el puerto 80 del contenedor al puerto 8082 del host (accede en http://localhost:8082).
 
@@ -35,7 +37,7 @@ services:
       - NGINX_IP_ADDRESS=${NGINX_IP_ADDRESS_TRANSCODER1}
       - NGINX_SERVER1_PORT=${NGINX_TRANSCODER1_SERVER1_PORT}
       - NGINX_SERVER2_PORT=${NGINX_TRANSCODER1_SERVER2_PORT}
-      - NGINX_MINIO_SERVER=${IP_ADDRESS_MINIO}:9000
+      - NGINX_MINIO_SERVER=minio:9000 # ✅ Usar nombre de servicio
       - NGINX_MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
       - NGINX_SECRET_KEY=${MINIO_ROOT_PASSWORD}
       - NGINX_REGION=${MINIO_REGION}
@@ -47,7 +49,6 @@ services:
       - ./servers/transcoderServers/transcoder1/index.html:/nginx-1.26.3/html/index.html # Monta un archivo HTML personalizado.
     networks:
       lan:
-        ipv4_address: ${NGINX_IP_ADDRESS_TRANSCODER1} # Asigna una dirección IP estática dentro de la red "lan".
     restart: always # Garantiza que el contenedor siempre se reinicie si se detiene.
 
   # Servicio Transcoder2: Otro servidor web para transcodificación o procesamiento multimedia.
@@ -61,7 +62,7 @@ services:
       - NGINX_IP_ADDRESS=${NGINX_IP_ADDRESS_TRANSCODER2}
       - NGINX_SERVER1_PORT=${NGINX_TRANSCODER2_SERVER1_PORT}
       - NGINX_SERVER2_PORT=${NGINX_TRANSCODER2_SERVER2_PORT}
-      - NGINX_MINIO_SERVER=${IP_ADDRESS_MINIO}:9000
+      - NGINX_MINIO_SERVER=minio:9000 # ✅ Usar nombre de servicio
       - NGINX_MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
       - NGINX_SECRET_KEY=${MINIO_ROOT_PASSWORD}
       - NGINX_REGION=${MINIO_REGION}
@@ -73,7 +74,6 @@ services:
       - ./servers/transcoderServers/transcoder2/index.html:/nginx-1.26.3/html/index.html # Monta un archivo HTML personalizado.
     networks:
       lan:
-        ipv4_address: ${NGINX_IP_ADDRESS_TRANSCODER2} # Asigna una dirección IP estática dentro de la red "lan".
     restart: always # Garantiza que el contenedor siempre se reinicie si se detiene.
 
   # Servicio MinIO: Servidor de almacenamiento compatible con Amazon S3.
@@ -89,46 +89,38 @@ services:
       - ./servers/minio/aws3DataMinio:/data # Monta un volumen local para almacenar los datos de MinIO.
     networks:
       lan:
-        ipv4_address: ${IP_ADDRESS_MINIO} # Asigna una dirección IP estática dentro de la red "lan".
     ports:
-      - 9000:9000 # Puerto para acceder al API de MinIO.
-      - 9001:9001 # Puerto para acceder a la interfaz de administración web.
+      - "9000:9000" # Puerto para acceder al API de MinIO.
+      - "9001:9001" # Puerto para acceder a la interfaz de administración web.
   minio-init:
     image: alpine:latest # Usa una imagen base que permita instalar herramientas adicionales
     depends_on:
       - minio # Asegura que el servicio MinIO esté iniciado antes de ejecutar este script
     environment:
-      - MINIO_HOST=${IP_ADDRESS_MINIO} # Dirección IP o nombre del servicio MinIO
+      - MINIO_HOST=minio # ✅ Usar nombre de servicio
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
       - MINIO_BUCKET=${MINIO_BUCKET}
     volumes:
       - ./servers/minio/init-minio.sh:/init-minio.sh # Monta el script de inicialización
-    entrypoint: [ "/bin/sh", "/init-minio.sh" ] # Ejecuta el script al iniciar el contenedor
-    networks:
-      lan: 
-        ipv4_address: ${IP_ADDRESS_MINIO_INIT}
-  postgres:
-    image: postgres:17 # Usa la imagen oficial de PostgreSQL versión 17.
-    environment:
-      - POSTGRES_DB=${DB_NAME} # Crea una base de datos llamada "my_api".
-      - POSTGRES_USER=${DB_USER} # Define un usuario de PostgreSQL llamado "kike".
-      - POSTGRES_PASSWORD=${DB_PASSWORD} # Establece la contraseña para el usuario "kike".
-      - TZ=America/Mexico_City # Configura la zona horaria aquí
-    volumes:
-      - ./servers/postgresQl/postgres_data:/var/lib/postgresql/data
-      - ./servers/postgresQl/init.sql:/docker-entrypoint-initdb.d/init.sql # Script de inicialización
+    entrypoint: ["/bin/sh", "/init-minio.sh"] # Ejecuta el script al iniciar el contenedor
     networks:
       lan:
-        ipv4_address: ${IP_ADDRESS_POSTGRESQL} # Asigna una dirección IP estática dentro de la red "lan".
+
+  postgres:
+    build: ./servers/postgresQl
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - TZ=America/Mexico_City
+    volumes:
+      - ./servers/postgresQl/postgres_data:/var/lib/postgresql/data
+      - ./servers/postgresQl/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      lan:
     ports:
-      - 5432:5432
-    command: >  # <--- Esto es clave
-      bash -c "
-        apt-get update &&
-        apt-get install -y postgresql-contrib &&
-        docker-entrypoint.sh postgres
-      "
+      - "5433:5432" #se usa el 5433 por que el 5432 esta bloqueado por postgres instalado en el nas
 
   # Servicio pgAdmin: Herramienta de administración gráfica para PostgreSQL.
   pgadmin:
@@ -138,13 +130,12 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=${PG_PASSWORD} # Establece la contraseña del usuario administrador.
     networks:
       lan:
-        ipv4_address: ${IP_ADDRESS_PGADMIN} # Asigna una dirección IP estática dentro de la red "lan".
     ports:
-      - 5050:80 # Mapea el puerto 80 del contenedor al puerto 5050 del host (accede a pgAdmin en http://localhost:5050).
+      - "5050:80" # Mapea el puerto 80 del contenedor al puerto 5050 del host (accede a pgAdmin en http://localhost:5050).
 
   app:
     build:
-      context: ./app          # ruta relativa desde donde está el compose.yaml
+      context: ./app # ruta relativa desde donde está el compose.yaml
       dockerfile: dockerfile.app #dockerfile.appdev #para desarrollo   # dockerfile.app  usar en produccion
     image: streaming-app-back
     container_name: streaming-app-back
@@ -152,7 +143,7 @@ services:
       - WHITE_LIST=${WHITE_LIST}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - IP_ADDRESS_POSTGRESQL=${IP_ADDRESS_POSTGRESQL}
+      - IP_ADDRESS_POSTGRESQL=postgres # ✅ Usar nombre de servicio
       - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
       - API_KEY=${API_KEY}
@@ -164,19 +155,18 @@ services:
       - MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      - IP_ADDRESS_MINIO=${IP_ADDRESS_MINIO}
+      - IP_ADDRESS_MINIO=minio # ✅ Usar nombre de servicio
       - MINIO_BUCKET=${MINIO_BUCKET}
       - TEMP_PROCESSING_DIR=${TEMP_PROCESSING_DIR}
       - BACK_PORT=${BACK_PORT}
     volumes:
-      - ./app:/usr/src/app      # Monta código host → solo para desarrollo
-      - /usr/src/app/node_modules  # Para que no sobreescribas node_modules solo para desarrollo
+      - ./app:/usr/src/app # Monta código host → solo para desarrollo
+      - /usr/src/app/node_modules # Para que no sobreescribas node_modules solo para desarrollo
     depends_on:
       - postgres
       - minio
     networks:
       lan:
-        ipv4_address: ${IP_ADDRESS_BACKEND} # Asigna una dirección IP estática dentro de la red "lan".
     ports:
       - "3000:3000"
     restart: unless-stopped # mapea tu puerto interno al host
@@ -186,8 +176,3 @@ networks:
   lan:
     name: lan # Nombre de la red personalizada.
     driver: bridge # Usa el controlador de red "bridge" de Docker.
-    ipam:
-      # Configuración del administrador de direcciones IP.
-      config:
-        - subnet: ${SUBNET} # Define la subred para la red.
-          gateway: ${GATEWAY} # Establece la puerta de enlace para la red.
