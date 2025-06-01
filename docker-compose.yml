@@ -136,7 +136,7 @@ services:
   app:
     build:
       context: ./app # ruta relativa desde donde está el compose.yaml
-      dockerfile: dockerfile.app #dockerfile.appdev #para desarrollo   # dockerfile.app  usar en produccion
+      dockerfile: dockerfile.appdev #dockerfile.appdev #para desarrollo   # dockerfile.app  usar en produccion
     image: streaming-app-back
     container_name: streaming-app-back
     environment:

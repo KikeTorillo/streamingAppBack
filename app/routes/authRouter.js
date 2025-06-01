@@ -42,6 +42,7 @@ router.post(
           httpOnly: true,
           secure: false, //Solo se envía por HTTPS cuando es true
           sameSite: 'lax',
+          maxAge: 24 * 60 * 60 * 1000,
         })
         .json(token.payload);
     } catch (error) {
