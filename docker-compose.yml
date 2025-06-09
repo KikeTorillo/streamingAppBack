@@ -1,5 +1,3 @@
-version: "3.8" # Versión del formato de Docker Compose (3.8 es compatible con características avanzadas).
-
 services:
   # Servicio CDN1: Servidor web basado en NGINX.
   cdn1:

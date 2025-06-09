@@ -6,7 +6,7 @@ const path = require('path');
 function stopContainers() {
   try {
     console.log('Deteniendo contenedores...');
-    execSync('docker-compose down', { stdio: 'inherit' }); // Ejecuta "docker-compose down"
+    execSync('docker compose down', { stdio: 'inherit' }); // Ejecuta "docker-compose down"
     console.log('Contenedores detenidos.');
   } catch (error) {
     console.error('Error al detener los contenedores:', error.message);
@@ -15,7 +15,7 @@ function stopContainers() {
 }
 
 // Función para eliminar carpetas locales
-/*function deleteLocalFolders(folders) {
+function deleteLocalFolders(folders) {
   console.log('Eliminando carpetas locales...');
   folders.forEach((folder) => {
     const fullPath = path.resolve(folder); // Resuelve la ruta absoluta
@@ -30,9 +30,10 @@ function stopContainers() {
       console.log(`La carpeta no existe: ${fullPath}`);
     }
   });
-}*/
+}
 
-function deleteLocalFolders(folders) {
+// Función para eliminar el contenido de las carpetas locales
+function deleteContentLocalFolders(folders) {
   console.log('Eliminando contenido de carpetas locales...');
   folders.forEach((folder) => {
     const fullPath = path.resolve(folder);
@@ -68,7 +69,7 @@ const localFolders = [
 // Ejecutar el proceso
 try {
   stopContainers(); // Detener los contenedores
-  deleteLocalFolders(localFolders); // Eliminar las carpetas locales
+  deleteContentLocalFolders(localFolders); // Eliminar las carpetas locales
   console.log('Limpieza completada.');
 } catch (error) {
   console.error('Error durante la limpieza:', error.message);
