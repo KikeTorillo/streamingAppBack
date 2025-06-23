@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS categories (
 ----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE,
+    user_name VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255),
     password VARCHAR(255) NOT NULL,
     role_id INT NOT NULL REFERENCES roles(id),
     recovery_token VARCHAR,
@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 CREATE INDEX ON users (role_id); -- Para joins frecuentes con roles
 CREATE INDEX ON users (recovery_token) WHERE recovery_token IS NOT NULL; -- Búsquedas de tokens
+CREATE UNIQUE INDEX users_email_unique ON users (email) WHERE email IS NOT NULL; -- Índice único para email, pero solo cuando no es NULL
 
 ----------------------------------------------------------------------
 -- Tabla: videos
@@ -312,8 +313,8 @@ END $$;
 
 DO $$
 BEGIN
-    INSERT INTO users (email, password, role_id)
+    INSERT INTO users (user_name, email, password, role_id)
     VALUES 
-        ('admin@mail.com', '$2b$10$zQi8jhrrGemGp2WeiPcWEufIb3W5nn0c7bdhwckaRp4nYQBYqAeAO', 1)
-    ON CONFLICT (email) DO NOTHING;
+        ('admin','admin@mail.com', '$2b$10$zQi8jhrrGemGp2WeiPcWEufIb3W5nn0c7bdhwckaRp4nYQBYqAeAO', 1)
+    ON CONFLICT (user_name) DO NOTHING;
 END $$;

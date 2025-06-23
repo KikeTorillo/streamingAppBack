@@ -167,7 +167,7 @@ services:
       lan:
     ports:
       - "3000:3000"
-    restart: unless-stopped # mapea tu puerto interno al host
+    restart: always # mapea tu puerto interno al host
 
 # Definición de la red personalizada.
 networks:

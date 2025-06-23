@@ -6,7 +6,7 @@ const path = require('path');
 function stopContainers() {
   try {
     console.log('Deteniendo contenedores...');
-    execSync('docker compose down', { stdio: 'inherit' }); // Ejecuta "docker-compose down"
+    execSync('docker compose down --volumes --remove-orphans', { stdio: 'inherit' }); // Ejecuta "docker-compose down"
     console.log('Contenedores detenidos.');
   } catch (error) {
     console.error('Error al detener los contenedores:', error.message);
