@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "docker compose up -d --build --force-recreate",
-    "stop": "docker compose down --volumes",
+    "dev": "docker compose down --volumes --remove-orphans && docker compose up -d --build",
+    "stop": "docker compose down --volumes --remove-orphans",
     "clean": "node ../clean.js",
     "start": "node index.js",
     "lint": "eslint"
+
   },
   "author": "",
   "license": "ISC",

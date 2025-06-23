@@ -5,11 +5,11 @@ const service = new AuthService;
 
 //Se crea la estrategia y se exporta
 const LocalStrategy = new Strategy({
-        usernameField: 'email'
+        usernameField: 'userName'
     }
-    ,async (email, password, done) => {
+    ,async (userName, password, done) => {
     try {
-        const user = await service.getUser(email,password);
+        const user = await service.getUser(userName,password);
         done(null, user);
     } catch (error) {
         done(error, false);

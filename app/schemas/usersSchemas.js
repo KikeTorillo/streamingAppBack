@@ -10,15 +10,22 @@ const email = Joi.string().email(); // Email válido según formato estándar
 const password = Joi.string().alphanum(); // Contraseña alfanumérica
 const roleId = Joi.number().positive(); // Rol del usuario (cadena de texto)
 const token = Joi.string(); // Token de autenticación o recuperación
+const userName = Joi.string()
+  .alphanum() // Solo permite caracteres alfanuméricos (sin espacios)
+  .min(3)
+  .max(30);
 
 /**
  * Esquema para la creación de un usuario.
  * Valida los datos necesarios para registrar un nuevo usuario.
  */
 const createUserSchema = Joi.object({
-  email: email.required().messages({
-    'any.required': 'El email es obligatorio',
-    'string.empty': 'El email no puede estar vacío',
+  userName: userName.messages({
+    'any.required': 'El userName es obligatorio',
+    'string.empty': 'El userName no puede estar vacío',
+    'string.base': 'El userName debe ser un string',
+  }),
+  email: email.messages({
     'string.base': 'El email debe ser un string',
   }),
   password: password.required().messages({
@@ -52,6 +59,10 @@ const getUserSchema = Joi.object({
  * Valida los datos opcionales que pueden ser actualizados.
  */
 const updateUserSchema = Joi.object({
+  userName: userName.optional().messages({
+    'string.empty': 'El userName no puede estar vacío',
+    'string.base': 'El userName debe ser un string',
+  }),
   email: email.optional().messages({
     'string.empty': 'El email no puede estar vacío',
   }),
@@ -67,10 +78,13 @@ const updateUserSchema = Joi.object({
  * Valida los datos necesarios para registrar un usuario.
  */
 const registrationSchema = Joi.object({
-  email: email.required().messages({
-    'any.required': 'El email es obligatorio',
-    'string.empty': 'El email no puede estar vacio',
-    'string.base': 'El email debe ser un string',
+  userName: userName.required().messages({
+    'any.required': 'El nombre de usuario es obligatorio',
+    'string.empty': 'El nombre de usuario no puede estar vacío',
+    'string.base': 'El nombre de usuario debe ser un string',
+    'string.alphanum': 'El nombre de usuario solo puede contener letras y números',
+    'string.min': 'El nombre debe tener al menos 3 caracteres',
+    'string.max': 'El nombre debe tener máximo 30 caracteres',
   }),
   password: password.required().messages({
     'any.required': 'El password es obligatorio',
@@ -84,10 +98,10 @@ const registrationSchema = Joi.object({
  * Valida las credenciales necesarias para autenticar a un usuario.
  */
 const loginSchema = Joi.object({
-  email: email.required().messages({
-    'any.required': 'El email es obligatorio',
-    'string.empty': 'El email no puede estar vacio',
-    'string.base': 'El email debe ser un string',
+  userName: userName.required().messages({
+    'any.required': 'El userName es obligatorio',
+    'string.empty': 'El userName no puede estar vacio',
+    'string.base': 'El userName debe ser un string',
   }),
   password: password.required().messages({
     'any.required': 'El password es obligatorio',

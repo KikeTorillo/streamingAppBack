@@ -36,8 +36,8 @@ class AuthService {
    * @returns {Object} Datos del usuario autenticado (sin contraseña).
    * @throws {Error} Error si el usuario no existe o la contraseña es incorrecta.
    */
-  async getUser(email, password) {
-    const user = await service.findByEmail(email); // Busca al usuario por email
+  async getUser(userName, password) {
+    const user = await service.findByUserName(userName); // Busca al usuario por email
     if (!user) {
       throw boom.unauthorized('Usuario no encontrado'); // Lanza error 401 si no existe
     }

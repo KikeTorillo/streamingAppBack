@@ -23,7 +23,7 @@ class UsersService {
    */
   async find() {
     const query =
-      'SELECT id, email, role_id, created_at, updated_at FROM users ORDER BY id';
+      'SELECT id, user_name, email, role_id, created_at, updated_at FROM users ORDER BY id';
     const result = await this.pool.query(query);
     return result.rows;
   }
@@ -36,7 +36,7 @@ class UsersService {
    */
   async findOne(id) {
     const query =
-      'SELECT id, email, role_id, recovery_token, created_at, updated_at FROM users WHERE id = $1';
+      'SELECT id, user_name, email, role_id, recovery_token, created_at, updated_at FROM users WHERE id = $1';
 
     const result = await this.pool.query(query, [id]);
 
@@ -60,18 +60,33 @@ class UsersService {
   }
 
   /**
+   * Busca un usuario por su email.
+   * @param {string} userName - Email del usuario a buscar.
+   * @returns {Object} Datos del usuario encontrado.
+   */
+  async findByUserName(userName) {
+    const query =
+      'SELECT us.*, ro.name AS role FROM users us JOIN roles ro ON us.role_id = ro.id WHERE user_name = $1';
+    const result = await this.pool.query(query, [userName]);
+    return result.rows[0];
+  }
+
+  /**
    * Crea un nuevo usuario.
    * @param {Object} body - Datos del usuario a crear (email, password, role).
    * @returns {Object} Confirmación de creación.
    * @throws {Error} Error si el email ya está registrado.
    */
   async create(body) {
-    // Verificar si el email ya existe
-    const checkQuery = 'SELECT * FROM users WHERE email = $1';
-    const checkResult = await this.pool.query(checkQuery, [body.email]);
 
-    if (checkResult.rows.length > 0) {
-      throw boom.conflict('El correo electrónico ya está registrado');
+    const userName = await this.findByUserName(body.userName);
+    if (userName) {
+      throw boom.conflict('El userName  ya está registrado');
+    }
+
+    const email = await this.findByEmail(body.email);
+    if (email) {
+      throw boom.conflict('El email  ya está registrado');
     }
 
     // Encriptar contraseña
@@ -79,11 +94,12 @@ class UsersService {
 
     // Insertar usuario con parámetros seguros
     const insertQuery = `
-     INSERT INTO users (email, password, role_id) 
-     VALUES ($1, $2, $3) 
-     RETURNING id, email, role_id`;
+     INSERT INTO users (user_name, email, password, role_id) 
+     VALUES ($1, $2, $3, $4) 
+     RETURNING id, user_name, email, role_id`;
 
     const result = await this.pool.query(insertQuery, [
+      body.userName,
       body.email,
       hash,
       body.roleId,
@@ -104,6 +120,17 @@ class UsersService {
     try {
       await client.query('BEGIN');
       const user = await this.findOne(id);
+
+      const userName = await this.findByUserName(changes.userName);
+      if (userName) {
+        throw boom.conflict('El userName  ya está registrado');
+      }
+
+      const email = await this.findByEmail(changes.email);
+      if (email) {
+        throw boom.conflict('El email  ya está registrado');
+      }
+
       const result = await updateTable(client, 'users', user.id, changes);
       await client.query('COMMIT');
       return result;
