@@ -147,6 +147,10 @@ services:
       dockerfile: dockerfile.appdev  # ✅ Nombre correcto del dockerfile
     container_name: streaming-app  # ✅ Nombre fijo del contenedor
     environment:
+      - IP_ADDRESS_POSTGRESQL=postgres # ✅ Usar nombre de servicio
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - IP_ADDRESS_MINIO=minio # ✅ Usar nombre de servicio
       - NODE_ENV=${NODE_ENV}
       - DB_HOST=${IP_ADDRESS_POSTGRESQL}  # postgres
       - DB_PORT=${DB_PORT}
@@ -165,6 +169,7 @@ services:
       - API_KEY=${API_KEY}
       - EMAIL=${EMAIL}
       - PASS_EMAIL=${PASS_EMAIL}
+      - BACK_PORT=${BACK_PORT}
       - FRONT_URL_LOCAL=${FRONT_URL_LOCAL}
       - WHITE_LIST=${WHITE_LIST}
     volumes:

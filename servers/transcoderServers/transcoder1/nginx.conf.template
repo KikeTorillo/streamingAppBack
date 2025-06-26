@@ -88,10 +88,10 @@ http {
             vod_hls_output_iframes_playlist off;
 
             # Headers CORS
-            add_header Access-Control-Allow-Origin *;
-            add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
-            add_header Access-Control-Allow-Headers 'Range';
-            add_header Cache-Control no-cache;
+            add_header Access-Control-Allow-Origin * always;
+            add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS' always;
+            add_header Access-Control-Allow-Headers 'Range' always;
+            add_header Cache-Control no-cache always;
 
             gzip on;
             gzip_disable msie6;
@@ -112,9 +112,9 @@ http {
             proxy_set_header X-Amz-Content-SHA256 e3b0c43288fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855;
             proxy_set_header Authorization $aws_token;
 
-            add_header Content-Type "text/vtt; charset=utf-8";
-            add_header Access-Control-Allow-Origin *;
-            add_header Cache-Control no-cache;
+            add_header Content-Type "text/vtt; charset=utf-8" always;
+            add_header Access-Control-Allow-Origin * always;
+            add_header Cache-Control no-cache always;
         }
 
         # ✅ Covers/thumbnails
@@ -130,8 +130,8 @@ http {
             proxy_set_header X-Amz-Content-SHA256 e3b0c43288fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855;
             proxy_set_header Authorization $aws_token;
             proxy_hide_header Content-Type;
-            add_header Content-Type "image/jpeg";
-            add_header Access-Control-Allow-Origin *;
+            add_header Content-Type "image/jpeg" always;
+            add_header Access-Control-Allow-Origin * always;
         }
     }
 }
