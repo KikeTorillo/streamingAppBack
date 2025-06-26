@@ -9,35 +9,38 @@ events {
 }
 
 http {
-    access_log off;
-    error_log off;
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log debug;
     log_not_found off;
     server_tokens off;
 
+    # Upstream a los transcoders usando nombres de contenedor
     upstream transcoders {
-        server ${NGINX_TRANSCODER1};
-        server ${NGINX_TRANSCODER2};
+        #server ${NGINX_TRANSCODER1}:80; # transcoder1:80
+        #server ${NGINX_TRANSCODER2}:80; # transcoder2:80
     }
 
     proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=hls_a:100m inactive=1h use_temp_path=off min_free=5g;
 
-    # vod media server cache
+    # Servidor principal CDN (puerto 80)
     server {
-        listen ${NGINX_IP_ADDRESS}:${NGINX_SERVER1_PORT};
+        listen 80;
 
+        # ✅ CONFIGURACIÓN SIMPLE COMO ANTES - TODO va al transcoder
         location / {
-            #root /nginx-1.26.3/html;
-            #index index.html;
-            # Desactivar caché para archivos estáticos
             proxy_pass http://transcoders/;
-            add_header Cache-Control "no-cache, no-store, must-revalidate";
-            add_header Pragma "no-cache";
-            add_header Expires 0;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
         }
 
+        # ✅ CACHÉ ESPECÍFICO para segmentos de video HLS (.ts)
         location ~* \.(ts)$ {
             proxy_set_header X-Real-IP $remote_addr;
-            proxy_pass http://${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}$request_uri;
+            proxy_set_header Host $host;
+            proxy_pass http://transcoders$request_uri;
+            
             proxy_cache hls_a;
             proxy_cache_key $uri;
             proxy_http_version 1.1;
@@ -53,51 +56,45 @@ http {
             add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
             add_header Access-Control-Allow-Headers 'Range';
             add_header Cache-Control no-cache;
+            add_header X-Cache-Status $upstream_cache_status;
         }
 
+        # ✅ SIN CACHÉ para playlists HLS (.m3u8) - siempre fresh
         location ~* \.(m3u8)$ {
             proxy_set_header X-Real-IP $remote_addr;
-            proxy_pass http://${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}$request_uri;
+            proxy_set_header Host $host;
+            proxy_pass http://transcoders$request_uri;
             proxy_cache off;
 
             add_header Access-Control-Allow-Origin *;
             add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
             add_header Access-Control-Allow-Headers 'Range';
             add_header Cache-Control no-cache;
-
         }
 
+        # ✅ Manejo específico para subtítulos (.vtt)
         location ~* \.(vtt)$ {
             proxy_set_header X-Real-IP $remote_addr;
-            proxy_pass http://${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}$request_uri;
+            proxy_set_header Host $host;
+            proxy_pass http://transcoders$request_uri;
             proxy_cache off;
 
-            # Forzar tipo MIME y evitar caché del navegador
             add_header Content-Type "text/vtt; charset=utf-8";
+            add_header Access-Control-Allow-Origin *;
             add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
             add_header Access-Control-Allow-Headers 'Range';
             add_header Cache-Control no-cache;
-
         }
 
+        # ✅ Manejo específico para imágenes
         location ~* \.(jpg|jpeg|png|webp|gif|svg)$ {
             proxy_set_header X-Real-IP $remote_addr;
-            proxy_pass http://${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}$request_uri;
+            proxy_set_header Host $host;
+            proxy_pass http://transcoders$request_uri;
             proxy_cache off;
+            
             add_header Access-Control-Allow-Origin *;
             add_header Access-Control-Allow-Methods "GET, HEAD, OPTIONS";
-        }
-
-    }
-
-    # vod media server upstream
-    server {
-        listen ${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT};
-        location / {
-            allow 127.0.0.1;
-            deny all;
-            proxy_set_header X-Real-IP $http_x_real_ip;
-            proxy_pass http://transcoders/;
         }
     }
 }

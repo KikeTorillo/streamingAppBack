@@ -1,77 +1,47 @@
-# Configuración global del servidor NGINX
-
-user www-data; # Define el usuario bajo el cual se ejecutará NGINX (www-data es común en sistemas Linux).
-worker_processes auto; # Ajusta automáticamente el número de procesos de trabajo según los núcleos de CPU disponibles.
-worker_rlimit_nofile 8192; # Establece el límite máximo de archivos abiertos por cada proceso de trabajo.
-pid /run/nginx.pid; # Especifica la ubicación del archivo PID (identificador de proceso) de NGINX.
+# Configuración nginx-vod-module OPTIMIZADA
+user www-data;
+worker_processes auto;
+worker_rlimit_nofile 8192;
+pid /run/nginx.pid;
 
 events {
-    worker_connections 1024; # Define el número máximo de conexiones simultáneas que puede manejar cada proceso de trabajo.
+    worker_connections 1024;
 }
 
 http {
-    error_log /var/log/nginx/error.log debug; # Habilita el registro de errores con nivel de depuración (debug).
-    access_log /var/log/nginx/access.log; # Define el archivo de registro de acceso.
-    log_not_found off; # Desactiva el registro de errores para archivos no encontrados (reduce ruido en los logs).
-    server_tokens off; # Oculta la versión de NGINX en las respuestas HTTP (mejora la seguridad).
+    error_log /var/log/nginx/error.log warn;  # Reducir verbosidad
+    access_log /var/log/nginx/access.log;
+    log_not_found off;
+    server_tokens off;
 
-    include /etc/nginx/mime.types; # Incluye los tipos MIME estándar para manejar diferentes formatos de archivo.
+    include /etc/nginx/mime.types;
 
-    # Configuración de caché para almacenamiento temporal de datos
-    proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=s3_a:2000m inactive=1d use_temp_path=off min_free=5g;
-    # - `/var/cache/nginx`: Directorio donde se almacena la caché.
-    # - `levels=1:2`: Estructura jerárquica de directorios para organizar la caché.
-    # - `keys_zone=s3_a:2000m`: Define una zona de caché llamada "s3_a" con 2000 MB de memoria.
-    # - `inactive=1d`: Elimina elementos de la caché si no se acceden durante 1 día.
-    # - `use_temp_path=off`: Desactiva el uso de un directorio temporal para la caché.
-    # - `min_free=5g`: Garantiza que haya al menos 5 GB de espacio libre en el disco.
-
-    # Configuración de autenticación AWS para interactuar con MinIO
+    # Configuración de autenticación AWS para MinIO
     aws_auth $aws_token {
-        access_key ${NGINX_MINIO_ACCESS_KEY}; # Clave de acceso para autenticarse en MinIO.
-        secret_key ${NGINX_SECRET_KEY}; # Clave secreta para autenticarse en MinIO.
-        service s3; # Servicio S3 compatible con MinIO.
-        region ${NGINX_REGION}; # Región configurada en MinIO.
+        access_key ${NGINX_MINIO_ACCESS_KEY};
+        secret_key ${NGINX_SECRET_KEY};
+        service s3;
+        region ${NGINX_REGION};
     }
 
-    # Definición de un grupo de servidores upstream para MinIO
-    upstream internal_minio {
-        server ${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}; # Dirección IP y puerto del servidor MinIO interno.
-    }
-
-    # Primer bloque de servidor (escucha en el puerto 80)
+    # ✅ SOLO UN SERVIDOR - Puerto 80
     server {
-
-        listen ${NGINX_IP_ADDRESS}:${NGINX_SERVER1_PORT}; # Escucha en la dirección IP NGINX_IP_ADDRESS y el puerto NGINX_SERVER1_PORT.
+        listen 80;
 
         location / {
-            root /nginx-1.26.3/html; # Define el directorio raíz para servir archivos estáticos.
-            index index.html; # Archivo predeterminado a servir cuando se accede a la raíz.
+            root /nginx-1.26.3/html;
+            index index.html;
             add_header Cache-Control "no-cache, no-store, must-revalidate"; # Desactiva el almacenamiento en caché del navegador.
             add_header Pragma "no-cache";
             add_header Expires 0;
         }
 
-        # Manejo de solicitudes al endpoint /minio/
+        # ✅ Endpoint directo a MinIO
         location /minio/ {
-            add_header Access-Control-Allow-Headers '*'; # Permite cualquier encabezado en solicitudes CORS.
-            add_header Access-Control-Expose-Headers 'Server,range,Content-Length,Content-Range'; # Encabezados expuestos en las respuestas CORS.
-            add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS'; # Métodos HTTP permitidos en CORS.
-            proxy_pass http://${NGINX_MINIO_SERVER}/; # Redirige las solicitudes al servidor MinIO.
-            proxy_set_header Host $host; # Envía el nombre del host original al servidor backend.
-            proxy_set_header X-Real-IP $remote_addr; # Envía la dirección IP real del cliente.
-            proxy_set_header X-Amz-Date $aws_auth_date; # Fecha de autenticación AWS.
-            proxy_set_header X-Amz-Content-SHA256 e3b0c43288fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855; # Hash SHA256 vacío.
-            proxy_set_header Authorization $aws_token; # Token de autenticación AWS.
-        }
-
-        # Manejo de solicitudes al endpoint /storage/
-        location ^~ /storage {
-            internal; # Restringe el acceso directo a esta ubicación desde el exterior.
-            if ($uri ~ ^/storage/hls/(.*\.mp4)(/.*)?$) {
-                set $file_uri /${NGINX_MINIO_BUCKET}/${NGINX_MINIO_VIDEO_DIR}/$1; # Extrae el nombre del archivo MP4 y lo asigna a $file_uri.
-            }
-            proxy_pass http://internal_minio$file_uri; # Redirige las solicitudes al servidor MinIO.
+            add_header Access-Control-Allow-Headers '*';
+            add_header Access-Control-Expose-Headers 'Server,range,Content-Length,Content-Range';
+            add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
+            proxy_pass http://${NGINX_MINIO_SERVER}/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Amz-Date $aws_auth_date;
@@ -79,86 +49,89 @@ http {
             proxy_set_header Authorization $aws_token;
         }
 
-        # Manejo de solicitudes al endpoint /vod/hls/
-        location /hls {
-            vod hls; # Habilita el módulo VOD (Video On Demand) para HLS (HTTP Live Streaming).
-            vod_mode remote; # Cambia a modo remoto para obtener segmentos de video desde un backend.
-            vod_upstream_location /storage; # Ubicación upstream para obtener los segmentos de video.
-            vod_segment_duration 10000; # Duración de cada segmento de video en milisegundos.
-            vod_align_segments_to_key_frames on; # Alinea los segmentos con los fotogramas clave.
-            vod_metadata_cache metadata_cache 512m; # Caché para metadatos de video (512 MB).
-            vod_response_cache response_cache 512m; # Caché para respuestas de video (512 MB).
-            vod_last_modified_types *; # Agrega encabezados Last-Modified a todas las respuestas.
-            vod_max_frame_count 20971520; # Número máximo de fotogramas en un archivo de video.
-            vod_segment_max_frame_count 655360; # Número máximo de fotogramas en un segmento.
-            vod_cache_buffer_size 1000K; # Tamaño del búfer de caché para segmentos.
-            vod_multi_uri_suffix ".play"; # Sufijo para múltiples URIs.
-            vod_hls_absolute_index_urls off; # Desactiva URLs absolutas para índices HLS.
-            vod_hls_absolute_master_urls off; # Desactiva URLs absolutas para playlists maestras.
-            vod_hls_absolute_iframe_urls off; # Desactiva URLs absolutas para iframes.
-            vod_hls_output_iframes_playlist off; # Desactiva la salida de playlists de iframes.
-
-            gzip on; # Habilita la compresión Gzip.
-            gzip_disable msie6; # Desactiva Gzip para navegadores antiguos como MSIE6.
-            gzip_vary on; # Agrega el encabezado Vary: Accept-Encoding.
-            gzip_types application/vnd.apple.mpegurl video/f4m application/dash+xml text/xml text/vtt; # Tipos MIME para comprimir.
+        # ✅ Storage interno para VOD - DIRECTO a MinIO
+        location ^~ /storage {
+            internal;
+            
+            if ($uri ~ ^/storage/hls/(.*\.mp4)(/.*)?$) {
+                set $file_uri /${NGINX_MINIO_BUCKET}/${NGINX_MINIO_VIDEO_DIR}/$1;
+            }
+            
+            # ✅ DIRECTO a MinIO (sin servidor intermedio)
+            proxy_pass http://${NGINX_MINIO_SERVER}$file_uri;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Amz-Date $aws_auth_date;
+            proxy_set_header X-Amz-Content-SHA256 e3b0c43288fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855;
+            proxy_set_header Authorization $aws_token;
         }
 
+        # ✅ HLS endpoint con caché optimizado
+        location /hls {
+            vod hls;
+            vod_mode remote;
+            vod_upstream_location /storage;
+            vod_segment_duration 10000;
+            vod_align_segments_to_key_frames on;
+            
+            # ✅ Caché integrado de VOD (mejor que proxy_cache)
+            vod_metadata_cache metadata_cache 512m;
+            vod_response_cache response_cache 512m;
+            vod_last_modified_types *;
+            vod_max_frame_count 20971520;
+            vod_segment_max_frame_count 655360;
+            vod_cache_buffer_size 1000K;
+            vod_multi_uri_suffix ".play";
+            vod_hls_absolute_index_urls off;
+            vod_hls_absolute_master_urls off;
+            vod_hls_absolute_iframe_urls off;
+            vod_hls_output_iframes_playlist off;
+
+            # Headers CORS
+            add_header Access-Control-Allow-Origin *;
+            add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
+            add_header Access-Control-Allow-Headers 'Range';
+            add_header Cache-Control no-cache;
+
+            gzip on;
+            gzip_disable msie6;
+            gzip_vary on;
+            gzip_types application/vnd.apple.mpegurl video/f4m application/dash+xml text/xml text/vtt;
+        }
+
+        # ✅ Subtítulos
         location /subs {
             if ($uri ~ ^/subs/(.+\.vtt)$) {
-                set $sub_path $1; # Captura todo después de /subs/ (incluyendo subdirectorios)
-                set $file_uri /${NGINX_MINIO_BUCKET}/${NGINX_MINIO_VIDEO_DIR}/$sub_path; # Ruta completa en MinIO
+                set $sub_path $1;
+                set $file_uri /${NGINX_MINIO_BUCKET}/${NGINX_MINIO_VIDEO_DIR}/$sub_path;
             }
-            proxy_pass http://internal_minio$file_uri; # Redirige las solicitudes al servidor MinIO.
+            proxy_pass http://${NGINX_MINIO_SERVER}$file_uri;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Amz-Date $aws_auth_date;
             proxy_set_header X-Amz-Content-SHA256 e3b0c43288fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855;
             proxy_set_header Authorization $aws_token;
+
+            add_header Content-Type "text/vtt; charset=utf-8";
+            add_header Access-Control-Allow-Origin *;
+            add_header Cache-Control no-cache;
         }
 
+        # ✅ Covers/thumbnails
         location /covers {
             if ($uri ~ ^/covers/(.+)$) {
-                set $sub_path $1; # Captura todo después de /covers/ (incluyendo subdirectorios)
-                set $file_uri /${NGINX_MINIO_BUCKET}/${NGINX_MINIO_COVERS_DIR}/$sub_path; # Ruta completa en MinIO
+                set $sub_path $1;
+                set $file_uri /${NGINX_MINIO_BUCKET}/${NGINX_MINIO_COVERS_DIR}/$sub_path;
             }
-            proxy_pass http://internal_minio$file_uri; # Redirige las solicitudes al servidor MinIO.
+            proxy_pass http://${NGINX_MINIO_SERVER}$file_uri;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Amz-Date $aws_auth_date;
             proxy_set_header X-Amz-Content-SHA256 e3b0c43288fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855;
             proxy_set_header Authorization $aws_token;
             proxy_hide_header Content-Type;
-            add_header Content-Type "image/jpeg"; # Asegura que el tipo MIME es correcto
-        }
-
-    }
-
-    # Segundo bloque de servidor (escucha en el puerto 81)
-    server {
-
-        listen ${NGINX_IP_ADDRESS}:${NGINX_SERVER2_PORT}; # Escucha en la dirección IP NGINX_IP_ADDRESS y el puerto NGINX_SERVER2_PORT.
-
-        location / {
-            allow 127.0.0.1; # Permite el acceso solo desde la dirección IP
-            deny all;
-            proxy_cache s3_a; # Usa la caché definida anteriormente ("s3_a").
-            slice 1m; # Divide las respuestas en segmentos de 1 MB para mejorar la eficiencia.
-            proxy_cache_key $uri$slice_range; # Clave de caché basada en la URI y el rango de bytes.
-            proxy_set_header Range $slice_range; # Envía el rango de bytes solicitado al backend.
-            proxy_http_version 1.1; # Usa HTTP/1.1 para soportar rangos de bytes.
-            proxy_cache_valid 200 206 302 301 304 1d; # Tiempo de validez de la caché para códigos de estado específicos.
-            proxy_cache_valid 404 1m; # Tiempo de validez de la caché para errores 404.
-            proxy_ignore_headers X-Accel-Expires Expires Cache-Control Set-Cookie; # Ignora ciertos encabezados del backend.
-            proxy_hide_header Set-Cookie; # Oculta el encabezado Set-Cookie en las respuestas.
-            proxy_cache_lock on; # Bloquea las solicitudes concurrentes mientras se llena la caché.
-            proxy_cache_use_stale error updating timeout http_500 http_502 http_503 http_504; # Usa respuestas obsoletas en caso de errores.
-            proxy_pass http://${NGINX_MINIO_SERVER}/; # Redirige las solicitudes al servidor MinIO.
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Amz-Date $aws_auth_date;
-            proxy_set_header X-Amz-Content-SHA256 e3b0c43288fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855;
-            proxy_set_header Authorization $aws_token;
+            add_header Content-Type "image/jpeg";
+            add_header Access-Control-Allow-Origin *;
         }
     }
 }
