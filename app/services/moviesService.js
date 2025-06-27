@@ -118,7 +118,7 @@ class MoviesService {
       user,
       ip,
     } = movieInfo;
-    
+
     const videoFileHash = await this.calculateFileHash(video);
 
     try {
@@ -204,6 +204,14 @@ class MoviesService {
     } finally {
       await deleteTempDir(video);
       await deleteTempDir(coverImage);
+      if (movieInfo.isTemporaryCoverImage && coverImage) {
+        try {
+          const { cleanupTempFile } = require('../utils/imageDownloader');
+          cleanupTempFile(coverImage);
+        } catch (error) {
+          console.error('⚠️ Error limpiando imagen temporal:', error);
+        }
+      }
       client.release();
     }
   }
@@ -223,10 +231,10 @@ class MoviesService {
       if (changes.coverImage) {
         const coverFileHash = await this.calculateFileHash(changes.coverImage);
         //const coverDirminio = `${config.coversDir}/${movie.cover_image}/cover.jpg`;
-         //await deleteFileFromMinIO(coverDirminio);
+        //await deleteFileFromMinIO(coverDirminio);
         const remoteCoverPath = `${config.coversDir}/${movie.cover_image}`;
         await deleteFilesByPrefix(remoteCoverPath);
-       
+
         // Procesa y sube la nueva portada
         await processAndUploadCover(changes.coverImage, coverFileHash);
         await deleteTempDir(changes.coverImage);
@@ -280,7 +288,7 @@ class MoviesService {
       const remoteCoverPath = `${config.coversDir}/${movie.cover_image}`;
       // Se asume que available_resolutions es un arreglo de alturas (por ejemplo, [360, 480, 720])
       const remoteVideoPaths = `${config.videoDir}/${file_hash}`;
-      
+
       await deleteFilesByPrefix(remoteCoverPath);
       await deleteFilesByPrefix(remoteVideoPaths);
 

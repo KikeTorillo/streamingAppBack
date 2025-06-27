@@ -8,7 +8,6 @@
     "clean": "node ../clean.js",
     "start": "node index.js",
     "lint": "eslint"
-
   },
   "author": "",
   "license": "ISC",
@@ -25,6 +24,7 @@
     "@formkit/tempo": "^0.1.2",
     "@hapi/boom": "^10.0.1",
     "aws-sdk": "^2.1692.0",
+    "axios": "^1.10.0",
     "bcrypt": "^5.1.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

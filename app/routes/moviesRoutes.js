@@ -176,31 +176,88 @@ async function processFile(taskId, fileInfo) {
 }
 
 async function completeInfoUser(req, res, next) {
-  // Extraer datos adicionales del cuerpo de la solicitud
-  // Obtener la IP del cliente
-  let clientIp = req.socket.remoteAddress || '';
-  // Si X-Forwarded-For contiene múltiples IPs, tomar la primera
-  if (Array.isArray(clientIp)) {
-    clientIp = clientIp[0];
-  } else if (typeof clientIp === 'string') {
-    clientIp = clientIp.split(',')[0].trim();
+  try {
+    // Extraer datos adicionales del cuerpo de la solicitud
+    // Obtener la IP del cliente
+    let clientIp = req.socket.remoteAddress || '';
+    
+    // Si X-Forwarded-For contiene múltiples IPs, tomar la primera
+    if (Array.isArray(clientIp)) {
+      clientIp = clientIp[0];
+    } else if (typeof clientIp === 'string') {
+      clientIp = clientIp.split(',')[0].trim();
+    }
+    
+    // Normalizar la IP (eliminar ::ffff: para IPv6)
+    clientIp = clientIp.replace(/^::ffff:/, '');
+    
+    const user = { id: 'anonymous' };
+    const ip = clientIp || 'unknown';
+    const data = req.body;
+    
+    data.user = user;
+    data.ip = ip;
+    
+    // Manejar archivos de video
+    if (req.files && req.files['video']) {
+      data.video = req.files['video'][0].path;
+      console.log('📹 Video archivo recibido:', data.video);
+    }
+    
+    // ✅ NUEVO: Manejar coverImage (archivo O URL)
+    if (req.files && req.files['coverImage']) {
+      // Si hay archivo subido, usarlo
+      data.coverImage = req.files['coverImage'][0].path;
+      console.log('🖼️ Imagen archivo recibida:', data.coverImage);
+      
+      // Si también viene coverImageUrl, eliminarla (priorizar archivo)
+      if (data.coverImageUrl) {
+        console.log('⚠️ Se recibió tanto archivo como URL. Priorizando archivo subido.');
+        delete data.coverImageUrl;
+      }
+    } else if (data.coverImageUrl) {
+      // Si no hay archivo pero sí URL, descargarla como archivo temporal
+      console.log('🌐 URL de imagen recibida, descargando...:', data.coverImageUrl);
+      
+      try {
+        const { downloadImageFromUrl, isValidImageUrl } = require('../utils/imageDownloader');
+        
+        // Validar URL
+        if (!isValidImageUrl(data.coverImageUrl)) {
+          throw new Error('URL de imagen no válida o dominio no permitido');
+        }
+        
+        // Descargar imagen y crear archivo temporal
+        const tempImagePath = await downloadImageFromUrl(data.coverImageUrl);
+        data.coverImage = tempImagePath;
+        data.isTemporaryCoverImage = true; // Flag para limpieza posterior
+        
+        console.log('✅ Imagen descargada como archivo temporal:', tempImagePath);
+        
+        // Limpiar coverImageUrl ya que ahora tenemos el archivo
+        delete data.coverImageUrl;
+        
+      } catch (error) {
+        console.error('❌ Error descargando imagen:', error);
+        return next(new Error(`Error descargando imagen: ${error.message}`));
+      }
+    } else {
+      // Si no hay ninguno de los dos, será manejado por la validación
+      console.log('⚠️ No se recibió imagen (ni archivo ni URL)');
+    }
+    
+    console.log('📦 Datos procesados en middleware:', {
+      title: data.title,
+      hasVideo: !!data.video,
+      hasCoverImage: !!data.coverImage,
+      isTemporary: !!data.isTemporaryCoverImage
+    });
+    
+    next();
+  } catch (error) {
+    console.error('❌ Error en completeInfoUser:', error);
+    next(error);
   }
-  // Normalizar la IP (eliminar ::ffff: para IPv6)
-  clientIp = clientIp.replace(/^::ffff:/, '');
-  const user = { id: 'anonymous' };
-  const ip = clientIp || 'unknown';
-  const data = req.body;
-  data.user = user;
-  data.ip = ip;
-  if (req.files && req.files['video']) {
-    data.video = req.files['video'] ? req.files['video'][0].path : '';
-  }
-  if (req.files && req.files['coverImage']) {
-    data.coverImage = req.files['coverImage']
-      ? req.files['coverImage'][0].path
-      : '';
-  }
-  next();
 }
 
 module.exports = router;

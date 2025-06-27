@@ -1,5 +1,4 @@
-// moviesSchemas.js
-// Importación de Joi para crear esquemas de validación
+// app/schemas/moviesSchemas.js
 const Joi = require('joi');
 
 /**
@@ -15,16 +14,18 @@ const releaseYear = Joi.number()
 const description = Joi.string().allow('');
 const video = Joi.string();
 const coverImage = Joi.string();
+const coverImageUrl = Joi.string().uri(); // Nueva validación para URLs
 const user = Joi.object();
 const ip = Joi.string();
 
-// Esquema para subir videos, adaptado para películas, series y episodios
+// Esquema para crear películas - ACTUALIZADO para manejar Files y URLs
 const createMovieSchema = Joi.object({
   // Nombre del contenido (película, serie o episodio)
   title: title.required().messages({
     'any.required': 'El nombre de la pelicula es obligatorio',
     'string.empty': 'El nombre no puede estar vacío',
   }),
+  
   // ID de la categoría
   categoryId: categoryId.required().messages({
     'any.required': 'La categoría es obligatoria',
@@ -50,16 +51,45 @@ const createMovieSchema = Joi.object({
     'string.empty': 'La ruta de la pelicula es obligatoria',
   }),
 
-  coverImage: coverImage.required().messages({
-    'any.required': 'La ruta de la portada es obligatoria para películas',
-    'string.empty': 'La ruta de la portada es obligatoria',
+  // CAMBIO IMPORTANTE: Ahora coverImage es opcional porque puede venir coverImageUrl
+  coverImage: coverImage.optional().messages({
+    'string.empty': 'La ruta de la portada no puede estar vacía',
   }),
+
+  // NUEVO: Campo para URLs de imágenes (TMDB, etc.)
+  coverImageUrl: coverImageUrl.optional().messages({
+    'string.uri': 'La URL de la imagen debe ser válida',
+    'string.empty': 'La URL de la imagen no puede estar vacía',
+  }),
+
+  // ✅ NUEVO: Campo interno para marcar archivos temporales
+  isTemporaryCoverImage: Joi.boolean().optional(),
 
   user: user.required(),
   ip: ip.required(),
+})
+// VALIDACIÓN PERSONALIZADA: Al menos uno de los dos campos debe estar presente
+.custom((value, helpers) => {
+  const { coverImage, coverImageUrl } = value;
+  
+  // Si no hay archivo subido Y no hay URL, es error
+  if (!coverImage && !coverImageUrl) {
+    return helpers.error('custom.coverImageRequired');
+  }
+  
+  // Si hay ambos, priorizar el archivo subido
+  if (coverImage && coverImageUrl) {
+    // Eliminar coverImageUrl si hay archivo
+    delete value.coverImageUrl;
+  }
+  
+  return value;
+})
+.messages({
+  'custom.coverImageRequired': 'Se requiere una imagen de portada (archivo o URL)',
 });
 
-// Esquema para búsqueda. En este caso se mantiene simple ya que la búsqueda se realiza por nombre y tipo de contenido.
+// Esquema para búsqueda por ID
 const getMovieSchema = Joi.object({
   id: id.required().messages({
     'any.required': 'El id es obligatorio',
@@ -69,7 +99,7 @@ const getMovieSchema = Joi.object({
   }),
 });
 
-// Esquema para búsqueda. En este caso se mantiene simple ya que la búsqueda se realiza por nombre y tipo de contenido.
+// Esquema para búsqueda por título
 const getMovieByTitleSchema = Joi.object({
   title: title.required().messages({
     'any.required': 'El titulo es obligatorio',
@@ -77,40 +107,39 @@ const getMovieByTitleSchema = Joi.object({
   }),
 });
 
-// Nuevo esquema para actualizar una película
+// Esquema para actualizar una película
 const updateMovieSchema = Joi.object({
-    // Nombre del contenido (película, serie o episodio)
-    title: title.optional().messages({
-      'any.required': 'El nombre de la pelicula es obligatorio',
-      'string.empty': 'El nombre no puede estar vacío',
-    }),
-    // ID de la categoría
-    categoryId: categoryId.optional().messages({
-      'any.required': 'La categoría es obligatoria',
-      'number.empty': 'La categoria no puede estar vacia',
-      'number.base': 'La categoría debe ser un ID numérico válido',
-    }),
+  title: title.optional().messages({
+    'string.empty': 'El nombre no puede estar vacío',
+  }),
   
-    // Año de lanzamiento
-    releaseYear: releaseYear.optional().messages({
-      'any.required': 'El año de lanzamiento es obligatorio',
-      'number.base': 'El año debe ser un número válido',
-      'number.min': 'El año no puede ser menor a 1900',
-      'number.max': `El año no puede ser mayor a ${new Date().getFullYear()}`,
-    }),
-  
-    description: description.optional().messages({
-      'any.required': 'La descripcion de la pelicula es obligatoria',
-      'string.empty': 'La descripcion de la pelicula es obligatoria',
-    }),
+  categoryId: categoryId.optional().messages({
+    'number.base': 'La categoría debe ser un ID numérico válido',
+  }),
 
-    coverImage: coverImage.optional().messages({
-      'any.required': 'La ruta de la portada es obligatoria para películas',
-      'string.empty': 'La ruta de la portada es obligatoria',
-    }),
-  
-    user: user.required(),
-    ip: ip.required(),
+  releaseYear: releaseYear.optional().messages({
+    'number.base': 'El año debe ser un número válido',
+    'number.min': 'El año no puede ser menor a 1900',
+    'number.max': `El año no puede ser mayor a ${new Date().getFullYear()}`,
+  }),
+
+  description: description.optional().messages({
+    'string.empty': 'La descripcion no puede estar vacía',
+  }),
+
+  coverImage: coverImage.optional().messages({
+    'string.empty': 'La ruta de la portada no puede estar vacía',
+  }),
+
+  coverImageUrl: coverImageUrl.optional().messages({
+    'string.uri': 'La URL de la imagen debe ser válida',
+  }),
+
+  // ✅ NUEVO: Campo interno para marcar archivos temporales
+  isTemporaryCoverImage: Joi.boolean().optional(),
+
+  user: user.required(),
+  ip: ip.required(),
 });
 
 module.exports = {
