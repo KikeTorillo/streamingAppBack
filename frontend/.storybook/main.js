@@ -1,15 +1,14 @@
-// ===== STORYBOOK CONFIG - PRESERVANDO TU CONFIGURACIÓN EXISTENTE + FIX DOCKER =====
+// ===== STORYBOOK CONFIG - FIX PARA ARCHIVOS JSX =====
 // frontend/.storybook/main.js
 
 /** @type { import('@storybook/react-vite').StorybookConfig } */
 const config = {
-  // ✅ PRESERVANDO TUS STORIES ORIGINALES (incluye .mdx)
+  // ✅ FIX: Remover .mdx ya que no tienes archivos MDX
   "stories": [
-    "../src/**/*.mdx",
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
   
-  // ✅ PRESERVANDO TODOS TUS ADDONS AVANZADOS
+  // ✅ TUS ADDONS ACTUALES
   "addons": [
     "@chromatic-com/storybook",
     "@storybook/addon-docs",
@@ -18,33 +17,30 @@ const config = {
     "@storybook/addon-vitest"
   ],
   
-  // ✅ PRESERVANDO TU FRAMEWORK CONFIG
+  // ✅ FRAMEWORK CONFIG
   "framework": {
     "name": "@storybook/react-vite",
     "options": {}
   },
   
-  // ✅ PRESERVANDO TUS FEATURES
+  // ✅ FEATURES
   "features": {
     "buildStoriesJson": true
   },
   
-  // ✅ PRESERVANDO TU TEMA DARK
+  // ✅ TEMA DARK
   "docs": {
     "theme": 'dark'
   },
   
-  // ✅ AGREGANDO SOLO EL FIX DOCKER - SIN ROMPER NADA
+  // ✅ CONFIG DOCKER/VITE
   viteFinal: (config) => {
-    // Solo agregar configuración Docker específica
     config.server = {
       ...config.server,
       host: '0.0.0.0',
       port: 6006,
       strictPort: true,
-      // ✅ FIX: Deshabilitar auto-open en Docker
       open: false,
-      // Configuración de HMR para Docker
       hmr: {
         port: 6006,
         host: '0.0.0.0'
