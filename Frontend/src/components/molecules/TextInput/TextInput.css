@@ -1,0 +1,351 @@
+/* ===== TEXTINPUT COMPONENT - OPTIMIZADO SIN REDUNDANCIAS ===== */
+/* TextInput.css - Solo estilos específicos de la molécula */
+/* Aprovecha COMPLETAMENTE el átomo Input actualizado con variables centralizadas */
+
+/* ===== WRAPPER BASE ===== */
+.text-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-family: var(--font-family-base);
+    gap: var(--space-xs);
+}
+
+.text-input-wrapper--full-width {
+    width: 100%;
+}
+
+.text-input-wrapper--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* ===== LABEL ===== */
+.text-input__label {
+    display: block;
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-tight);
+    margin: 0;
+    transition: color var(--transition-normal);
+}
+
+.text-input__label--required::after {
+    content: ' *';
+    color: var(--color-danger);
+    font-weight: var(--font-weight-bold);
+}
+
+/* Estados del label */
+.text-input-wrapper--focused .text-input__label {
+    color: var(--border-focus);
+}
+
+.text-input-wrapper--error .text-input__label {
+    color: var(--color-danger);
+}
+
+.text-input-wrapper--success .text-input__label {
+    color: var(--color-success);
+}
+
+.text-input-wrapper--warning .text-input__label {
+    color: var(--color-warning);
+}
+
+/* ===== CONTAINER ===== */
+.text-input__container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* ===== AJUSTES PARA ICONOS - USANDO VARIABLES DEL SISTEMA ===== */
+/* Padding adicional cuando hay iconos, calculado correctamente con variables */
+
+/* Iconos izquierdos/derechos - cálculo basado en variables del sistema */
+.input-base.text-input--with-left-icon {
+    padding-left: calc(var(--component-padding-lg) + 2.4rem);
+}
+
+.input-base.text-input--with-right-icon {
+    padding-right: calc(var(--space-lg) + var(--space-xl)); /* 16px + 24px = 40px */
+}
+
+/* Ajustes precisos por tamaño usando variables del sistema */
+.input-base--xs.text-input--with-left-icon {
+    padding-left: calc(var(--space-md) + var(--space-lg)); /* 12px + 16px = 28px */
+}
+
+.input-base--xs.text-input--with-right-icon {
+    padding-right: calc(var(--space-md) + var(--space-lg)); /* 12px + 16px = 28px */
+}
+
+.input-base--sm.text-input--with-left-icon {
+    padding-left: calc(var(--space-lg) + var(--space-lg)); /* 16px + 16px = 32px */
+}
+
+.input-base--sm.text-input--with-right-icon {
+    padding-right: calc(var(--space-lg) + var(--space-lg)); /* 16px + 16px = 32px */
+}
+
+.input-base--md.text-input--with-left-icon {
+    padding-left: calc(var(--space-lg) + var(--space-xl)); /* 16px + 24px = 40px */
+}
+
+.input-base--md.text-input--with-right-icon {
+    padding-right: calc(var(--space-lg) + var(--space-xl)); /* 16px + 24px = 40px */
+}
+
+.input-base--lg.text-input--with-left-icon {
+    padding-left: calc(var(--space-xl) + var(--space-xl)); /* 24px + 24px = 48px */
+}
+
+.input-base--lg.text-input--with-right-icon {
+    padding-right: calc(var(--space-xl) + var(--space-xl)); /* 24px + 24px = 48px */
+}
+
+.input-base--xl.text-input--with-left-icon {
+    padding-left: calc(var(--space-2xl) + var(--space-xl)); /* 32px + 24px = 56px */
+}
+
+.input-base--xl.text-input--with-right-icon {
+    padding-right: calc(var(--space-2xl) + var(--space-xl)); /* 32px + 24px = 56px */
+}
+
+/* ===== ICONOS ===== */
+.text-input__icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    pointer-events: none;
+    z-index: 2;
+    transition: color var(--transition-normal);
+}
+
+.text-input__icon--left {
+    left: var(--space-md);
+}
+
+.text-input__icon--right {
+    right: var(--space-md);
+}
+
+/* Iconos clickeables */
+.text-input__icon--clickable {
+    pointer-events: auto;
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-normal);
+}
+
+.text-input__icon--clickable:hover {
+    background-color: var(--bg-secondary);
+    color: var(--color-primary);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.text-input__icon--clickable:focus {
+    outline: 0.2rem solid var(--border-focus);
+    outline-offset: 0.2rem;
+    background-color: var(--bg-secondary);
+}
+
+.text-input__icon--clickable:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+/* Estados de iconos según variante del wrapper */
+.text-input-wrapper--error .text-input__icon:not(.text-input__icon--clickable) {
+    color: var(--color-danger);
+}
+
+.text-input-wrapper--success .text-input__icon:not(.text-input__icon--clickable) {
+    color: var(--color-success);
+}
+
+.text-input-wrapper--warning .text-input__icon:not(.text-input__icon--clickable) {
+    color: var(--color-warning);
+}
+
+.text-input-wrapper--focused .text-input__icon:not(.text-input__icon--clickable) {
+    color: var(--border-focus);
+}
+
+/* Ajustes de iconos por tamaño del wrapper - USANDO VARIABLES DEL SISTEMA */
+.text-input-wrapper--xs .text-input__icon {
+    font-size: var(--component-font-xs);
+}
+
+.text-input-wrapper--xs .text-input__icon--left {
+    left: var(--space-sm); /* 8px - Variable del sistema */
+}
+
+.text-input-wrapper--xs .text-input__icon--right {
+    right: var(--space-sm);
+}
+
+.text-input-wrapper--sm .text-input__icon {
+    font-size: var(--component-font-sm);
+}
+
+.text-input-wrapper--sm .text-input__icon--left {
+    left: var(--space-md); /* 12px - Variable del sistema */
+}
+
+.text-input-wrapper--sm .text-input__icon--right {
+    right: var(--space-md);
+}
+
+.text-input-wrapper--md .text-input__icon {
+    font-size: var(--component-font-md);
+}
+
+.text-input-wrapper--md .text-input__icon--left {
+    left: var(--space-lg); /* 16px - Variable del sistema */
+}
+
+.text-input-wrapper--md .text-input__icon--right {
+    right: var(--space-lg);
+}
+
+.text-input-wrapper--lg .text-input__icon,
+.text-input-wrapper--xl .text-input__icon {
+    font-size: var(--component-font-lg);
+}
+
+.text-input-wrapper--lg .text-input__icon--left,
+.text-input-wrapper--xl .text-input__icon--left {
+    left: var(--space-xl); /* 24px - Variable del sistema */
+}
+
+.text-input-wrapper--lg .text-input__icon--right,
+.text-input-wrapper--xl .text-input__icon--right {
+    right: var(--space-xl);
+}
+
+/* ===== FOOTER ===== */
+.text-input__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-md);
+    min-height: 2rem;
+}
+
+/* ===== MENSAJES ===== */
+.text-input__helper-text {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: var(--line-height-normal);
+    margin: 0;
+    transition: color var(--transition-normal);
+}
+
+.text-input__error-text {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--color-danger);
+    line-height: var(--line-height-normal);
+    font-weight: var(--font-weight-medium);
+    margin: 0;
+    animation: slideInError 0.2s ease-out;
+}
+
+/* Animación sutil para errores */
+@keyframes slideInError {
+    from {
+        opacity: 0;
+        transform: translateY(-0.4rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== CONTADOR DE CARACTERES ===== */
+.text-input__char-count {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+    transition: color var(--transition-normal);
+}
+
+/* Estados del contador */
+.text-input__char-count[data-warning="true"] {
+    color: var(--color-warning);
+    font-weight: var(--font-weight-semibold);
+}
+
+.text-input__char-count[data-danger="true"] {
+    color: var(--color-danger);
+    font-weight: var(--font-weight-bold);
+    animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* ===== RESPONSIVE ESPECÍFICO SOLO PARA ICONOS - USANDO VARIABLES ===== */
+@media (max-width: 768px) {
+    /* Solo ajustes específicos de iconos en móviles */
+    .text-input__icon--clickable {
+        /* Área táctil mínima para iconos */
+        min-width: var(--touch-target-min);
+        min-height: var(--touch-target-min);
+        padding: var(--space-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Mantener posiciones usando variables del sistema */
+    .text-input-wrapper--lg .text-input__icon--left,
+    .text-input-wrapper--xl .text-input__icon--left {
+        left: var(--space-xl); /* 24px - Consistente con desktop */
+    }
+    
+    .text-input-wrapper--lg .text-input__icon--right,
+    .text-input-wrapper--xl .text-input__icon--right {
+        right: var(--space-xl); /* 24px - Consistente con desktop */
+    }
+    
+    /* Ajustar footer en móvil */
+    .text-input__footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-xs);
+    }
+    
+    .text-input__char-count {
+        text-align: right;
+    }
+}
+
+/* ===== VERSIÓN COMPACTA (ESPECÍFICA DE TEXTINPUT) ===== */
+.text-input-wrapper--compact {
+    gap: calc(var(--space-xs) / 2);
+}
+
+.text-input-wrapper--compact .text-input__footer {
+    min-height: 1.6rem;
+    gap: var(--space-sm);
+}
+
+.text-input-wrapper--compact .text-input__helper-text,
+.text-input-wrapper--compact .text-input__error-text,
+.text-input-wrapper--compact .text-input__char-count {
+    font-size: var(--font-size-xs);
+}

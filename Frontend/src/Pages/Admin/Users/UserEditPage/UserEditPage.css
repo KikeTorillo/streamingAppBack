@@ -1,0 +1,493 @@
+/* ===== USER EDIT PAGE STYLES - HOMOLOGADO CON USER CREATE ===== */
+/* src/Pages/Admin/Users/UserEditPage/UserEditPage.css */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.user-edit {
+  /* Layout - IGUAL QUE user-create */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  max-width: 80rem; /* 800px */
+  margin: 0 auto;
+  
+  /* Fuente */
+  font-family: var(--font-family-base);
+}
+
+/* ===== HEADER ACTIONS ===== */
+.user-edit__header-actions {
+  /* Layout - IGUAL QUE user-create__header-actions */
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* ===== MENSAJES DE ESTADO ===== */
+.user-edit__error,
+.user-edit__success {
+  /* Layout - IGUAL QUE user-create */
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  border: 0.1rem solid;
+  
+  /* Tipografía - IGUAL QUE user-create */
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  
+  /* Animación - IGUAL QUE user-create */
+  animation: slideIn 0.3s ease-out;
+}
+
+.user-edit__error {
+  /* Colores de error - IGUAL QUE user-create */
+  background-color: var(--color-danger-light);
+  border-color: var(--color-danger);
+  color: var(--color-danger-dark);
+}
+
+.user-edit__success {
+  /* Colores de éxito - IGUAL QUE user-create */
+  background-color: var(--color-success-light);
+  border-color: var(--color-success);
+  color: var(--color-success-dark);
+}
+
+.user-edit__error-icon,
+.user-edit__success-icon {
+  /* Iconos - IGUAL QUE user-create */
+  font-size: var(--font-size-lg);
+  flex-shrink: 0;
+}
+
+.user-edit__error-content,
+.user-edit__success-content {
+  /* Texto - IGUAL QUE user-create */
+  flex: 1;
+  min-width: 0;
+}
+
+.user-edit__error-message {
+  /* Layout - IGUAL QUE user-create__error */
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  border: 0.1rem solid;
+  background-color: var(--color-danger-light);
+  border-color: var(--color-danger);
+  color: var(--color-danger-dark);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  animation: slideIn 0.3s ease-out;
+}
+
+/* ===== INFORMACIÓN ACTUAL DEL USUARIO ===== */
+.user-edit__current-info {
+  /* Layout - ADAPTADO PARA EDIT */
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.user-edit__current-info-section {
+  /* Layout - IGUAL QUE user-create__info-section */
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 0.1rem solid var(--border-default);
+  padding: var(--space-lg);
+}
+
+.user-edit__info-title {
+  /* Reset - IGUAL QUE user-create__info-title */
+  margin: 0 0 var(--space-md) 0;
+  
+  /* Tipografía - IGUAL QUE user-create__info-title */
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.user-edit__current-info-grid {
+  /* Layout */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: var(--space-md);
+}
+
+.user-edit__current-info-item {
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  border: 0.1rem solid var(--border-primary);
+}
+
+.user-edit__current-info-label {
+  /* Tipografía */
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.user-edit__current-info-value {
+  /* Tipografía */
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  font-family: var(--font-family-mono);
+}
+
+/* Advertencia para usuario actual */
+.user-edit__warning {
+  /* Layout - SIMILAR A user-create pero con warning */
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 0.1rem solid var(--color-warning);
+  background-color: var(--color-warning-light);
+  font-size: var(--font-size-sm);
+  color: var(--color-warning);
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--space-md);
+}
+
+.user-edit__warning-icon {
+  /* Layout */
+  flex-shrink: 0;
+}
+
+/* ===== CONTENEDOR DEL FORMULARIO - IGUAL QUE CREATE ===== */
+.user-edit__form-container {
+  /* Layout - EXACTAMENTE IGUAL QUE user-create__form-container */
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 0.1rem solid var(--border-default);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.user-edit__form-header {
+  /* Layout - IGUAL QUE user-create__form-header */
+  margin-bottom: var(--space-xl);
+  text-align: center;
+}
+
+.user-edit__form-title {
+  /* Reset - IGUAL QUE user-create__form-title */
+  margin: 0 0 var(--space-sm) 0;
+  
+  /* Tipografía - IGUAL QUE user-create__form-title */
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.user-edit__form-description {
+  /* Reset - IGUAL QUE user-create__form-description */
+  margin: 0;
+  
+  /* Tipografía - IGUAL QUE user-create__form-description */
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+/* ===== ESTADOS DE FORMULARIO - IGUAL QUE CREATE ===== */
+.user-edit__form {
+  /* Base del formulario */
+}
+
+.user-edit__form--success {
+  /* Estado de éxito - IGUAL QUE user-create */
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* ===== ESTADOS DE LOADING ===== */
+.user-edit__loading {
+  /* Layout - SIMILAR A user-create pero adaptado */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-3xl);
+  color: var(--text-secondary);
+}
+
+.user-edit__loading-spinner {
+  /* Tipografía */
+  font-size: var(--font-size-4xl);
+  margin-bottom: var(--space-lg);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ===== ESTADOS DE ERROR - PÁGINA COMPLETA ===== */
+.user-edit__error {
+  /* Layout - SIMILAR A user-create pero para errores de página */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-3xl);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 0.1rem solid var(--border-default);
+}
+
+.user-edit__error-icon {
+  /* Tipografía */
+  font-size: var(--font-size-4xl);
+  margin-bottom: var(--space-lg);
+}
+
+.user-edit__error h2 {
+  /* Reset */
+  margin: 0 0 var(--space-md) 0;
+  
+  /* Tipografía */
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-danger);
+}
+
+.user-edit__error p {
+  /* Reset */
+  margin: 0 0 var(--space-lg) 0;
+  
+  /* Tipografía */
+  color: var(--text-secondary);
+}
+
+/* ===== ANIMACIONES - IGUAL QUE CREATE ===== */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== RESPONSIVE DESIGN - IGUAL QUE CREATE ===== */
+
+/* Tablets */
+@media (max-width: 768px) {
+  .user-edit {
+    gap: var(--space-lg);
+    max-width: none;
+    padding: 0 var(--space-md);
+  }
+  
+  .user-edit__header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .user-edit__header-actions > * {
+    width: 100%;
+  }
+  
+  .user-edit__current-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .user-edit__form-container {
+    padding: var(--space-lg);
+  }
+  
+  .user-edit__loading,
+  .user-edit__error {
+    padding: var(--space-xl);
+  }
+}
+
+/* Móviles */
+@media (max-width: 480px) {
+  .user-edit {
+    gap: var(--space-md);
+  }
+  
+  .user-edit__current-info-section,
+  .user-edit__form-container {
+    padding: var(--space-md);
+  }
+  
+  .user-edit__current-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .user-edit__form-header {
+    margin-bottom: var(--space-lg);
+    text-align: left;
+  }
+  
+  .user-edit__form-title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .user-edit__form-description {
+    font-size: var(--font-size-sm);
+  }
+  
+  .user-edit__success,
+  .user-edit__error-message {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--space-md);
+  }
+  
+  .user-edit__warning {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--space-sm);
+  }
+  
+  .user-edit__loading,
+  .user-edit__error {
+    padding: var(--space-lg);
+  }
+}
+
+/* ===== ACCESIBILIDAD - IGUAL QUE CREATE ===== */
+
+/* Focus visible mejorado */
+.user-edit__header-actions .button:focus-visible {
+  outline: 0.2rem solid var(--color-primary);
+  outline-offset: 0.2rem;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .user-edit__current-info-section,
+  .user-edit__form-container {
+    border-width: 0.2rem;
+  }
+  
+  .user-edit__success {
+    border-width: 0.2rem;
+  }
+  
+  .user-edit__error-message {
+    border-width: 0.2rem;
+  }
+  
+  .user-edit__warning {
+    border-width: 0.2rem;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .user-edit__loading-spinner {
+    animation: none;
+  }
+  
+  .user-edit__success,
+  .user-edit__error-message {
+    animation: none;
+  }
+}
+
+/* ===== MODO OSCURO - IGUAL QUE CREATE ===== */
+@media (prefers-color-scheme: dark) {
+  .user-edit__current-info-section,
+  .user-edit__form-container {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-default);
+  }
+  
+  .user-edit__success {
+    background-color: rgba(34, 197, 94, 0.1);
+    border-color: var(--color-success);
+  }
+  
+  .user-edit__error-message {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: var(--color-danger);
+  }
+  
+  .user-edit__warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    border-color: var(--color-warning);
+  }
+}
+
+/* Forzar modo oscuro con clase */
+.dark .user-edit__current-info-section,
+.dark .user-edit__form-container {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-default);
+}
+
+.dark .user-edit__success {
+  background-color: rgba(34, 197, 94, 0.1);
+  border-color: var(--color-success);
+}
+
+.dark .user-edit__error-message {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: var(--color-danger);
+}
+
+.dark .user-edit__warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: var(--color-warning);
+}
+
+/* ===== UTILIDADES ESPECÍFICAS ===== */
+
+/* Estados de formulario específicos */
+.user-edit__form-container[data-has-changes="true"] {
+  border-color: var(--color-warning);
+  box-shadow: 0 0 0 0.1rem rgba(245, 158, 11, 0.2);
+}
+
+.user-edit__form-container[data-saving="true"] {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.1rem rgba(59, 130, 246, 0.2);
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .user-edit__header-actions,
+  .user-edit__success,
+  .user-edit__error-message {
+    display: none;
+  }
+  
+  .user-edit {
+    gap: var(--space-md);
+  }
+  
+  .user-edit__current-info-section,
+  .user-edit__form-container {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 0.1rem solid #000;
+  }
+}

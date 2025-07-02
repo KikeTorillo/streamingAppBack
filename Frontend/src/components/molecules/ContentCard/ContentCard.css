@@ -1,0 +1,421 @@
+/* ===== CONTENT CARD COMPONENT - MOLÉCULA PARA CARÁTULAS ===== */
+/* ContentCard.css - Usando el sistema de diseño completo */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.content-card {
+  transition: all var(--transition-normal);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+  /* El aspect ratio se manejará en el container de imagen */
+}
+
+/* Estados de la card */
+.content-card:hover {
+  transform: translateY(-0.5rem) scale(1.02);
+  box-shadow: var(--shadow-xl);
+}
+
+.content-card:focus-visible {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+}
+
+.content-card:active {
+  transform: translateY(-0.2rem) scale(1.01);
+}
+
+/* ===== TAMAÑOS DE CARD ===== */
+.content-card--sm {
+  max-width: 20rem; /* 200px */
+}
+
+.content-card--md {
+  max-width: 28rem; /* 280px */
+}
+
+.content-card--lg {
+  max-width: 32rem; /* 320px */
+}
+
+.content-card--xl {
+  max-width: 36rem; /* 360px */
+}
+
+/* ===== CONTENEDOR DE IMAGEN ===== */
+.content-card__image-container {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-muted);
+}
+
+/* ContentImage hereda el aspect ratio, no necesitamos definirlo aquí */
+.content-card__image {
+  width: 100%;
+  height: 100%;
+  /* ContentImage maneja su propio border radius, transition y object-fit */
+}
+
+/* Hover effect para la imagen - aplicado al ContentImage */
+.content-card:hover .content-card__image .content-image__img {
+  transform: scale(1.05);
+}
+
+/* ===== SKELETON LOADING ===== */
+.content-card__image-skeleton {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    90deg,
+    var(--bg-muted) 25%,
+    var(--bg-secondary) 50%,
+    var(--bg-muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 2s infinite;
+}
+
+.content-card__loading-spinner {
+  font-size: var(--font-size-2xl);
+  animation: spin 2s linear infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== OVERLAY DE CONTROLES ===== */
+.content-card__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.1) 30%,
+    rgba(0, 0, 0, 0.4) 70%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+}
+
+.content-card:hover .content-card__overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.content-card__controls {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  transform: translateY(2rem);
+  transition: transform var(--transition-normal);
+}
+
+.content-card:hover .content-card__controls {
+  transform: translateY(0);
+}
+
+.content-card__play-button {
+  /* El botón hereda los estilos del átomo Button */
+  box-shadow: var(--shadow-md);
+}
+
+.content-card__favorite-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(0.8rem);
+  border: 0.1rem solid rgba(255, 255, 255, 0.3);
+}
+
+/* ===== BADGE DE TIPO ===== */
+.content-card__type-badge {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  z-index: 2;
+}
+
+/* ===== INFORMACIÓN DE LA CARD ===== */
+.content-card__info {
+  padding: var(--space-md);
+  flex: 1;
+}
+
+.content-card__title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-xs) 0;
+  line-height: var(--line-height-tight);
+  
+  /* Truncar texto largo */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.content-card__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-sm) 0;
+  line-height: var(--line-height-normal);
+}
+
+.content-card__details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.content-card__meta {
+  flex: 1;
+}
+
+.content-card__duration {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.content-card__rating {
+  display: flex;
+  align-items: center;
+}
+
+/* ===== ESTADOS ESPECIALES ===== */
+
+/* Estado de carga */
+.content-card--loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.content-card--loading:hover {
+  transform: none;
+  box-shadow: var(--shadow-md);
+}
+
+/* Estado deshabilitado */
+.content-card--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.content-card--disabled:hover {
+  transform: none;
+  box-shadow: var(--shadow-md);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablets */
+@media (max-width: 768px) {
+  .content-card__type-badge {
+    top: var(--space-xs);
+    left: var(--space-xs);
+  }
+  
+  .content-card__info {
+    padding: var(--space-sm);
+  }
+  
+  .content-card__title {
+    font-size: var(--font-size-sm);
+  }
+  
+  .content-card__controls {
+    gap: var(--space-xs);
+  }
+  
+  /* Ajustar tamaños en móviles */
+  .content-card--lg {
+    max-width: 24rem;
+  }
+  
+  .content-card--xl {
+    max-width: 28rem;
+  }
+}
+
+/* Móviles */
+@media (max-width: 480px) {
+  /* Deshabilitar hover effects en móviles */
+  .content-card:hover {
+    transform: none;
+    box-shadow: var(--shadow-md);
+  }
+  
+  .content-card:hover .content-card__image .content-image__img {
+    transform: none;
+  }
+  
+  .content-card__overlay {
+    /* En móviles, el overlay siempre visible pero más sutil */
+    opacity: 0.3;
+    pointer-events: auto;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.6) 100%
+    );
+  }
+  
+  .content-card__controls {
+    transform: translateY(0);
+    justify-content: center;
+    align-items: flex-end;
+    height: 100%;
+    padding-bottom: var(--space-md);
+  }
+  
+  .content-card__favorite-button {
+    /* Hacer más visible en móviles */
+    background-color: rgba(255, 255, 255, 0.9);
+    color: var(--text-primary);
+  }
+  
+  /* Tamaños más pequeños en móviles */
+  .content-card--md {
+    max-width: 18rem;
+  }
+  
+  .content-card--lg {
+    max-width: 20rem;
+  }
+  
+  .content-card--xl {
+    max-width: 22rem;
+  }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-width: 320px) {
+  .content-card__info {
+    padding: var(--space-xs);
+  }
+  
+  .content-card__title {
+    font-size: var(--font-size-xs);
+    -webkit-line-clamp: 1; /* Solo una línea en pantallas muy pequeñas */
+  }
+  
+  .content-card__details {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-xs);
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+.dark .content-card__image-container {
+  background-color: var(--bg-muted);
+}
+
+.dark .content-card__image-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-muted) 25%,
+    var(--bg-secondary) 50%,
+    var(--bg-muted) 75%
+  );
+}
+
+.dark .content-card__favorite-button {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-white);
+}
+
+/* ===== ACCESIBILIDAD ===== */
+@media (prefers-reduced-motion: reduce) {
+  .content-card,
+  .content-card__image,
+  .content-card__overlay,
+  .content-card__controls,
+  .content-card__loading-spinner {
+    transition: none;
+    animation: none;
+  }
+  
+  .content-card:hover {
+    transform: none;
+  }
+  
+  .content-card:hover .content-card__image .content-image__img {
+    transform: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .content-card__overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.9) 100%
+    );
+  }
+  
+  .content-card__favorite-button {
+    background-color: var(--bg-primary);
+    border: 0.2rem solid var(--text-primary);
+    color: var(--text-primary);
+  }
+}
+
+/* ===== ASPECTOS ESPECÍFICOS POR TAMAÑO ===== */
+
+/* Ajustes de padding por tamaño */
+.content-card--sm .content-card__info {
+  padding: var(--space-sm);
+}
+
+.content-card--lg .content-card__info {
+  padding: var(--space-lg);
+}
+
+.content-card--xl .content-card__info {
+  padding: var(--space-lg);
+}
+
+/* Ajustes de tipografía por tamaño */
+.content-card--sm .content-card__title {
+  font-size: var(--font-size-sm);
+}
+
+.content-card--lg .content-card__title {
+  font-size: var(--font-size-lg);
+}
+
+.content-card--xl .content-card__title {
+  font-size: var(--font-size-lg);
+}

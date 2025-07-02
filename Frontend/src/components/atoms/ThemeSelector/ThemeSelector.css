@@ -1,0 +1,74 @@
+.theme-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-family-base);
+}
+
+.theme-selector__select {
+  height: var(--component-height-md);
+  padding: var(--component-padding-md);
+  font-size: var(--component-font-md);
+  border: 0.1rem solid var(--border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.theme-selector__toggle {
+  height: var(--component-height-md);
+  padding: 0 var(--space-sm);
+  font-size: var(--component-font-md);
+  background-color: var(--color-secondary);
+  color: var(--text-on-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-normal);
+}
+
+.theme-selector__toggle:hover {
+  background-color: var(--color-secondary-hover);
+}
+
+.theme-selector--variant-floating {
+  position: fixed;
+  bottom: var(--space-md);
+  right: var(--space-md);
+  background-color: var(--bg-secondary);
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-tooltip);
+}
+
+.theme-selector--variant-compact .theme-selector__label {
+  display: none;
+}
+
+.theme-selector--size-xs .theme-selector__select,
+.theme-selector--size-xs .theme-selector__toggle {
+  height: var(--component-height-xs);
+  font-size: var(--component-font-xs);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.theme-selector--size-sm .theme-selector__select,
+.theme-selector--size-sm .theme-selector__toggle {
+  height: var(--component-height-sm);
+  font-size: var(--component-font-sm);
+}
+
+.theme-selector--size-lg .theme-selector__select,
+.theme-selector--size-lg .theme-selector__toggle {
+  height: var(--component-height-lg);
+  font-size: var(--component-font-lg);
+  padding: var(--space-md) var(--space-lg);
+}
+
+.theme-selector--size-xl .theme-selector__select,
+.theme-selector--size-xl .theme-selector__toggle {
+  height: var(--component-height-xl);
+  font-size: var(--component-font-xl);
+  padding: var(--space-md) var(--space-xl);
+}

@@ -1,0 +1,391 @@
+/* Success */
+.btn--success {
+  background-color: var(--color-success);
+  color: var(--text-on-primary);
+  border-color: var(--color-success);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--success:hover:not(:disabled) {
+  background-color: var(--color-success-hover);
+  border-color: var(--color-success-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-0.1rem);
+}
+
+.btn--success:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Warning */
+.btn--warning {
+  background-color: var(--color-warning);
+  color: var(--text-on-primary);
+  border-color: var(--color-warning);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--warning:hover:not(:disabled) {
+  background-color: var(--color-warning-hover);
+  border-color: var(--color-warning-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-0.1rem);
+}
+
+.btn--warning:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}/* ===== BUTTON COMPONENT - CORREGIDO PARA REGLAS DEL PROYECTO ===== */
+/* Button.css - Usando 4 variantes estándar: default, success, warning, error */
+
+/* Clase base del botón - Usando variables del sistema */
+.btn {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  
+  /* Tipografía - Usando variables del sistema */
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--text-primary);
+  
+  /* Interacción */
+  cursor: pointer;
+  user-select: none;
+  
+  /* Transiciones - Usando variables del sistema */
+  transition: all var(--transition-normal);
+  
+  /* Bordes - Usando variables del sistema */
+  border: 0.1rem solid transparent;
+  border-radius: var(--radius-md);
+  
+  /* Eliminar estilos por defecto */
+  background: none;
+  outline: none;
+  
+  /* Mejorar accesibilidad táctil */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Estados base - Mejorados con variables del sistema */
+.btn:focus-visible {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+  z-index: 1;
+}
+
+.btn:disabled,
+.btn--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* TAMAÑOS - Usando variables del sistema (5 tamaños estándar) */
+.btn--xs {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+  min-height: 2.4rem;
+  gap: var(--space-xs);
+}
+
+.btn--sm {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  min-height: 3.2rem;
+  gap: var(--space-xs);
+}
+
+.btn--md {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-base);
+  min-height: 4.0rem;
+  gap: var(--space-sm);
+}
+
+.btn--lg {
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--font-size-lg);
+  min-height: 4.8rem;
+  gap: var(--space-sm);
+}
+
+.btn--xl {
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--font-size-xl);
+  min-height: 5.6rem;
+  gap: var(--space-sm);
+}
+
+/* VARIANTES VISUALES - MANTENIENDO LAS 7 VARIANTES ACTUALES */
+
+/* Primary */
+.btn--primary {
+  background-color: var(--color-primary);
+  color: var(--text-on-primary);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-0.1rem);
+}
+
+.btn--primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Secondary */
+.btn--secondary {
+  background-color: var(--color-secondary);
+  color: var(--text-on-primary);
+  border-color: var(--color-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background-color: var(--color-secondary-hover);
+  border-color: var(--color-secondary-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-0.1rem);
+}
+
+.btn--secondary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Outline */
+.btn--outline {
+  background-color: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn--outline:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  color: var(--text-on-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-0.1rem);
+}
+
+.btn--outline:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Ghost */
+.btn--ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border-color: transparent;
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.btn--ghost:active:not(:disabled) {
+  background-color: var(--bg-muted);
+}
+
+/* Danger */
+.btn--danger {
+  background-color: var(--color-danger);
+  color: var(--text-on-primary);
+  border-color: var(--color-danger);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--danger:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-0.1rem);
+}
+
+.btn--danger:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* RADIO DE BORDES */
+.btn--rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+.btn--rounded-md {
+  border-radius: var(--radius-md);
+}
+
+.btn--rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.btn--rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+.btn--rounded-full {
+  border-radius: var(--radius-full);
+}
+
+/* MODIFICADORES */
+.btn--full-width {
+  width: 100%;
+}
+
+.btn--icon-only {
+  aspect-ratio: 1;
+  padding: var(--space-sm);
+}
+
+.btn--icon-only.btn--xs {
+  padding: var(--space-xs);
+}
+
+.btn--icon-only.btn--sm {
+  padding: var(--space-xs);
+}
+
+.btn--icon-only.btn--lg {
+  padding: var(--space-md);
+}
+
+.btn--icon-only.btn--xl {
+  padding: var(--space-lg);
+}
+
+/* ELEMENTOS INTERNOS */
+.btn__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn__icon--left {
+  order: -1;
+}
+
+.btn__icon--right {
+  order: 1;
+}
+
+/* SPINNER DE LOADING */
+.btn--loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.btn__spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn__spinner-svg {
+  width: 1.6rem;
+  height: 1.6rem;
+  animation: btn-spin 1s linear infinite;
+}
+
+.btn__spinner-circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-dasharray: 31.416;
+  stroke-dashoffset: 31.416;
+  animation: btn-spinner-dash 2s ease-in-out infinite;
+}
+
+/* ANIMACIONES */
+@keyframes btn-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes btn-spinner-dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+/* ESTADOS PSEUDO PARA STORYBOOK */
+.btn.pseudo-hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-0.1rem);
+}
+
+.btn--success.pseudo-hover {
+  background-color: var(--color-success-hover);
+  border-color: var(--color-success-hover);
+}
+
+.btn--warning.pseudo-hover {
+  background-color: var(--color-warning-hover);
+  border-color: var(--color-warning-hover);
+}
+
+.btn--error.pseudo-hover {
+  background-color: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
+}
+
+.btn.pseudo-focus {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+  z-index: 1;
+}
+
+/* RESPONSIVE - MOBILE FIRST */
+@media (max-width: 768px) {
+  .btn--lg {
+    min-height: 4.4rem; /* Mínimo táctil en móviles */
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-base);
+  }
+  
+  .btn--xl {
+    min-height: 4.4rem;
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--font-size-lg);
+  }
+}

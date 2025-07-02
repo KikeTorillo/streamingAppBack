@@ -1,0 +1,100 @@
+/* ===== PAGE LAYOUT TEMPLATE ===== */
+/* PageLayout.css - Usando el sistema de diseño */
+
+/* ===== CONTENEDOR BASE ===== */
+.page-layout {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== HEADER ===== */
+.page-layout__header {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+/* ===== FILTERS ===== */
+.page-layout__filters {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+/* ===== CONTENIDO PRINCIPAL ===== */
+.page-layout__content {
+  flex: 1;
+  width: 100%;
+  margin: 0 auto;
+  /* maxWidth y padding se setean via props */
+}
+
+/* ===== VARIANTES ===== */
+
+/* Variante centrada (contenido más estrecho) */
+.page-layout--variant-centered .page-layout__content {
+  max-width: 80rem !important; /* 800px */
+}
+
+/* Variante ancha (sin restricción de ancho) */
+.page-layout--variant-wide .page-layout__content {
+  max-width: none !important;
+  padding-left: var(--space-lg) !important;
+  padding-right: var(--space-lg) !important;
+}
+
+/* Variante compacta (menos padding) */
+.page-layout--variant-compact .page-layout__content {
+  padding: var(--space-lg) !important;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .page-layout__content {
+    padding-left: var(--space-lg) !important;
+    padding-right: var(--space-lg) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-layout__content {
+    padding: var(--space-md) !important;
+  }
+  
+  /* Variante compacta en móvil */
+  .page-layout--variant-compact .page-layout__content {
+    padding: var(--space-sm) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-layout__content {
+    padding: var(--space-sm) !important;
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+.dark .page-layout {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* ===== SCROLL BEHAVIOR ===== */
+.page-layout {
+  scroll-behavior: smooth;
+}
+
+/* ===== ACCESIBILIDAD ===== */
+@media (prefers-reduced-motion: reduce) {
+  .page-layout {
+    scroll-behavior: auto;
+  }
+}
+
+/* Focus management para el contenido principal */
+.page-layout__content:focus-visible {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.4rem;
+}

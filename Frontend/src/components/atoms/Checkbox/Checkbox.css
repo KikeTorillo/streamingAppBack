@@ -1,0 +1,281 @@
+/* components/atoms/Checkbox/Checkbox.css */
+/* ===== CHECKBOX COMPONENT - SISTEMA DE DISEÑO ===== */
+
+.checkbox-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-family: var(--font-family-base);
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  position: relative;
+  cursor: pointer;
+}
+
+/* ===== INPUT NATIVO (OCULTO PERO FUNCIONAL) ===== */
+.checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  /* REMOVIDO: pointer-events: none; */
+  /* El input debe poder recibir eventos para que sea clickeable */
+}
+
+/* ===== CHECKBOX VISUAL PERSONALIZADO ===== */
+.checkbox-custom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0.2rem solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-primary);
+  transition: all var(--transition-normal);
+  flex-shrink: 0;
+  position: relative;
+  cursor: pointer;
+  /* AGREGADO: Hacer que el área visual también sea clickeable */
+  z-index: 1;
+}
+
+/* AGREGADO: Expandir el área clickeable del input para cubrir el checkbox visual */
+.checkbox-wrapper .checkbox {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+  z-index: 2; /* Encima del visual para recibir clicks */
+}
+
+/* ===== TAMAÑOS ===== */
+.checkbox--xs + .checkbox-custom {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.checkbox--sm + .checkbox-custom {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.checkbox--md + .checkbox-custom {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.checkbox--lg + .checkbox-custom {
+  width: 2.0rem;
+  height: 2.0rem;
+}
+
+/* ===== ÍCONO DE CHECK ===== */
+.checkbox-check {
+  width: 70%;
+  height: 70%;
+  color: var(--color-white);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all var(--transition-fast);
+  pointer-events: none; /* El ícono no debe interferir con clicks */
+}
+
+/* ===== ESTADOS ===== */
+
+/* Hover */
+.checkbox:not(:disabled):not(:checked) + .checkbox-custom:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Focus */
+.checkbox:focus-visible + .checkbox-custom {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+  border-color: var(--border-focus);
+}
+
+/* Checked */
+.checkbox:checked + .checkbox-custom {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.checkbox:checked + .checkbox-custom .checkbox-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Checked + Hover */
+.checkbox:checked:not(:disabled) + .checkbox-custom:hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+/* Disabled */
+.checkbox:disabled + .checkbox-custom {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--bg-disabled);
+  border-color: var(--border-default);
+}
+
+.checkbox:disabled:checked + .checkbox-custom {
+  background-color: var(--text-disabled);
+  border-color: var(--text-disabled);
+}
+
+/* Error state */
+.checkbox--error + .checkbox-custom {
+  border-color: var(--color-danger);
+}
+
+.checkbox--error:focus-visible + .checkbox-custom {
+  outline-color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+/* ===== LABEL ===== */
+.checkbox-label {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  line-height: var(--line-height-normal);
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-normal);
+  font-weight: var(--font-weight-normal);
+}
+
+.checkbox-label:hover {
+  color: var(--color-primary);
+}
+
+.checkbox-required {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
+  margin-left: var(--space-xs);
+}
+
+/* ===== ESTADOS DEL LABEL ===== */
+.checkbox-container--disabled .checkbox-label {
+  opacity: 0.6;
+  cursor: not-allowed;
+  color: var(--text-disabled);
+}
+
+.checkbox-container--disabled .checkbox-label:hover {
+  color: var(--text-disabled);
+}
+
+/* ===== HELPER TEXT ===== */
+.checkbox-helper {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: var(--line-height-tight);
+  margin-left: calc(var(--space-sm) + 1.6rem); /* Alinear con el label */
+}
+
+/* ===== ERROR MESSAGE ===== */
+.checkbox-error {
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-medium);
+  margin-left: calc(var(--space-sm) + 1.6rem); /* Alinear con el label */
+  animation: slideInError 0.2s ease-out;
+}
+
+/* ===== DIFERENTES TAMAÑOS DE HELPER Y ERROR ===== */
+.checkbox--xs ~ .checkbox-helper,
+.checkbox--xs ~ .checkbox-error {
+  margin-left: calc(var(--space-sm) + 1.2rem);
+}
+
+.checkbox--sm ~ .checkbox-helper,
+.checkbox--sm ~ .checkbox-error {
+  margin-left: calc(var(--space-sm) + 1.4rem);
+}
+
+.checkbox--lg ~ .checkbox-helper,
+.checkbox--lg ~ .checkbox-error {
+  margin-left: calc(var(--space-sm) + 2.0rem);
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+.dark .checkbox-custom {
+  background-color: var(--bg-primary);
+  border-color: var(--border-default);
+}
+
+.dark .checkbox-label {
+  color: var(--text-primary);
+}
+
+.dark .checkbox-helper {
+  color: var(--text-muted);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  /* Área táctil más grande en móvil */
+  .checkbox-custom {
+    min-width: 4.4rem;
+    min-height: 4.4rem;
+    padding: var(--space-sm);
+  }
+  
+  .checkbox--xs + .checkbox-custom,
+  .checkbox--sm + .checkbox-custom,
+  .checkbox--md + .checkbox-custom,
+  .checkbox--lg + .checkbox-custom {
+    min-width: 4.4rem;
+    min-height: 4.4rem;
+  }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+@media (prefers-reduced-motion: reduce) {
+  .checkbox-custom,
+  .checkbox-check,
+  .checkbox-label,
+  .checkbox-error {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ===== ESTADOS ADICIONALES ===== */
+.checkbox:indeterminate + .checkbox-custom {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.checkbox:indeterminate + .checkbox-custom .checkbox-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Para estado indeterminado, usar una línea en lugar de check */
+.checkbox:indeterminate + .checkbox-custom .checkbox-check path {
+  d: path("M4 8h8");
+  stroke-width: 2;
+  stroke-linecap: round;
+}

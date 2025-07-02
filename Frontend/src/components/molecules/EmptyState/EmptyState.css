@@ -1,0 +1,165 @@
+/* ===== EMPTY STATE MOLECULE ===== */
+/* EmptyState.css - Usando el sistema de diseño completo */
+
+/* ===== CONTENEDOR BASE ===== */
+.empty-state {
+  /* El Card base ya maneja el container */
+  width: 100%;
+}
+
+.empty-state__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-md);
+}
+
+/* ===== ÍCONO ===== */
+.empty-state__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-4xl);
+  line-height: 1;
+  opacity: 0.8;
+  
+  /* Animación sutil */
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+@keyframes gentle-pulse {
+  0%, 100% { 
+    opacity: 0.8; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.6; 
+    transform: scale(1.02);
+  }
+}
+
+/* ===== TEXTO ===== */
+.empty-state__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+  line-height: var(--line-height-tight);
+}
+
+.empty-state__description {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-muted);
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+  max-width: 40rem; /* Limitar ancho para mejor legibilidad */
+}
+
+/* ===== ACCIÓN ===== */
+.empty-state__action {
+  margin-top: var(--space-sm);
+}
+
+/* ===== TAMAÑOS ===== */
+
+/* Tamaño pequeño */
+.empty-state--size-sm .empty-state__content {
+  gap: var(--space-sm);
+}
+
+.empty-state--size-sm .empty-state__icon {
+  font-size: var(--font-size-2xl);
+}
+
+.empty-state--size-sm .empty-state__title {
+  font-size: var(--font-size-md);
+}
+
+.empty-state--size-sm .empty-state__description {
+  font-size: var(--font-size-sm);
+}
+
+/* Tamaño grande */
+.empty-state--size-lg .empty-state__content {
+  gap: var(--space-lg);
+}
+
+.empty-state--size-lg .empty-state__icon {
+  font-size: var(--font-size-6xl);
+}
+
+.empty-state--size-lg .empty-state__title {
+  font-size: var(--font-size-xl);
+}
+
+.empty-state--size-lg .empty-state__description {
+  font-size: var(--font-size-lg);
+}
+
+.empty-state--size-lg .empty-state__action {
+  margin-top: var(--space-md);
+}
+
+/* ===== VARIANTES ===== */
+
+/* Variante de información */
+.empty-state--variant-info .empty-state__title {
+  color: var(--color-info);
+}
+
+.empty-state--variant-info .empty-state__icon {
+  color: var(--color-info);
+}
+
+/* Variante de advertencia */
+.empty-state--variant-warning .empty-state__title {
+  color: var(--color-warning);
+}
+
+.empty-state--variant-warning .empty-state__icon {
+  color: var(--color-warning);
+}
+
+/* Variante de error */
+.empty-state--variant-error .empty-state__title {
+  color: var(--color-danger);
+}
+
+.empty-state--variant-error .empty-state__icon {
+  color: var(--color-danger);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .empty-state__description {
+    font-size: var(--font-size-sm);
+  }
+  
+  .empty-state--size-lg .empty-state__icon {
+    font-size: var(--font-size-4xl);
+  }
+  
+  .empty-state--size-lg .empty-state__title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .empty-state--size-lg .empty-state__description {
+    font-size: var(--font-size-md);
+  }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+@media (prefers-reduced-motion: reduce) {
+  .empty-state__icon {
+    animation: none;
+  }
+}
+
+/* Focus management para elementos interactivos */
+.empty-state__action button:focus-visible,
+.empty-state__action a:focus-visible {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+}

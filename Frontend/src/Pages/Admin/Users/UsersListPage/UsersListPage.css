@@ -1,0 +1,351 @@
+/* ===== USERS LIST PAGE STYLES ===== */
+/* src/Pages/Admin/Users/UsersListPage.css */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.users-list {
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  
+  /* Posición relativa para overlays */
+  position: relative;
+  
+  /* Fuente */
+  font-family: var(--font-family-base);
+}
+
+/* ===== HEADER ACTIONS ===== */
+.users-list__header-actions {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* ===== RESUMEN/ESTADÍSTICAS ===== */
+.users-list__summary {
+  /* Layout */
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 0.1rem solid var(--border-default);
+  padding: var(--space-lg);
+}
+
+.users-list__stats {
+  /* Grid de estadísticas */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--space-lg);
+}
+
+.users-list__stat {
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-xs);
+}
+
+.users-list__stat-value {
+  /* Tipografía */
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.users-list__stat-label {
+  /* Tipografía */
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ===== TABLA DE USUARIOS ===== */
+.users-list__table {
+  /* Layout */
+  width: 100%;
+  position: relative;
+}
+
+/* Estado de eliminación */
+.users-list__table--deleting {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* ===== CELDAS PERSONALIZADAS ===== */
+.users-list__id {
+  /* Estilo para ID */
+  font-family: var(--font-family-mono, 'Courier New', monospace);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.users-list__email {
+  /* Estilo para email */
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+  
+  /* Truncamiento */
+  display: block;
+  max-width: 25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.users-list__email:hover {
+  color: var(--color-primary);
+  cursor: help;
+}
+
+.users-list__date {
+  /* Estilo para fechas */
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.users-list__date--muted {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ===== OVERLAY DE ELIMINACIÓN ===== */
+.users-list__deleting-overlay {
+  /* Posición */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  
+  /* Fondo */
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(0.2rem);
+  
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.users-list__deleting-message {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  
+  /* Colores */
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  
+  /* Espaciado */
+  padding: var(--space-lg) var(--space-xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  border: 0.1rem solid var(--border-default);
+  
+  /* Tipografía */
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.users-list__deleting-spinner {
+  /* Animación del spinner */
+  font-size: var(--font-size-lg);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet (768px - 1199px) */
+@media (max-width: 1199px) {
+  .users-list {
+    gap: var(--space-md);
+  }
+  
+  .users-list__summary {
+    padding: var(--space-md);
+  }
+  
+  .users-list__stats {
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: var(--space-md);
+  }
+  
+  .users-list__stat-value {
+    font-size: var(--font-size-lg);
+  }
+  
+  .users-list__email {
+    max-width: 20rem;
+  }
+}
+
+/* Mobile (hasta 767px) */
+@media (max-width: 767px) {
+  .users-list__header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-xs);
+  }
+  
+  .users-list__summary {
+    padding: var(--space-sm);
+  }
+  
+  .users-list__stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+  }
+  
+  .users-list__stat-value {
+    font-size: var(--font-size-base);
+  }
+  
+  .users-list__stat-label {
+    font-size: var(--font-size-xs);
+  }
+  
+  .users-list__email {
+    max-width: 15rem;
+  }
+  
+  .users-list__deleting-message {
+    padding: var(--space-md);
+    margin: var(--space-md);
+  }
+}
+
+/* Mobile muy pequeño (hasta 479px) */
+@media (max-width: 479px) {
+  .users-list {
+    gap: var(--space-sm);
+  }
+  
+  .users-list__stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .users-list__email {
+    max-width: 12rem;
+  }
+}
+
+/* ===== ESTADOS ESPECIALES ===== */
+
+/* Loading state */
+.users-list--loading .users-list__summary {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Error state */
+.users-list--error .users-list__summary {
+  border-color: var(--color-danger-light);
+  background-color: var(--color-danger-light);
+}
+
+/* Empty state */
+.users-list--empty .users-list__summary {
+  display: none;
+}
+
+/* ===== ACCESIBILIDAD ===== */
+
+/* Reducir animaciones si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+  .users-list__deleting-spinner {
+    animation: none;
+  }
+  
+  .users-list__deleting-overlay {
+    backdrop-filter: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .users-list__summary {
+    border-width: 0.2rem;
+  }
+  
+  .users-list__id {
+    font-weight: var(--font-weight-bold);
+  }
+  
+  .users-list__deleting-message {
+    border-width: 0.2rem;
+  }
+}
+
+/* ===== FOCUS MANAGEMENT ===== */
+
+/* Focus visible para elementos interactivos */
+.users-list__email:focus-visible {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+  border-radius: var(--radius-sm);
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .users-list__header-actions,
+  .users-list__deleting-overlay {
+    display: none;
+  }
+  
+  .users-list__summary {
+    break-inside: avoid;
+    margin-bottom: var(--space-lg);
+  }
+  
+  .users-list__stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ===== TOOLTIPS PARA EMAILS LARGOS ===== */
+.users-list__email[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: var(--space-xs);
+  
+  /* Estilo del tooltip */
+  padding: var(--space-xs) var(--space-sm);
+  background-color: var(--bg-tooltip);
+  color: var(--text-on-tooltip);
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  z-index: 1001;
+  
+  /* Sombra */
+  box-shadow: var(--shadow-lg);
+  
+  /* Flecha del tooltip */
+  border: 0.5rem solid transparent;
+  border-top-color: var(--bg-tooltip);
+}
+
+/* Evitar tooltip en dispositivos táctiles */
+@media (hover: none) {
+  .users-list__email[title]:hover::after {
+    display: none;
+  }
+}

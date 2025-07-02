@@ -1,0 +1,561 @@
+/* ===== DYNAMIC FORM COMPONENT - CON TEXTSELECT INTEGRADO ===== */
+/* DynamicForm.css - Actualizado para usar TextSelect */
+
+/* Contenedor principal del formulario dinámico */
+.dynamic-form {
+  font-family: var(--font-family-base);
+  color: var(--text-primary);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Grid de campos */
+.dynamic-form__grid {
+  display: grid;
+  gap: var(--space-lg); /* Incrementado para mejor separación */
+  margin-bottom: var(--space-xl);
+  width: 100%;
+}
+
+/* Contenedor individual de cada campo */
+.dynamic-form__field {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Labels del formulario dinámico - HOMOLOGADOS CON TEXTINPUT */
+.dynamic-form__label {
+  display: block;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-xs); /* Consistente con TextInput */
+}
+
+.dynamic-form__label--required::after {
+  content: ' *';
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
+}
+
+/* ===== NOTA: SELECT AHORA USA TEXTSELECT ===== */
+/* Los estilos del select nativo se mantienen para compatibilidad */
+/* pero el componente ahora usa TextSelect que tiene sus propios estilos */
+
+/* SELECT NATIVO (FALLBACK) - HOMOLOGADO CON EL SISTEMA */
+.dynamic-form__select {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 0.1rem solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  transition: all var(--transition-normal);
+  outline: none;
+  box-sizing: border-box;
+  cursor: pointer;
+  min-height: 4.0rem; /* Consistente con Input md */
+  
+  /* Flecha del select usando variables del sistema */
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right var(--space-sm) center;
+  background-repeat: no-repeat;
+  background-size: 1.5rem 1.5rem;
+  padding-right: calc(var(--space-md) + 2.4rem);
+}
+
+/* Estados del select nativo - HOMOLOGADOS CON INPUT */
+.dynamic-form__select:hover:not(:disabled):not(:focus) {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.dynamic-form__select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 0.3rem rgba(59, 130, 246, 0.1);
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.1rem;
+}
+
+.dynamic-form__select:disabled {
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-primary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ===== TEXTAREA - HOMOLOGADO CON EL SISTEMA ===== */
+.dynamic-form__textarea {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 0.1rem solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  transition: all var(--transition-normal);
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  line-height: var(--line-height-normal);
+  min-height: 8rem; /* Altura mínima para textarea */
+}
+
+/* Estados del textarea - HOMOLOGADOS CON INPUT */
+.dynamic-form__textarea:hover:not(:disabled):not(:focus) {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.dynamic-form__textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 0.3rem rgba(59, 130, 246, 0.1);
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.1rem;
+}
+
+.dynamic-form__textarea:disabled {
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-primary);
+  cursor: not-allowed;
+  opacity: 0.6;
+  resize: none;
+}
+
+/* Placeholder del textarea */
+.dynamic-form__textarea::placeholder {
+  color: var(--text-placeholder);
+  opacity: 1;
+}
+
+/* ===== CHECKBOX - HOMOLOGADO CON EL SISTEMA ===== */
+.dynamic-form__checkbox-container {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+
+.dynamic-form__checkbox {
+  width: 1.6rem;
+  height: 1.6rem;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  border: 0.1rem solid var(--border-default);
+  transition: all var(--transition-normal);
+}
+
+.dynamic-form__checkbox:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.dynamic-form__checkbox:focus {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+}
+
+/* ===== RADIO - HOMOLOGADO CON EL SISTEMA ===== */
+.dynamic-form__radio-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.dynamic-form__radio-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+
+.dynamic-form__radio {
+  width: 1.6rem;
+  height: 1.6rem;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  border: 0.1rem solid var(--border-default);
+  transition: all var(--transition-normal);
+}
+
+.dynamic-form__radio:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.dynamic-form__radio:focus {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+}
+
+/* Labels de checkbox y radio - MEJORADOS */
+.dynamic-form__checkbox-label,
+.dynamic-form__radio-label {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  cursor: pointer;
+  line-height: var(--line-height-normal);
+  user-select: none;
+  transition: color var(--transition-normal);
+  font-weight: var(--font-weight-normal);
+}
+
+.dynamic-form__checkbox-label:hover,
+.dynamic-form__radio-label:hover {
+  color: var(--color-primary);
+}
+
+/* ===== MENSAJES DE ERROR - HOMOLOGADOS CON TEXTINPUT ===== */
+.dynamic-form__error-message {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  margin-top: var(--space-xs);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-medium);
+  animation: slideInError 0.2s ease-out;
+}
+
+/* ===== MENSAJES DE AYUDA - NUEVO ===== */
+.dynamic-form__helper-text {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+  line-height: var(--line-height-tight);
+  transition: color var(--transition-normal);
+}
+
+/* ===== CONTADOR DE CARACTERES - HOMOLOGADO CON TEXTINPUT ===== */
+.dynamic-form__char-count {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: var(--space-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  transition: color var(--transition-normal);
+}
+
+/* Estados del contador según longitud */
+.dynamic-form__char-count[data-warning="true"] {
+  color: var(--color-warning);
+}
+
+.dynamic-form__char-count[data-danger="true"] {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== MENSAJE DE FORMULARIO VACÍO ===== */
+.dynamic-form__empty-message {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: var(--font-size-base);
+  padding: var(--space-xl);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 0.1rem dashed var(--border-secondary);
+}
+
+/* ===== CONTENEDOR DEL BOTÓN DE ENVÍO ===== */
+.dynamic-form__submit-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-xl);
+  gap: var(--space-md);
+}
+
+/* ===== ESTADOS DEL FORMULARIO ===== */
+.dynamic-form--loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.dynamic-form--compact .dynamic-form__grid {
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.dynamic-form--compact .dynamic-form__label {
+  font-size: var(--font-size-xs);
+  margin-bottom: var(--space-xs);
+}
+
+.dynamic-form--compact .dynamic-form__submit-container {
+  margin-top: var(--space-lg);
+}
+
+/* ===== LAYOUT RESPONSIVE - GRID COLUMNS ===== */
+.dynamic-form__grid--1-cols {
+  grid-template-columns: 1fr;
+}
+
+.dynamic-form__grid--2-cols {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.dynamic-form__grid--3-cols {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.dynamic-form__grid--4-cols {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ===== CAMPOS CON ANCHO ESPECÍFICO ===== */
+.dynamic-form__field--full {
+  grid-column: 1 / -1;
+}
+
+.dynamic-form__field--half {
+  grid-column: span 1;
+}
+
+.dynamic-form__field--third {
+  grid-column: span 1;
+}
+
+.dynamic-form__field--quarter {
+  grid-column: span 1;
+}
+
+/* ===== TIPOS DE CAMPO ESPECÍFICOS ===== */
+.dynamic-form__field--textarea {
+  /* Los textarea tienden a necesitar más espacio */
+}
+
+.dynamic-form__field--select {
+  /* Los select del sistema ya están bien estilizados por TextSelect */
+}
+
+.dynamic-form__field--checkbox,
+.dynamic-form__field--radio {
+  /* Campos de selección múltiple */
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  /* En móvil, forzar una columna para mejor UX */
+  .dynamic-form__grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-md);
+  }
+  
+  /* Botón de envío ancho completo en móvil */
+  .dynamic-form__submit-container {
+    justify-content: stretch;
+  }
+  
+  .dynamic-form__submit-container .button {
+    width: 100%;
+  }
+  
+  /* Mejorar área táctil para campos nativos */
+  .dynamic-form__checkbox,
+  .dynamic-form__radio {
+    min-width: 4.4rem;
+    min-height: 4.4rem;
+    transform: scale(1.2);
+  }
+  
+  /* Ajustar labels para móvil */
+  .dynamic-form__checkbox-label,
+  .dynamic-form__radio-label {
+    font-size: var(--font-size-sm);
+  }
+  
+  /* Textarea más compacto en móvil */
+  .dynamic-form__textarea {
+    min-height: 6rem;
+    font-size: var(--font-size-base);
+  }
+}
+
+@media (max-width: 480px) {
+  /* En pantallas muy pequeñas */
+  .dynamic-form {
+    padding: 0;
+  }
+  
+  .dynamic-form__grid {
+    gap: var(--space-sm);
+  }
+  
+  .dynamic-form__submit-container {
+    margin-top: var(--space-lg);
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+.dark .dynamic-form__label {
+  color: var(--text-primary);
+}
+
+.dark .dynamic-form__select {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+.dark .dynamic-form__textarea {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+.dark .dynamic-form__textarea::placeholder {
+  color: var(--text-placeholder);
+}
+
+.dark .dynamic-form__checkbox-label,
+.dark .dynamic-form__radio-label {
+  color: var(--text-primary);
+}
+
+.dark .dynamic-form__helper-text {
+  color: var(--text-muted);
+}
+
+.dark .dynamic-form__char-count {
+  color: var(--text-muted);
+}
+
+.dark .dynamic-form__empty-message {
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+  border-color: var(--border-secondary);
+}
+
+/* ===== ANIMACIONES CONDICIONALES ===== */
+@media (prefers-reduced-motion: reduce) {
+  .dynamic-form__error-message {
+    animation: none;
+  }
+  
+  .dynamic-form__checkbox,
+  .dynamic-form__radio,
+  .dynamic-form__textarea,
+  .dynamic-form__select,
+  .dynamic-form__helper-text,
+  .dynamic-form__char-count {
+    transition: none;
+  }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+.dynamic-form__checkbox:focus-visible,
+.dynamic-form__radio:focus-visible {
+  outline: 0.3rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+}
+
+.dynamic-form__textarea:focus-visible,
+.dynamic-form__select:focus-visible {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+}
+
+/* ===== CONTRASTE ALTO ===== */
+@media (prefers-contrast: high) {
+  .dynamic-form__label {
+    font-weight: var(--font-weight-semibold);
+  }
+  
+  .dynamic-form__error-message {
+    font-weight: var(--font-weight-bold);
+  }
+  
+  .dynamic-form__checkbox,
+  .dynamic-form__radio,
+  .dynamic-form__textarea,
+  .dynamic-form__select {
+    border-width: 0.2rem;
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .dynamic-form {
+    break-inside: avoid;
+  }
+  
+  .dynamic-form__submit-container {
+    display: none;
+  }
+  
+  .dynamic-form__helper-text,
+  .dynamic-form__char-count {
+    display: none;
+  }
+  
+  .dynamic-form__error-message {
+    color: #000;
+    font-weight: bold;
+  }
+}
+
+/* ===== INTEGRACIÓN CON TEXTSELECT ===== */
+/* Los select fields ahora usan TextSelect automáticamente */
+/* Sus estilos están en TextSelect.css */
+
+.dynamic-form__field--select .text-select-wrapper {
+  /* El TextSelect ya maneja todo su styling */
+  /* Solo necesitamos asegurar que se integre bien */
+}
+
+/* Asegurar que TextSelect tenga el mismo espaciado */
+.dynamic-form__field .text-select-wrapper {
+  margin: 0; /* TextSelect ya maneja su propio spacing */
+}
+
+/* ===== ESTADOS DE VALIDACIÓN VISUAL ===== */
+.dynamic-form__field--error .dynamic-form__textarea,
+.dynamic-form__field--error .dynamic-form__select {
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+.dynamic-form__field--error .dynamic-form__textarea:focus,
+.dynamic-form__field--error .dynamic-form__select:focus {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 0.3rem rgba(239, 68, 68, 0.1);
+  outline-color: var(--color-danger);
+}
+
+.dynamic-form__field--success .dynamic-form__textarea,
+.dynamic-form__field--success .dynamic-form__select {
+  border-color: var(--color-success);
+  background-color: var(--color-success-light);
+}
+
+.dynamic-form__field--success .dynamic-form__textarea:focus,
+.dynamic-form__field--success .dynamic-form__select:focus {
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 0.3rem rgba(34, 197, 94, 0.1);
+  outline-color: var(--color-success);
+}

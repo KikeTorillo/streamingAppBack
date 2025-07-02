@@ -1,0 +1,237 @@
+/* ===== APP HEADER ORGANISM ===== */
+/* AppHeader.css - Usando el sistema de diseño */
+
+/* ===== CONTENEDOR BASE ===== */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg) var(--space-xl);
+  background: linear-gradient(
+    135deg, 
+    var(--color-primary) 0%, 
+    var(--color-primary-hover) 100%
+  );
+  color: var(--text-white);
+  box-shadow: var(--shadow-lg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: var(--space-lg);
+}
+
+/* ===== BRAND/LOGO ===== */
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.app-header__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  text-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.2);
+  color: var(--text-white);
+}
+
+/* ===== BÚSQUEDA ===== */
+.app-header__search {
+  flex: 1;
+  max-width: 40rem;
+  margin: 0 var(--space-lg);
+}
+
+.search-input {
+  width: 100%;
+}
+
+/* Override del TextInput para el header */
+.app-header .search-input input {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
+}
+
+.app-header .search-input input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ===== USUARIO ===== */
+.app-header__user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-shrink: 0;
+}
+
+.app-header__welcome {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  opacity: 0.9;
+  color: var(--text-white);
+}
+
+.logout-button {
+  color: var(--text-white) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ===== TAMAÑOS ===== */
+
+/* Tamaño pequeño */
+.app-header--size-sm {
+  padding: var(--space-md) var(--space-lg);
+  gap: var(--space-md);
+}
+
+.app-header--size-sm .app-header__title {
+  font-size: var(--font-size-lg);
+}
+
+.app-header--size-sm .app-header__search {
+  margin: 0 var(--space-md);
+}
+
+.app-header--size-sm .app-header__user {
+  gap: var(--space-sm);
+}
+
+/* Tamaño grande */
+.app-header--size-lg {
+  padding: var(--space-xl) var(--space-2xl);
+  gap: var(--space-xl);
+}
+
+.app-header--size-lg .app-header__title {
+  font-size: var(--font-size-3xl);
+}
+
+.app-header--size-lg .app-header__search {
+  margin: 0 var(--space-xl);
+  max-width: 50rem;
+}
+
+.app-header--size-lg .app-header__user {
+  gap: var(--space-lg);
+}
+
+.app-header--size-lg .app-header__welcome {
+  font-size: var(--font-size-md);
+}
+
+/* ===== VARIANTES ===== */
+
+/* Variante simple (sin gradiente) */
+.app-header--variant-simple {
+  background: var(--color-primary);
+}
+
+/* Variante transparente */
+.app-header--variant-transparent {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(1rem);
+}
+
+/* Variante oscura */
+.app-header--variant-dark {
+  background: linear-gradient(
+    135deg, 
+    var(--bg-primary) 0%, 
+    var(--bg-secondary) 100%
+  );
+  color: var(--text-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.app-header--variant-dark .app-header__title {
+  color: var(--text-primary);
+  text-shadow: none;
+}
+
+.app-header--variant-dark .app-header__welcome {
+  color: var(--text-primary);
+}
+
+.app-header--variant-dark .logout-button {
+  color: var(--text-primary) !important;
+  border-color: var(--border-default) !important;
+}
+
+.app-header--variant-dark .logout-button:hover {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .app-header {
+    padding: var(--space-md) var(--space-lg);
+  }
+  
+  .app-header__search {
+    max-width: 30rem;
+    margin: 0 var(--space-md);
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+  
+  .app-header__brand {
+    order: 1;
+  }
+  
+  .app-header__user {
+    order: 2;
+  }
+  
+  .app-header__search {
+    order: 3;
+    flex: 1 1 100%;
+    margin: 0;
+    max-width: none;
+  }
+  
+  .app-header__welcome {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    padding: var(--space-sm);
+  }
+  
+  .app-header__title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .app-header__user {
+    gap: var(--space-sm);
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+.dark .app-header {
+  background: linear-gradient(
+    135deg, 
+    var(--color-primary) 0%, 
+    var(--color-primary-hover) 100%
+  );
+}
+
+.dark .app-header--variant-dark {
+  background: linear-gradient(
+    135deg, 
+    var(--bg-primary) 0%, 
+    var(--bg-secondary) 100%
+  );
+}

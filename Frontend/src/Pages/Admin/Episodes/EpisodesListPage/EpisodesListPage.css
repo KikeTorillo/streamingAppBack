@@ -1,0 +1,369 @@
+/* ===== EPISODES LIST PAGE - HOMOLOGADO CON VARIABLES CENTRALIZADAS ===== */
+/* EpisodesListPage.css - Siguiendo el patrón de SeriesListPage */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.episodes-list-page {
+  font-family: var(--font-family-base);
+  color: var(--text-primary);
+}
+
+.episodes-list-page__content {
+  padding: var(--space-lg);
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* ===== ESTILOS DE CELDAS - HOMOLOGADOS CON SERIES ===== */
+
+/* ID del episodio */
+.episodes-list__id {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  min-width: 4rem;
+  text-align: center;
+}
+
+/* Título del episodio */
+.episodes-list__title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  max-width: 25rem;
+}
+
+.episodes-list__title-text {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  line-height: var(--line-height-tight);
+  
+  /* Truncar texto largo */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.episodes-list__title-badge {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  background-color: var(--bg-accent);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  width: fit-content;
+}
+
+/* Serie del episodio */
+.episodes-list__serie {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  background-color: var(--bg-primary-light);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: 0.1rem solid var(--border-primary);
+  display: inline-block;
+  max-width: 15rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Temporada y episodio */
+.episodes-list__season-episode {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  background-color: var(--bg-success-light);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: 0.1rem solid var(--border-success);
+  display: inline-block;
+  text-align: center;
+  min-width: 5rem;
+}
+
+/* Duración del episodio */
+.episodes-list__duration {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  text-align: center;
+  min-width: 5rem;
+}
+
+/* Fecha de creación */
+.episodes-list__date {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-tight);
+}
+
+/* ===== ESTADOS RESPONSIVE ===== */
+
+/* Tablets */
+@media (max-width: 768px) {
+  .episodes-list-page__content {
+    padding: var(--space-md);
+  }
+  
+  .episodes-list__title {
+    max-width: 20rem;
+  }
+  
+  .episodes-list__title-text {
+    font-size: var(--font-size-sm);
+  }
+  
+  .episodes-list__serie {
+    max-width: 12rem;
+  }
+}
+
+/* Móviles */
+@media (max-width: 480px) {
+  .episodes-list-page__content {
+    padding: var(--space-sm);
+  }
+  
+  .episodes-list__title {
+    max-width: 15rem;
+  }
+  
+  .episodes-list__title-text {
+    font-size: var(--font-size-xs);
+  }
+  
+  .episodes-list__title-badge {
+    font-size: var(--font-size-xs);
+    padding: var(--space-xs);
+  }
+  
+  .episodes-list__serie {
+    max-width: 10rem;
+    font-size: var(--font-size-xs);
+  }
+  
+  .episodes-list__season-episode {
+    font-size: var(--font-size-xs);
+    min-width: 4rem;
+  }
+  
+  .episodes-list__duration {
+    font-size: var(--font-size-xs);
+    min-width: 4rem;
+  }
+}
+
+/* ===== ESTADOS DE INTERACCIÓN ===== */
+
+/* Hover states para celdas interactivas */
+.episodes-list__title:hover .episodes-list__title-text {
+  color: var(--color-primary);
+}
+
+.episodes-list__serie:hover {
+  background-color: var(--bg-primary);
+  border-color: var(--color-primary);
+}
+
+/* ===== ACCESIBILIDAD ===== */
+
+/* Focus states */
+.episodes-list__title:focus-within .episodes-list__title-text,
+.episodes-list__serie:focus {
+  outline: 0.2rem solid var(--color-primary);
+  outline-offset: 0.1rem;
+}
+
+/* Reducir animaciones para usuarios con preferencias de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .episodes-list__title,
+  .episodes-list__serie,
+  .episodes-list__season-episode,
+  .episodes-list__duration {
+    transition: none;
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+@media (prefers-color-scheme: dark) {
+  .episodes-list__title-badge {
+    background-color: var(--bg-accent-dark, var(--bg-accent));
+  }
+  
+  .episodes-list__serie {
+    background-color: var(--bg-primary-light-dark, var(--bg-primary-light));
+  }
+  
+  .episodes-list__season-episode {
+    background-color: var(--bg-success-light-dark, var(--bg-success-light));
+  }
+}
+
+/* ===== ESTILOS ADICIONALES PARA EL SELECTOR DE SERIES ===== */
+/* Agregar al final de EpisodesListPage.css */
+
+/* ===== FILTROS Y SELECTOR DE SERIES ===== */
+.episodes-list-page__filters {
+  margin-bottom: var(--space-lg);
+  padding: var(--space-md);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 0.1rem solid var(--border-color);
+}
+
+.episodes-list-page__filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-width: 40rem;
+}
+
+.episodes-list-page__filter-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  display: block;
+}
+
+.episodes-list-page__serie-select {
+  /* Layout */
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 0.1rem solid var(--border-color);
+  border-radius: var(--radius-sm);
+  
+  /* Tipografía */
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  
+  /* Visual */
+  background-color: var(--bg-primary);
+  box-shadow: var(--shadow-sm);
+  
+  /* Transiciones */
+  transition: all var(--transition-base);
+  
+  /* Cursor */
+  cursor: pointer;
+}
+
+.episodes-list-page__serie-select:hover:not(:disabled) {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-md);
+}
+
+.episodes-list-page__serie-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.3rem var(--color-primary-light);
+}
+
+.episodes-list-page__serie-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--bg-muted);
+}
+
+/* ===== ESTADÍSTICAS ESPECÍFICAS ===== */
+.episodes-list-page__stats {
+  margin-bottom: var(--space-lg);
+}
+
+.episodes-list-page__stat-card {
+  background-color: var(--bg-secondary);
+  border: 0.1rem solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.episodes-list-page__stat-card h3 {
+  margin: 0 0 var(--space-md) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.episodes-list-page__stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-md);
+}
+
+.episodes-list-page__stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-sm);
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  border: 0.1rem solid var(--border-light);
+}
+
+.episodes-list-page__stat-number {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  line-height: 1.2;
+}
+
+.episodes-list-page__stat-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  margin-top: var(--space-xs);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .episodes-list-page__filters {
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm);
+  }
+  
+  .episodes-list-page__filter-group {
+    max-width: 100%;
+  }
+  
+  .episodes-list-page__stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+  }
+  
+  .episodes-list-page__stat-item {
+    padding: var(--space-xs);
+  }
+  
+  .episodes-list-page__stat-number {
+    font-size: var(--font-size-xl);
+  }
+  
+  .episodes-list-page__stat-label {
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .episodes-list-page__stat-grid {
+    grid-template-columns: 1fr;
+  }
+}

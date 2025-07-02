@@ -1,0 +1,179 @@
+/* ===== LOGIN REGISTER PAGE ===== */
+/* LoginRegister.css - Refactorizado para usar LoginCard */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.login-register-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-lg);
+  background: linear-gradient(
+    135deg, 
+    var(--color-primary) 0%, 
+    var(--color-primary-hover) 100%
+  );
+  box-sizing: border-box;
+}
+
+/* ===== CONTENIDO CENTRAL ===== */
+.login-register-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xl);
+  width: 100%;
+  max-width: 48rem; /* 480px - Ancho máximo para el contenido */
+}
+
+/* ===== HEADER DE LA PÁGINA ===== */
+.login-register-header {
+  text-align: center;
+  color: var(--text-white);
+  margin-bottom: var(--space-md);
+}
+
+.app-title {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  margin-bottom: var(--space-sm);
+  line-height: var(--line-height-tight);
+  text-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.2);
+}
+
+.app-subtitle {
+  font-size: var(--font-size-lg);
+  margin: 0;
+  opacity: 0.9;
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablets y pantallas medianas */
+@media (max-width: 768px) {
+  .login-register-container {
+    padding: var(--space-md);
+  }
+  
+  .login-register-content {
+    gap: var(--space-lg);
+    max-width: 100%;
+  }
+  
+  .app-title {
+    font-size: var(--font-size-3xl);
+  }
+  
+  .app-subtitle {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Móviles */
+@media (max-width: 480px) {
+  .login-register-container {
+    padding: var(--space-sm);
+    min-height: 100vh; /* Asegurar altura completa en móviles */
+  }
+  
+  .login-register-content {
+    gap: var(--space-md);
+  }
+  
+  .app-title {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .app-subtitle {
+    font-size: var(--font-size-sm);
+  }
+  
+  .login-register-header {
+    margin-bottom: var(--space-sm);
+  }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-width: 320px) {
+  .login-register-container {
+    padding: var(--space-xs);
+  }
+  
+  .app-title {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+.dark .login-register-container {
+  /* El gradiente ya usa las variables de color, se adapta automáticamente */
+}
+
+.dark .app-title,
+.dark .app-subtitle {
+  color: var(--text-white); /* Siempre blanco sobre el gradiente */
+}
+
+/* ===== ESTADOS ESPECIALES ===== */
+
+/* Estado de carga de la página completa */
+.login-register-container--loading {
+  pointer-events: none;
+}
+
+/* Variante sin header para páginas más simples */
+.login-register-container--simple .login-register-header {
+  display: none;
+}
+
+.login-register-container--simple .login-register-content {
+  gap: var(--space-lg);
+}
+
+/* ===== ANIMACIONES ===== */
+.login-register-content {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+@media (prefers-reduced-motion: reduce) {
+  .login-register-content {
+    animation: none;
+  }
+}
+
+/* ===== UTILIDADES ===== */
+
+/* Centrado alternativo sin flexbox para compatibilidad */
+.login-register-container--fallback {
+  display: table;
+  width: 100%;
+  height: 100vh;
+  table-layout: fixed;
+}
+
+.login-register-container--fallback .login-register-content {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* ===== INTEGRACIÓN CON EL SISTEMA ===== */
+
+/* El LoginCard heredará automáticamente todas las variables CSS */
+/* No necesitamos estilos adicionales para el componente */
+/* Toda la consistencia viene del sistema de diseño en App.css */

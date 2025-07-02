@@ -1,0 +1,369 @@
+/* ===== CONTENT IMAGE COMPONENT - ÁTOMO PARA IMÁGENES DE CONTENIDO ===== */
+/* ContentImage.css - Usando el sistema de diseño completo */
+
+/* ===== CONTENEDOR BASE ===== */
+.content-image {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--bg-muted);
+  
+  /* Patrón de fondo para indicar carga */
+  background-image: linear-gradient(
+    45deg,
+    var(--bg-muted) 25%,
+    transparent 25%,
+    transparent 75%,
+    var(--bg-muted) 75%
+  );
+  background-size: 2rem 2rem;
+  
+  /* Transiciones suaves */
+  transition: all var(--transition-normal);
+  
+  /* Border radius por defecto */
+  border-radius: var(--radius-md);
+}
+
+/* ===== ASPECT RATIOS ===== */
+.content-image--aspect-1-1 {
+  aspect-ratio: 1/1; /* Cuadrado - avatares, logos */
+}
+
+.content-image--aspect-4-3 {
+  aspect-ratio: 4/3; /* Landscape estándar */
+}
+
+.content-image--aspect-3-2 {
+  aspect-ratio: 3/2; /* Fotografía clásica */
+}
+
+.content-image--aspect-16-9 {
+  aspect-ratio: 16/9; /* Widescreen - banners, thumbnails de video */
+}
+
+.content-image--aspect-2-3 {
+  aspect-ratio: 2/3; /* Portrait - carátulas de películas/series */
+}
+
+.content-image--aspect-3-4 {
+  aspect-ratio: 3/4; /* Portrait más estrecho */
+}
+
+.content-image--aspect-auto {
+  aspect-ratio: auto; /* Altura automática según contenido */
+}
+
+/* ===== BORDER RADIUS ===== */
+.content-image--rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+.content-image--rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.content-image--rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+.content-image--rounded-full {
+  border-radius: var(--radius-full);
+}
+
+/* ===== IMAGEN PRINCIPAL ===== */
+.content-image__img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: all var(--transition-normal);
+  
+  /* Prevenir selección y arrastre */
+  user-select: none;
+  -webkit-user-drag: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+/* ===== OBJECT FIT ===== */
+.content-image--fit-cover .content-image__img {
+  object-fit: cover;
+}
+
+.content-image--fit-contain .content-image__img {
+  object-fit: contain;
+}
+
+.content-image--fit-fill .content-image__img {
+  object-fit: fill;
+}
+
+.content-image--fit-scale-down .content-image__img {
+  object-fit: scale-down;
+}
+
+.content-image--fit-none .content-image__img {
+  object-fit: none;
+}
+
+/* ===== SKELETON DE CARGA ===== */
+.content-image__skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: linear-gradient(
+    90deg,
+    var(--bg-muted) 25%,
+    var(--bg-secondary) 50%,
+    var(--bg-muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: contentImageLoading 2s infinite;
+  z-index: 1;
+}
+
+.content-image__skeleton-icon {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-sm);
+  animation: contentImagePulse 2s infinite;
+}
+
+@keyframes contentImageLoading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes contentImagePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+/* ===== ESTADO DE ERROR ===== */
+.content-image__error-state {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: var(--bg-muted);
+  color: var(--text-muted);
+  z-index: 2;
+}
+
+.content-image__error-icon {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-xs);
+  color: var(--color-danger);
+}
+
+.content-image__error-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  line-height: var(--line-height-tight);
+}
+
+/* ===== ESTADOS ESPECIALES ===== */
+
+/* Estado de carga - skeleton visible */
+.content-image--loading .content-image__img {
+  opacity: 0;
+}
+
+/* Estado cargado - skeleton oculto */
+.content-image--loading .content-image__skeleton {
+  opacity: 1;
+}
+
+/* Imagen cargada exitosamente */
+.content-image__img[src]:not([src=""]) {
+  opacity: 1;
+}
+
+/* Blur effect (para loading progresivo) */
+.content-image--blur .content-image__img {
+  filter: blur(0.5rem);
+  transition: filter var(--transition-normal);
+}
+
+.content-image--blur.content-image--loaded .content-image__img {
+  filter: blur(0);
+}
+
+/* ===== HOVER EFFECTS ===== */
+.content-image:hover .content-image__img {
+  transform: scale(1.02);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablets */
+@media (max-width: 768px) {
+  .content-image__skeleton-icon {
+    font-size: var(--font-size-xl);
+  }
+  
+  .content-image__error-icon {
+    font-size: var(--font-size-lg);
+  }
+  
+  .content-image__error-text {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Móviles */
+@media (max-width: 480px) {
+  /* Deshabilitar hover effects en móviles */
+  .content-image:hover .content-image__img {
+    transform: none;
+  }
+  
+  .content-image__skeleton-icon {
+    font-size: var(--font-size-lg);
+  }
+  
+  .content-image__error-icon {
+    font-size: var(--font-size-base);
+  }
+  
+  /* Patrón de fondo más pequeño en móviles */
+  .content-image {
+    background-size: 1.5rem 1.5rem;
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+.dark .content-image {
+  background-color: var(--bg-muted);
+}
+
+.dark .content-image__skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-muted) 25%,
+    var(--bg-secondary) 50%,
+    var(--bg-muted) 75%
+  );
+}
+
+.dark .content-image__error-state {
+  background-color: var(--bg-muted);
+}
+
+/* ===== ACCESIBILIDAD ===== */
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .content-image,
+  .content-image__img,
+  .content-image__skeleton-icon {
+    transition: none;
+    animation: none;
+  }
+  
+  .content-image:hover .content-image__img {
+    transform: none;
+  }
+  
+  .content-image__skeleton {
+    background: var(--bg-muted);
+  }
+}
+
+/* High contrast */
+@media (prefers-contrast: high) {
+  .content-image {
+    border: 0.1rem solid var(--text-primary);
+  }
+  
+  .content-image__error-state {
+    border: 0.2rem solid var(--color-danger);
+    background-color: var(--bg-primary);
+  }
+  
+  .content-image__error-text {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+/* ===== UTILIDADES ===== */
+
+/* Para cuando se usa como imagen circular (avatares) */
+.content-image--rounded-full {
+  overflow: hidden;
+}
+
+.content-image--rounded-full .content-image__img {
+  border-radius: inherit;
+}
+
+/* Para imágenes con overlay de contenido */
+.content-image--overlay {
+  position: relative;
+}
+
+.content-image--overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.content-image--overlay:hover::after {
+  opacity: 1;
+}
+
+/* ===== OPTIMIZACIONES ===== */
+
+/* Mejorar rendering de imágenes */
+.content-image__img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Prevenir layout shift durante carga */
+.content-image {
+  contain: layout style paint;
+}
+
+/* Optimización para imágenes lazy */
+.content-image__img[loading="lazy"] {
+  content-visibility: auto;
+}

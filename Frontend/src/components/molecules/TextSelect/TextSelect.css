@@ -1,0 +1,300 @@
+/* ===== TEXTSELECT COMPONENT - OPTIMIZADO SIN REDUNDANCIAS ===== */
+/* TextSelect.css - Solo estilos específicos de la molécula */
+/* Aprovecha COMPLETAMENTE el átomo Select actualizado con variables centralizadas */
+
+/* ===== WRAPPER BASE ===== */
+.text-select-wrapper {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-family: var(--font-family-base);
+    gap: var(--space-xs);
+}
+
+.text-select-wrapper--full-width {
+    width: 100%;
+}
+
+.text-select-wrapper--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* ===== LABEL (IDÉNTICO A TEXTINPUT) ===== */
+.text-select__label {
+     display: block;
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-tight);
+    margin: 0;
+    transition: color var(--transition-normal);
+}
+
+.text-select__label--required::after {
+    content: ' *';
+    color: var(--color-danger);
+    font-weight: var(--font-weight-bold);
+}
+
+/* Estados del label */
+.text-select-wrapper--focused .text-select__label {
+    color: var(--border-focus);
+}
+
+.text-select-wrapper--error .text-select__label {
+    color: var(--color-danger);
+}
+
+.text-select-wrapper--success .text-select__label {
+    color: var(--color-success);
+}
+
+.text-select-wrapper--warning .text-select__label {
+    color: var(--color-warning);
+}
+
+/* ===== CONTAINER ===== */
+.text-select__container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* ===== AJUSTES PARA ICONOS - USANDO VARIABLES CENTRALIZADAS ===== */
+/* Padding adicional cuando hay icono izquierdo, basado en variables del sistema */
+
+.select-base.text-select--with-left-icon {
+    padding-left: calc(var(--component-padding-lg) + 2.4rem);
+}
+
+.select-base.text-select--with-right-icon {
+    padding-right: calc(var(--space-lg) + var(--space-xl)); /* 16px + 24px = 40px */
+}
+
+.select-base--xs.text-select--with-left-icon {
+    padding-left: calc(var(--space-md) + var(--space-lg)); /* 12px + 16px = 28px */
+}
+
+.select-base--xs.text-select--with-right-icon {
+    padding-right: calc(var(--space-md) + var(--space-lg)); /* 12px + 16px = 28px */
+}
+
+.select-base--sm.text-select--with-left-icon {
+    padding-left: calc(var(--space-lg) + var(--space-lg)); /* 16px + 16px = 32px */
+}
+
+.select-base--sm.text-select--with-right-icon {
+    padding-right: calc(var(--space-lg) + var(--space-lg)); /* 16px + 16px = 32px */
+}
+
+.select-base--md.text-select--with-left-icon {
+    padding-left: calc(var(--space-lg) + var(--space-xl)); /* 16px + 24px = 40px */
+}
+
+.select-base--md.text-select--with-right-icon {
+    padding-right: calc(var(--space-lg) + var(--space-xl)); /* 16px + 24px = 40px */
+}
+
+.select-base--lg.text-select--with-left-icon {
+    padding-left: calc(var(--space-xl) + var(--space-xl)); /* 24px + 24px = 48px */
+}
+
+.input-base--lg.text-input--with-right-icon {
+    padding-right: calc(var(--space-xl) + var(--space-xl)); /* 24px + 24px = 48px */
+}
+
+.select-base--xl.text-select--with-left-icon {
+    padding-left: calc(var(--space-2xl) + var(--space-xl)); /* 32px + 24px = 56px */
+}
+
+.select-base--xl.text-select--with-right-icon {
+    padding-right: calc(var(--space-2xl) + var(--space-xl)); /* 32px + 24px = 56px */
+}
+
+
+/* ===== ICONOS (SOLO IZQUIERDO PARA SELECT) ===== */
+.text-select__icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    pointer-events: none;
+    z-index: 2; /* Sobre el select */
+    transition: color var(--transition-normal);
+}
+
+.text-select__icon--left {
+    left: var(--space-md);
+}
+
+/* Iconos clickeables */
+.text-select__icon--clickable {
+    pointer-events: auto;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs);
+    transition: all var(--transition-normal);
+    background-color: transparent;
+}
+
+.text-select__icon--clickable:hover {
+    background-color: var(--bg-secondary);
+    color: var(--color-primary);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.text-select__icon--clickable:focus {
+    outline: 0.2rem solid var(--border-focus);
+    outline-offset: 0.2rem;
+    background-color: var(--bg-secondary);
+}
+
+.text-select__icon--clickable:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+/* Estados de iconos según variante del wrapper */
+.text-select-wrapper--error .text-select__icon:not(.text-select__icon--clickable) {
+    color: var(--color-danger);
+}
+
+.text-select-wrapper--success .text-select__icon:not(.text-select__icon--clickable) {
+    color: var(--color-success);
+}
+
+.text-select-wrapper--warning .text-select__icon:not(.text-select__icon--clickable) {
+    color: var(--color-warning);
+}
+
+.text-select-wrapper--focused .text-select__icon:not(.text-select__icon--clickable) {
+    color: var(--border-focus);
+}
+
+/* Ajustes de iconos por tamaño del wrapper */
+.text-select-wrapper--xs .text-select__icon {
+    font-size: var(--component-font-xs);
+}
+
+.text-select-wrapper--xs .text-select__icon--left {
+    left: var(--space-sm);
+}
+
+.text-select-wrapper--sm .text-select__icon {
+    font-size: var(--component-font-sm);
+}
+
+.text-select-wrapper--md .text-select__icon {
+    font-size: var(--component-font-md);
+}
+
+.text-select-wrapper--lg .text-select__icon,
+.text-select-wrapper--xl .text-select__icon {
+    font-size: var(--component-font-lg);
+}
+
+.text-select-wrapper--lg .text-select__icon--left,
+.text-select-wrapper--xl .text-select__icon--left {
+    left: var(--space-xl);
+}
+
+/* ===== FOOTER (IDÉNTICO A TEXTINPUT) ===== */
+.text-select__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-md);
+    min-height: 2rem;
+}
+
+/* ===== MENSAJES ===== */
+.text-select__message {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    margin: 0;
+}
+
+.text-select__message--error {
+    color: var(--color-danger);
+    font-weight: var(--font-weight-medium);
+    animation: slideInError 0.2s ease-out;
+}
+
+.text-select__message--helper {
+    color: var(--text-secondary);
+    transition: color var(--transition-normal);
+}
+
+/* Animación sutil para errores */
+@keyframes slideInError {
+    from {
+        opacity: 0;
+        transform: translateY(-0.4rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== RESPONSIVE ESPECÍFICO SOLO PARA ICONOS ===== */
+@media (max-width: 768px) {
+    /* Solo ajustes específicos de iconos en móviles */
+    .text-select__icon--clickable {
+        /* Área táctil mínima para iconos */
+        min-width: var(--touch-target-min);
+        min-height: var(--touch-target-min);
+        padding: var(--space-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Ajustar footer en móvil */
+    .text-select__footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-xs);
+    }
+}
+
+/* ===== ESTADOS DE FOCO ESPECIALES (ESPECÍFICOS DE MOLÉCULA) ===== */
+.text-select-wrapper--focused .text-select__container {
+    z-index: 1; /* Elevar sobre otros elementos cuando está enfocado */
+}
+
+/* ===== UTILIDADES ADICIONALES (ESPECÍFICAS DE TEXTSELECT) ===== */
+.text-select-wrapper--required .text-select__label::after {
+    content: ' *';
+    color: var(--color-danger);
+    font-weight: var(--font-weight-bold);
+}
+
+/* ===== VERSIÓN COMPACTA (ESPECÍFICA DE TEXTSELECT) ===== */
+.text-select-wrapper--compact {
+    gap: calc(var(--space-xs) / 2);
+}
+
+.text-select-wrapper--compact .text-select__footer {
+    min-height: 1.6rem;
+    gap: var(--space-sm);
+}
+
+.text-select-wrapper--compact .text-select__message {
+    font-size: var(--font-size-xs);
+}
+
+/* Accesibilidad específica solo para animaciones de la molécula */
+@media (prefers-reduced-motion: reduce) {
+    .text-select__message--error {
+        animation: none;
+    }
+    
+    .text-select__icon--clickable {
+        transition: none;
+    }
+}

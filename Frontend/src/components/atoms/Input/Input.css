@@ -1,0 +1,303 @@
+/* ===== INPUT COMPONENT - HOMOLOGADO CON VARIABLES CENTRALIZADAS ===== */
+/* Input.css - Actualizado para usar las variables del app.css */
+
+/* Clase base del input - Usando variables del sistema */
+.input-base {
+  display: block;
+  width: 100%;
+  position: relative;
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-primary);
+  border: 0.1rem solid var(--border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-primary);
+  transition: all var(--transition-normal);
+  outline: none;
+  appearance: none;
+  box-sizing: border-box;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== TAMAÑOS - USANDO VARIABLES CENTRALIZADAS ===== */
+.input-base--xs {
+  padding: var(--component-padding-xs);        
+  font-size: var(--component-font-xs);         
+  min-height: var(--component-height-xs);      
+  line-height: var(--line-height-tight);
+}
+
+.input-base--sm {
+  padding: var(--component-padding-sm);        
+  font-size: var(--component-font-sm);         
+  min-height: var(--component-height-sm);      
+  line-height: var(--line-height-tight);
+}
+
+.input-base--md {
+  padding: var(--component-padding-md);        
+  font-size: var(--component-font-md);         
+  min-height: var(--component-height-md);      
+  line-height: var(--line-height-normal);
+}
+
+.input-base--lg {
+  padding: var(--component-padding-lg);        
+  font-size: var(--component-font-lg);         
+  min-height: var(--component-height-lg);      
+  line-height: var(--lint-normal);
+}
+
+.input-base--xl {
+  padding: var(--component-padding-xl);       
+  font-size: var(--component-font-xl);        
+  min-height: var(--component-height-xl);     
+  line-height: var(--line-height-normal);
+}
+
+.input-base--rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+.input-base--rounded-md {
+  border-radius: var(--radius-md);
+}
+
+.input-base--rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.input-base--rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+.input-base--rounded-full {
+  border-radius: var(--radius-full);
+}
+
+/* ===== ESTADOS INTERACTIVOS - Mejorados con variables del sistema ===== */
+.input-base:hover:not(:disabled):not(:focus) {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.input-base:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 0.3rem rgba(59, 130, 246, 0.1);
+  outline: 0.2rem solid var(--border-e-heighfocus);
+  outline-offset: 0.2rem;
+  z-index: 1;
+}
+
+.input-base:disabled {
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+  cursor: not-allowed;
+  border-color: var(--border-default);
+  opacity: 0.6;
+}
+
+.input-base:read-only {
+  background-color: var(--bg-muted);
+  color: var(--text-secondary);
+  cursor: default;
+  border-color: var(--border-default);
+}
+
+.input-base:read-only:focus {
+  box-shadow: 0 0 0 0.3rem rgba(107, 114, 128, 0.1);
+  border-color: var(--border-secondary);
+  outline-color: var(--border-secondary);
+}
+
+/* ===== PLACEHOLDER - Mejorado ===== */
+.input-base::placeholder {
+  color: var(--text-placeholder);
+  opacity: 1;
+  transition: opacity var(--transition-fast);
+}
+
+.input-base:focus::placeholder {
+  opacity: 0.6;
+}
+
+.input-base:disabled::placeholder {
+  color: var(--text-disabled);
+}
+
+/* ===== VARIANTES SEMÁNTICAS ===== */
+/* Default (ya definido en base) */
+.input-base--default {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+/* Error */
+.input-base--error {
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+.input-base--error:focus {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 0.3rem rgba(239, 68, 68, 0.1);
+  outline-color: var(--color-danger);
+}
+
+.input-base--error:hover:not(:disabled):not(:focus) {
+  border-color: var(--color-danger-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Success */
+.input-base--success {
+  border-color: var(--color-success);
+  background-color: var(--color-success-light);
+}
+
+.input-base--success:focus {
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 0.3rem rgba(34, 197, 94, 0.1);
+  outline-color: var(--color-success);
+}
+
+.input-base--success:hover:not(:disabled):not(:focus) {
+  border-color: var(--color-success-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Warning */
+.input-base--warning {
+  border-color: var(--color-warning);
+  background-color: var(--color-warning-light);
+}
+
+.input-base--warning:focus {
+  border-color: var(--color-warning);
+  box-shadow: 0 0 0 0.3rem rgba(245, 158, 11, 0.1);
+  outline-color: var(--color-warning);
+}
+
+.input-base--warning:hover:not(:disabled):not(:focus) {
+  border-color: var(--color-warning-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== ESTADOS ESPECÍFICOS ===== */
+/* Input con valor */
+.input-base:not(:placeholder-shown) {
+  background-color: var(--bg-primary);
+}
+
+/* Input requerido */
+.input-base:required:invalid:not(:focus):not(:placeholder-shown) {
+  border-color: var(--color-danger);
+}
+
+.input-base:required:valid:not(:focus):not(:placeholder-shown) {
+  border-color: var(--color-success);
+}
+
+/* ===== RESPONSIVE - ÁREA TÁCTIL MÓVIL ===== */
+@media (max-width: 768px) {
+  /* Asegurar área táctil mínima en móviles (44px) */
+  .input-base--xs,
+  .input-base--sm {
+    min-height: var(--touch-target-min);        /* 44px mínimo */
+    padding: var(--space-sm) var(--space-md);
+  }
+  
+  /* Los tamaños más grandes ya tienen suficiente área táctil */
+  .input-base--lg {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-base);
+    min-height: var(--component-height-lg);     /* Mantener 56px */
+  }
+  
+  .input-base--xl {
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-lg);
+    min-height: var(--component-height-xl);     /* Mantener 56px */
+  }
+  
+  /* Evitar zoom en iOS - área táctil crítica */
+  .input-base {
+    font-size: max(var(--font-size-base), 1.6rem);
+  }
+}
+
+@media (max-width: 480px) {
+  /* En móviles muy pequeños, priorizar usabilidad */
+  .input-base--lg,
+  .input-base--xl {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-base);
+    /* Mantener altura estándar para consistencia */
+    min-height: var(--component-height-lg);
+  }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+@media (prefers-reduced-motion: reduce) {
+  .input-base {
+    transition: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .input-base {
+    border-width: 0.2rem;
+  }
+  
+  .input-base:focus {
+    outline-width: 0.3rem;
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+.dark .input-base {
+  background-color: var(--bg-primary);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.dark .input-base:disabled {
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-default);
+}
+
+.dark .input-base:focus {
+  box-shadow: 0 0 0 0.3rem rgba(96, 165, 250, 0.1);
+}
+
+/* Clase forzada para modo oscuro con prefers-color-scheme */
+@media (prefers-color-scheme: dark) {
+  .input-base:focus {
+    box-shadow: 0 0 0 0.3rem rgba(96, 165, 250, 0.1);
+  }
+}
+
+/* ===== HERRAMIENTAS DE DEBUGGING ===== */
+/* Solo activo cuando se agrega clase .debug-heights al body */
+.debug-heights .input-base {
+  outline: 2px dashed green !important;
+  outline-offset: -2px;
+}
+
+.debug-heights .input-base::after {
+  content: 'Input: ' attr(class);
+  position: absolute;
+  top: -2rem;
+  left: 0;
+  background: green;
+  color: white;
+  font-size: 1rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.2rem;
+  z-index: 1000;
+  white-space: nowrap;
+  font-family: monospace;
+}

@@ -1,0 +1,40 @@
+/* ===== USERCREATEPAGE.CSS - SISTEMA DE DISEÑO PURO ===== */
+/* src/Pages/Admin/Users/UserCreatePage/UserCreatePage.css */
+
+/* 
+✅ SISTEMA PURO: Solo estilos específicos de UserCreatePage
+✅ RESPETO TOTAL: Container maneja su propio layout completamente
+✅ VARIABLES: Solo variables CSS del sistema de diseño
+✅ FILOSOFÍA: El Container se comporta como debe, sin ajustes
+*/
+
+/* ===== ESTADOS ESPECÍFICOS DE LA PÁGINA ===== */
+
+/* Estado de carga aplicado al Container */
+.user-create--loading {
+  pointer-events: none;
+  opacity: 0.8;
+  transition: opacity var(--transition-normal);
+}
+
+/* Estado de éxito aplicado al Container */
+.user-create--success {
+  /* El Container ya maneja su apariencia, solo lógica específica */
+}
+
+/* ===== ACCESIBILIDAD ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  .user-create--loading {
+    transition: none;
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+
+@media print {
+  .user-create--loading {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

@@ -1,0 +1,421 @@
+/* ===== FILEINPUT COMPONENT - HOMOLOGADO CON INPUT USANDO VARIABLES CENTRALIZADAS ===== */
+/* FileInput.css - Corregido para usar las mismas variables que Input.css */
+
+/* Contenedor wrapper */
+.file-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  font-family: var(--font-family-base);
+}
+
+/* Clase base del file input - HOMOLOGADA CON INPUT */
+.file-input {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+/* Input file oculto */
+.file-input__input {
+  position: absolute;
+  width: 0.1rem;
+  height: 0.1rem;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===== LABEL QUE ACTÚA COMO BOTÓN - IDÉNTICO A INPUT-BASE ===== */
+.file-input__button {
+  /* Layout */
+  display: block;
+  width: 100%;
+  position: relative;
+  cursor: pointer;
+  
+  /* Tipografía - IDÉNTICA A INPUT-BASE */
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-primary);
+  
+  /* Estilos base - IDÉNTICOS A INPUT-BASE */
+  border: 0.1rem solid var(--border-default);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-primary);
+  transition: all var(--transition-normal);
+  outline: none;
+  appearance: none;
+  box-sizing: border-box;
+  
+  /* Interacción */
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  
+  /* Layout interno */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-sm);
+}
+
+/* ===== TAMAÑOS - USANDO VARIABLES CENTRALIZADAS IDÉNTICAS A INPUT ===== */
+.file-input--xs .file-input__button,
+.file-input__button--xs {
+  padding: var(--component-padding-xs);        /* 4px 8px */
+  font-size: var(--component-font-xs);         /* 12px */
+  min-height: var(--component-height-xs);      /* 28px */
+  line-height: var(--line-height-tight);
+}
+
+.file-input--sm .file-input__button,
+.file-input__button--sm {
+  padding: var(--component-padding-sm);        /* 8px 16px */
+  font-size: var(--component-font-sm);         /* 14px */
+  min-height: var(--component-height-sm);      /* 32px */
+  line-height: var(--line-height-tight);
+}
+
+.file-input--md .file-input__button,
+.file-input__button--md {
+  padding: var(--component-padding-md);        /* 8px 16px */
+  font-size: var(--component-font-md);         /* 16px */
+  min-height: var(--component-height-md);      /* 40px */
+  line-height: var(--line-height-normal);
+}
+
+/* 🔧 CORRECCIÓN PRINCIPAL: LG ahora usa las mismas variables que Input */
+.file-input--lg .file-input__button,
+.file-input__button--lg {
+  padding: var(--component-padding-lg);        /* 16px 24px */
+  font-size: var(--component-font-lg);         /* 20px */
+  min-height: var(--component-height-lg);      /* ✅ 56px - HOMOLOGADO CON INPUT */
+  line-height: var(--line-height-normal);
+}
+
+.file-input--xl .file-input__button,
+.file-input__button--xl {
+  padding: var(--component-padding-xl);        /* 16px 32px */
+  font-size: var(--component-font-xl);         /* 24px */
+  min-height: var(--component-height-xl);      /* 56px */
+  line-height: var(--line-height-normal);
+}
+
+/* ===== RADIO DE BORDES - IDÉNTICO A INPUT ===== */
+.file-input--rounded-sm .file-input__button,
+.file-input__button--rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+.file-input--rounded-md .file-input__button,
+.file-input__button--rounded-md {
+  border-radius: var(--radius-md);
+}
+
+.file-input--rounded-lg .file-input__button,
+.file-input__button--rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.file-input--rounded-xl .file-input__button,
+.file-input__button--rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+.file-input--rounded-full .file-input__button,
+.file-input__button--rounded-full {
+  border-radius: var(--radius-full);
+}
+
+/* ===== ESTADOS INTERACTIVOS - IDÉNTICOS A INPUT ===== */
+.file-input__button:hover:not(.file-input__button--disabled) {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.file-input--focused .file-input__button {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 0.3rem rgba(59, 130, 246, 0.1);
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+  z-index: 1;
+}
+
+.file-input--disabled .file-input__button,
+.file-input__button--disabled {
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+  cursor: not-allowed;
+  border-color: var(--border-default);
+  opacity: 0.6;
+}
+
+/* ===== VARIANTES SEMÁNTICAS - IDÉNTICAS A INPUT ===== */
+
+/* Default */
+.file-input--default .file-input__button,
+.file-input__button--default {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+/* Success */
+.file-input--success .file-input__button,
+.file-input__button--success {
+  border-color: var(--color-success);
+  background-color: var(--color-success-light);
+}
+
+.file-input--success.file-input--focused .file-input__button {
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 0.3rem rgba(34, 197, 94, 0.1);
+  outline-color: var(--color-success);
+}
+
+.file-input--success .file-input__button:hover:not(.file-input__button--disabled) {
+  border-color: var(--color-success-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Warning */
+.file-input--warning .file-input__button,
+.file-input__button--warning {
+  border-color: var(--color-warning);
+  background-color: var(--color-warning-light);
+}
+
+.file-input--warning.file-input--focused .file-input__button {
+  border-color: var(--color-warning);
+  box-shadow: 0 0 0 0.3rem rgba(245, 158, 11, 0.1);
+  outline-color: var(--color-warning);
+}
+
+.file-input--warning .file-input__button:hover:not(.file-input__button--disabled) {
+  border-color: var(--color-warning-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Danger */
+.file-input--danger .file-input__button,
+.file-input__button--danger {
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+.file-input--danger.file-input--focused .file-input__button {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 0.3rem rgba(239, 68, 68, 0.1);
+  outline-color: var(--color-danger);
+}
+
+.file-input--danger .file-input__button:hover:not(.file-input__button--disabled) {
+  border-color: var(--color-danger-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== CONTENIDO DEL BOTÓN ===== */
+.file-input__icon {
+  flex-shrink: 0;
+  font-size: 1.2em;
+  color: var(--text-secondary);
+  transition: color var(--transition-normal);
+}
+
+.file-input__text {
+  flex: 1;
+  text-align: left;
+  color: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color var(--transition-normal);
+}
+
+.file-input__files-info {
+  color: var(--text-secondary);
+  font-size: 0.9em;
+  flex-shrink: 0;
+  transition: color var(--transition-normal);
+}
+
+/* ===== ESTADO CON ARCHIVOS SELECCIONADOS ===== */
+.file-input--has-files .file-input__button {
+  border-color: var(--color-success);
+  background-color: rgba(34, 197, 94, 0.02);
+}
+
+.file-input--has-files .file-input__text {
+  color: var(--color-success);
+  font-weight: var(--font-weight-medium);
+}
+
+.file-input--has-files .file-input__icon {
+  color: var(--color-success);
+}
+
+.file-input--has-files .file-input__files-info {
+  color: var(--color-success);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ===== MENSAJES DE AYUDA Y ERROR ===== */
+.file-input__helper {
+  margin-top: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-tight);
+  transition: color var(--transition-normal);
+}
+
+.file-input__error {
+  margin-top: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-medium);
+  animation: slideInError 0.2s ease-out;
+}
+
+/* Animación sutil para errores */
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== RESPONSIVE - ÁREA TÁCTIL MÓVIL ===== */
+@media (max-width: 768px) {
+  /* Asegurar área táctil mínima en móviles (igual que Input) */
+  .file-input--xs .file-input__button,
+  .file-input__button--xs,
+  .file-input--sm .file-input__button,
+  .file-input__button--sm {
+    min-height: var(--touch-target-min);        /* 44px mínimo */
+    padding: var(--space-sm) var(--space-md);
+  }
+  
+  /* Los tamaños grandes mantienen altura pero ajustan padding */
+  .file-input--lg .file-input__button,
+  .file-input__button--lg {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-base);
+    min-height: var(--component-height-lg);     /* Mantener 56px */
+  }
+  
+  .file-input--xl .file-input__button,
+  .file-input__button--xl {
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-lg);
+    min-height: var(--component-height-xl);     /* Mantener 56px */
+  }
+}
+
+@media (max-width: 480px) {
+  /* En móviles muy pequeños, optimizar para usabilidad */
+  .file-input--lg .file-input__button,
+  .file-input__button--lg,
+  .file-input--xl .file-input__button,
+  .file-input__button--xl {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-base);
+    /* Mantener altura estándar para consistencia */
+    min-height: var(--component-height-lg);
+  }
+  
+  /* Ajustar el gap interno en móviles */
+  .file-input__button {
+    gap: var(--space-xs);
+  }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+@media (prefers-reduced-motion: reduce) {
+  .file-input__button,
+  .file-input__text,
+  .file-input__icon,
+  .file-input__files-info {
+    transition: none;
+  }
+  
+  .file-input__error {
+    animation: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .file-input__button {
+    border-width: 0.2rem;
+  }
+  
+  .file-input--focused .file-input__button {
+    outline-width: 0.3rem;
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+.dark .file-input__button {
+  background-color: var(--bg-primary);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.dark .file-input--disabled .file-input__button,
+.dark .file-input__button--disabled {
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-default);
+}
+
+.dark .file-input--focused .file-input__button {
+  box-shadow: 0 0 0 0.3rem rgba(96, 165, 250, 0.1);
+}
+
+/* Soporte para prefers-color-scheme */
+@media (prefers-color-scheme: dark) {
+  .file-input--focused .file-input__button {
+    box-shadow: 0 0 0 0.3rem rgba(96, 165, 250, 0.1);
+  }
+}
+
+/* ===== HERRAMIENTAS DE DEBUGGING ===== */
+/* Solo activo cuando se agrega clase .debug-heights al body */
+.debug-heights .file-input__button {
+  outline: 2px dashed blue !important;
+  outline-offset: -2px;
+}
+
+.debug-heights .file-input__button::after {
+  content: 'FileInput: ' attr(class);
+  position: absolute;
+  top: -2rem;
+  left: 0;
+  background: blue;
+  color: white;
+  font-size: 1rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.2rem;
+  z-index: 1000;
+  white-space: nowrap;
+  font-family: monospace;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .file-input__button {
+    border: 0.1rem solid #000;
+    box-shadow: none;
+  }
+  
+  .file-input__files-info {
+    display: none;
+  }
+}

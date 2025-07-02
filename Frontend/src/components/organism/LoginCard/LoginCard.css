@@ -1,0 +1,197 @@
+/* ===== LOGIN CARD COMPONENT ===== */
+/* LoginCard.css */
+/* Organismo que usa Card, TextInput y Button del sistema */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.login-card {
+  width: 100%;
+  max-width: 42rem; /* 420px */
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* ===== FORMULARIO ===== */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  width: 100%;
+}
+
+/* ===== MENSAJE DE ERROR GLOBAL ===== */
+.login-card__error {
+  padding: var(--space-md);
+  background-color: var(--color-danger-light);
+  border: 0.1rem solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  animation: slideInError 0.3s ease-out;
+}
+
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== ACCIONES DEL FOOTER ===== */
+.login-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+/* ===== SECCIÓN DE REGISTRO ===== */
+.login-card__register {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  text-align: center;
+}
+
+.login-card__register-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  line-height: var(--line-height-normal);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .login-card {
+    max-width: 100%;
+    margin: var(--space-md);
+  }
+  
+  /* Ajustar padding en móviles */
+  .login-card.card--padding-xl {
+    padding: var(--space-lg);
+  }
+  
+  /* Stack vertical en móvil */
+  .login-card__actions {
+    gap: var(--space-sm);
+  }
+  
+  .login-card__register {
+    gap: var(--space-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    margin: var(--space-sm);
+  }
+  
+  .login-card.card--padding-xl {
+    padding: var(--space-md);
+  }
+  
+  .login-form {
+    gap: var(--space-md);
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+.dark .login-card__error {
+  background-color: var(--color-danger-light);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.dark .login-card__register-text {
+  color: var(--text-muted);
+}
+
+/* ===== ESTADOS DE CARGA ===== */
+.login-card--loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* ===== ACCESIBILIDAD ===== */
+.login-card__error {
+  /* Ya tiene role="alert" en el JSX */
+}
+
+/* Focus visible para los botones en el footer */
+.login-card__actions .button:focus-visible {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+}
+
+/* ===== ANIMACIONES CONDICIONALES ===== */
+@media (prefers-reduced-motion: reduce) {
+  .login-card__error {
+    animation: none;
+  }
+}
+
+/* ===== UTILIDADES ===== */
+.login-card__divider {
+  width: 100%;
+  height: 0.1rem;
+  background-color: var(--border-default);
+  margin: var(--space-md) 0;
+}
+
+.login-card__divider-text {
+  position: relative;
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  background-color: var(--bg-primary);
+  padding: 0 var(--space-sm);
+  margin: var(--space-md) 0;
+}
+
+.login-card__divider-text::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 0.1rem;
+  background-color: var(--border-default);
+  z-index: -1;
+}
+
+/* ===== VARIANTES DE TAMAÑO ===== */
+.login-card--compact {
+  max-width: 32rem; /* 320px */
+}
+
+.login-card--compact .login-form {
+  gap: var(--space-md);
+}
+
+.login-card--compact .card--padding-xl {
+  padding: var(--space-lg);
+}
+
+.login-card--wide {
+  max-width: 52rem; /* 520px */
+}
+
+/* ===== INTEGRATION CON CARD VARIANTS ===== */
+.login-card.card--elevated {
+  /* Card elevada para login más destacado */
+}
+
+.login-card.card--outlined {
+  /* Card con borde para contextos específicos */
+}
+
+/* ===== PERFORMANCE ===== */
+.login-card {
+  contain: layout style;
+}

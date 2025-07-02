@@ -1,0 +1,536 @@
+/* ===== STATS CARD MOLECULE STYLES ===== */
+/* src/components/molecules/StatsCard/StatsCard.css */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.stats-card {
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-height: 12rem;
+  
+  /* Fuente */
+  font-family: var(--font-family-base);
+  
+  /* Transiciones */
+  transition: all var(--transition-normal);
+  
+  /* Posición relativa para elementos absolutos */
+  position: relative;
+}
+
+/* ===== VARIANTES DE COLOR ===== */
+.stats-card--blue {
+  --stats-card-color: var(--blue-500);
+  --stats-card-color-light: var(--blue-50);
+  --stats-card-color-dark: var(--blue-700);
+}
+
+.stats-card--green {
+  --stats-card-color: var(--green-500);
+  --stats-card-color-light: var(--green-50);
+  --stats-card-color-dark: var(--green-700);
+}
+
+.stats-card--red {
+  --stats-card-color: var(--red-500);
+  --stats-card-color-light: var(--red-50);
+  --stats-card-color-dark: var(--red-700);
+}
+
+.stats-card--yellow {
+  --stats-card-color: var(--yellow-500);
+  --stats-card-color-light: var(--yellow-50);
+  --stats-card-color-dark: var(--yellow-700);
+}
+
+.stats-card--purple {
+  --stats-card-color: var(--color-primary);
+  --stats-card-color-light: var(--color-primary-light);
+  --stats-card-color-dark: var(--color-primary-dark);
+}
+
+.stats-card--gray {
+  --stats-card-color: var(--gray-500);
+  --stats-card-color-light: var(--gray-50);
+  --stats-card-color-dark: var(--gray-700);
+}
+
+/* ===== VARIANTES DE ESTILO ===== */
+.stats-card--minimal {
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+.stats-card--bordered {
+  border: 0.2rem solid var(--stats-card-color);
+}
+
+.stats-card--gradient {
+  background: linear-gradient(135deg, var(--stats-card-color-light) 0%, var(--bg-secondary) 100%);
+}
+
+/* ===== TAMAÑOS ===== */
+.stats-card--sm {
+  min-height: 10rem;
+  gap: var(--space-sm);
+}
+
+.stats-card--sm .stats-card__title {
+  font-size: var(--font-size-sm);
+}
+
+.stats-card--sm .stats-card__value {
+  font-size: var(--font-size-xl);
+}
+
+.stats-card--sm .stats-card__icon {
+  font-size: var(--font-size-lg);
+}
+
+.stats-card--md {
+  min-height: 12rem;
+  gap: var(--space-md);
+}
+
+.stats-card--lg {
+  min-height: 14rem;
+  gap: var(--space-lg);
+}
+
+.stats-card--lg .stats-card__title {
+  font-size: var(--font-size-lg);
+}
+
+.stats-card--lg .stats-card__value {
+  font-size: var(--font-size-3xl);
+}
+
+.stats-card--lg .stats-card__icon {
+  font-size: var(--font-size-2xl);
+}
+
+/* ===== ESTADOS INTERACTIVOS ===== */
+.stats-card--interactive {
+  cursor: pointer;
+}
+
+.stats-card--interactive:hover {
+  transform: translateY(-0.2rem);
+  box-shadow: var(--shadow-xl);
+}
+
+.stats-card--interactive:active {
+  transform: translateY(0);
+}
+
+.stats-card--interactive:focus-visible {
+  outline: 0.2rem solid var(--stats-card-color);
+  outline-offset: 0.2rem;
+}
+
+/* ===== HEADER ===== */
+.stats-card__header {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  
+  /* Flex para distribución */
+  flex-shrink: 0;
+}
+
+.stats-card__icon {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  /* Tamaño */
+  width: 4rem;
+  height: 4rem;
+  
+  /* Colores */
+  background-color: var(--stats-card-color-light);
+  color: var(--stats-card-color);
+  
+  /* Forma */
+  border-radius: var(--radius-lg);
+  
+  /* Tipografía */
+  font-size: var(--font-size-xl);
+  line-height: 1;
+}
+
+.stats-card__title {
+  /* Reset */
+  margin: 0;
+  
+  /* Layout */
+  flex: 1;
+  min-width: 0;
+  
+  /* Tipografía */
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  line-height: var(--line-height-tight);
+  
+  /* Overflow */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== VALOR PRINCIPAL ===== */
+.stats-card__value-section {
+  /* Layout */
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-height: 0;
+}
+
+.stats-card__value {
+  /* Reset */
+  margin: 0;
+  
+  /* Tipografía */
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  line-height: var(--line-height-tight);
+  
+  /* Layout */
+  width: 100%;
+  
+  /* Permitir wrap en números muy largos */
+  word-break: break-word;
+}
+
+/* ===== CAMBIO PORCENTUAL ===== */
+.stats-card__footer {
+  /* Layout */
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.stats-card__change {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  
+  /* Tipografía */
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+
+.stats-card__change--up {
+  color: var(--green-600);
+}
+
+.stats-card__change--down {
+  color: var(--red-600);
+}
+
+.stats-card__change--neutral {
+  color: var(--text-muted);
+}
+
+.stats-card__change-icon {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  /* Tamaño */
+  font-size: var(--font-size-sm);
+  line-height: 1;
+}
+
+.stats-card__change-value {
+  font-weight: var(--font-weight-semibold);
+}
+
+.stats-card__change-label {
+  color: var(--text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+/* ===== ESTADOS DE LOADING ===== */
+.stats-card--loading {
+  pointer-events: none;
+}
+
+.stats-card__skeleton {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary) 25%,
+    var(--bg-hover) 50%,
+    var(--bg-tertiary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.stats-card__skeleton--value {
+  height: 3.2rem;
+  width: 80%;
+  max-width: 12rem;
+}
+
+.stats-card__skeleton--change {
+  height: 1.6rem;
+  width: 60%;
+  max-width: 8rem;
+}
+
+.stats-card__value--skeleton {
+  display: flex;
+  align-items: center;
+}
+
+.stats-card__change--skeleton {
+  display: flex;
+  align-items: center;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ===== ESTADO DE ERROR ===== */
+.stats-card--error {
+  border-color: var(--red-200);
+}
+
+.stats-card__error-message {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  
+  /* Colores */
+  color: var(--red-600);
+  background-color: var(--red-50);
+  
+  /* Espaciado */
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: 0.1rem solid var(--red-200);
+  
+  /* Tipografía */
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-sm);
+}
+
+.stats-card__error-icon {
+  flex-shrink: 0;
+  font-size: var(--font-size-base);
+}
+
+.stats-card__error-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ===== ENLACES ===== */
+.stats-card__link {
+  /* Reset de enlace */
+  text-decoration: none;
+  color: inherit;
+  
+  /* Layout */
+  display: block;
+  width: 100%;
+  
+  /* Estados */
+  transition: all var(--transition-normal);
+}
+
+.stats-card__link:hover,
+.stats-card__link:focus {
+  text-decoration: none;
+  color: inherit;
+}
+
+.stats-card__link:focus-visible {
+  outline: 0.2rem solid var(--stats-card-color);
+  outline-offset: 0.2rem;
+  border-radius: var(--radius-lg);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet */
+@media (max-width: 1199px) {
+  .stats-card {
+    min-height: 10rem;
+    gap: var(--space-sm);
+  }
+  
+  .stats-card__value {
+    font-size: var(--font-size-xl);
+  }
+  
+  .stats-card__icon {
+    width: 3.6rem;
+    height: 3.6rem;
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .stats-card {
+    min-height: 9rem;
+  }
+  
+  .stats-card__header {
+    gap: var(--space-xs);
+  }
+  
+  .stats-card__icon {
+    width: 3.2rem;
+    height: 3.2rem;
+    font-size: var(--font-size-base);
+  }
+  
+  .stats-card__title {
+    font-size: var(--font-size-sm);
+  }
+  
+  .stats-card__value {
+    font-size: var(--font-size-lg);
+  }
+  
+  .stats-card__change {
+    font-size: var(--font-size-xs);
+  }
+  
+  /* Tamaños móvil para variantes */
+  .stats-card--sm {
+    min-height: 8rem;
+  }
+  
+  .stats-card--lg {
+    min-height: 10rem;
+  }
+  
+  .stats-card--lg .stats-card__value {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* Mobile muy pequeño */
+@media (max-width: 479px) {
+  .stats-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+  
+  .stats-card__icon {
+    width: 2.8rem;
+    height: 2.8rem;
+    font-size: var(--font-size-sm);
+  }
+  
+  .stats-card__title {
+    width: 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+
+/* Reducir animaciones si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+  .stats-card,
+  .stats-card__skeleton,
+  .stats-card__link {
+    animation: none;
+    transition: none;
+  }
+  
+  .stats-card--interactive:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .stats-card {
+    border-width: 0.2rem;
+  }
+  
+  .stats-card__icon {
+    border: 0.1rem solid var(--stats-card-color);
+  }
+  
+  .stats-card__error-message {
+    border-width: 0.2rem;
+  }
+}
+
+/* ===== UTILIDADES ===== */
+
+/* Truncar título en una línea */
+.stats-card__title--truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Título en múltiples líneas */
+.stats-card__title--multiline {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Valor muy grande */
+.stats-card__value--large {
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-none);
+}
+
+/* Ocultar cambio en móvil si es necesario */
+.stats-card__change--hide-mobile {
+  @media (max-width: 479px) {
+    display: none;
+  }
+}
+
+/* ===== GRID LAYOUT HELPER ===== */
+/* Para usar en contenedores padre */
+.stats-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(25rem, 1fr));
+  gap: var(--space-lg);
+}
+
+@media (max-width: 767px) {
+  .stats-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    gap: var(--space-md);
+  }
+}
+
+@media (max-width: 479px) {
+  .stats-card-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,419 @@
+/* ===== ACTIONS DROPDOWN COMPONENT - VERSIÓN CORREGIDA ===== */
+/* src/components/molecules/ActionsDropdown/ActionsDropdown.css */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.actions-dropdown {
+  /* Layout */
+  position: relative;
+  display: inline-block;
+  
+  /* Z-index del sistema de diseño - bajo por defecto */
+  z-index: 1;
+}
+
+/* IMPORTANTE: Cuando el dropdown está abierto, elevar todo el contenedor */
+.actions-dropdown--open {
+  z-index: var(--z-dropdown);
+}
+
+/* ===== TRIGGER BUTTON ===== */
+.actions-dropdown__trigger {
+  /* El Button ya tiene sus estilos, solo ajustes específicos */
+  min-width: auto;
+  aspect-ratio: 1;
+  
+  /* Estados específicos del trigger */
+  transition: all var(--transition-fast);
+  
+  /* Z-index bajo por defecto para no interferir con otros dropdowns */
+  position: relative;
+  z-index: 1;
+}
+
+/* Cuando el dropdown está abierto, el trigger tiene z-index más alto */
+.actions-dropdown--open .actions-dropdown__trigger {
+  z-index: calc(var(--z-dropdown) + 1);
+}
+
+.actions-dropdown__trigger:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+}
+
+.actions-dropdown__trigger[aria-expanded="true"] {
+  background-color: var(--bg-muted);
+  color: var(--color-primary);
+}
+
+/* ===== BACKDROP ===== */
+.actions-dropdown__backdrop {
+  /* Layout */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  
+  /* Visual */
+  background: transparent;
+  
+  /* Z-index del sistema */
+  z-index: calc(var(--z-dropdown) - 1);
+  
+  /* Cursor */
+  cursor: default;
+}
+
+/* ===== MENU DESPLEGABLE ===== */
+.actions-dropdown__menu {
+  /* Layout */
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  min-width: 16rem;
+  max-width: 24rem;
+  
+  /* Visual usando variables del sistema */
+  background: var(--bg-primary);
+  border: 0.1rem solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  
+  /* Espaciado del sistema */
+  padding: var(--space-xs);
+  
+  /* Z-index MÁS ALTO para estar por encima de TODO */
+  z-index: calc(var(--z-dropdown) + 2);
+  
+  /* Animación */
+  animation: actions-dropdown-appear var(--transition-fast) ease-out;
+  transform-origin: top;
+  
+  /* Scrolling para menús largos */
+  max-height: 32rem;
+  overflow-y: auto;
+  
+  /* Mejorar scroll en iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ===== POSICIONAMIENTO DEL MENU ===== */
+
+/* Bottom Right (por defecto) */
+.actions-dropdown__menu--bottom-right {
+  top: calc(100% + var(--space-xs));
+  right: 0;
+  transform-origin: top right;
+  
+  /* CORRECCIÓN: Asegurar que no se corte */
+  max-height: calc(100vh - 100% - var(--space-lg));
+  overflow-y: auto;
+}
+
+/* Bottom Left */
+.actions-dropdown__menu--bottom-left {
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  transform-origin: top left;
+  
+  /* CORRECCIÓN: Asegurar que no se corte */
+  max-height: calc(100vh - 100% - var(--space-lg));
+  overflow-y: auto;
+}
+
+/* Top Right */
+.actions-dropdown__menu--top-right {
+  bottom: calc(100% + var(--space-xs));
+  right: 0;
+  transform-origin: bottom right;
+  
+  /* CORRECCIÓN: Asegurar que no se corte hacia arriba */
+  max-height: calc(100vh - 100% - var(--space-lg));
+  overflow-y: auto;
+}
+
+/* Top Left */
+.actions-dropdown__menu--top-left {
+  bottom: calc(100% + var(--space-xs));
+  left: 0;
+  transform-origin: bottom left;
+  
+  /* CORRECCIÓN: Asegurar que no se corte hacia arriba */
+  max-height: calc(100vh - 100% - var(--space-lg));
+  overflow-y: auto;
+}
+
+/* ===== ITEMS DEL MENU ===== */
+.actions-dropdown__item {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  
+  /* Visual */
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  
+  /* Tipografía del sistema */
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  text-align: left;
+  line-height: var(--line-height-normal);
+  
+  /* Interacción */
+  cursor: pointer;
+  user-select: none;
+  
+  /* Transiciones del sistema */
+  transition: all var(--transition-fast);
+  
+  /* Estados de focus/hover */
+  outline: none;
+}
+
+/* Estados del item */
+.actions-dropdown__item:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.actions-dropdown__item:focus {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  outline: 0.2rem solid var(--color-primary);
+  outline-offset: -0.2rem;
+}
+
+.actions-dropdown__item:active:not(:disabled) {
+  background-color: var(--bg-muted);
+  transform: translateY(0.1rem);
+}
+
+/* ===== VARIANTE DANGER ===== */
+.actions-dropdown__item--danger {
+  color: var(--color-danger);
+}
+
+.actions-dropdown__item--danger:hover:not(:disabled) {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.actions-dropdown__item--danger:focus {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+  outline-color: var(--color-danger);
+}
+
+/* ===== ESTADO DISABLED ===== */
+.actions-dropdown__item--disabled,
+.actions-dropdown__item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ===== ELEMENTOS INTERNOS DEL ITEM ===== */
+
+/* Ícono */
+.actions-dropdown__icon {
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  /* Tamaño */
+  width: 1.6rem;
+  height: 1.6rem;
+  
+  /* Tipografía */
+  font-size: var(--font-size-sm);
+  line-height: 1;
+}
+
+/* Label */
+.actions-dropdown__label {
+  /* Layout */
+  flex: 1;
+  min-width: 0;
+  
+  /* Texto */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Shortcut/Atajo de teclado */
+.actions-dropdown__shortcut {
+  /* Layout */
+  flex-shrink: 0;
+  
+  /* Visual */
+  background-color: var(--bg-muted);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.4rem;
+  
+  /* Tipografía */
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-muted);
+  font-family: var(--font-family-mono);
+  line-height: 1;
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes actions-dropdown-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ===== CORRECCIÓN PARA CONTEXTOS ESPECÍFICOS ===== */
+
+/* Asegurar que dentro de tablas funcione correctamente */
+.data-table .actions-dropdown__menu,
+table .actions-dropdown__menu,
+.users-list__table .actions-dropdown__menu {
+  /* CORRECCIÓN: Usar position fixed para evitar cortes en contenedores con overflow */
+  position: fixed;
+  z-index: var(--z-popover); /* Z-index más alto para estar por encima de todo */
+}
+
+/* Corrección específica para contenedores con overflow */
+.table-container .actions-dropdown__menu,
+.overflow-hidden .actions-dropdown__menu,
+.overflow-auto .actions-dropdown__menu {
+  position: fixed;
+  z-index: var(--z-popover);
+}
+
+/* IMPORTANTE: Para position fixed necesitamos calcular la posición con JS */
+/* o usar una clase específica para casos problemáticos */
+.actions-dropdown--fixed .actions-dropdown__menu {
+  position: fixed;
+  z-index: var(--z-popover);
+}
+
+/* Asegurar visibilidad completa del menú */
+.actions-dropdown__menu {
+  /* CORRECCIÓN: Asegurar que el menú sea completamente visible */
+  min-height: fit-content;
+  width: max-content;
+  min-width: 16rem;
+  
+  /* Evitar que se corte por los bordes de la pantalla */
+  max-width: calc(100vw - 2rem);
+}
+
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablets y móviles */
+@media (max-width: 768px) {
+  .actions-dropdown__menu {
+    /* En móviles, menús más anchos */
+    min-width: 20rem;
+    max-width: calc(100vw - 3.2rem);
+    
+    /* Padding aumentado para touch */
+    padding: var(--space-sm);
+  }
+  
+  .actions-dropdown__item {
+    /* Área táctil más grande */
+    padding: var(--space-md) var(--space-lg);
+    
+    /* Texto más grande */
+    font-size: var(--font-size-base);
+  }
+  
+  .actions-dropdown__icon {
+    width: 2rem;
+    height: 2rem;
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+  .actions-dropdown__menu {
+    /* En móviles pequeños, centrar más */
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
+  }
+  
+  .actions-dropdown__menu--bottom-right,
+  .actions-dropdown__menu--bottom-left {
+    transform-origin: top center;
+  }
+  
+  .actions-dropdown__menu--top-right,
+  .actions-dropdown__menu--top-left {
+    transform-origin: bottom center;
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+@media (prefers-color-scheme: dark) {
+  .actions-dropdown__menu {
+    background: var(--bg-primary);
+    border-color: var(--border-default);
+    box-shadow: var(--shadow-lg), 0 0 0 0.1rem rgba(255, 255, 255, 0.05);
+  }
+  
+  .actions-dropdown__shortcut {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+  }
+}
+
+/* Forzar modo oscuro con clase */
+.dark .actions-dropdown__menu {
+  background: var(--bg-primary);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-lg), 0 0 0 0.1rem rgba(255, 255, 255, 0.05);
+}
+
+.dark .actions-dropdown__shortcut {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  .actions-dropdown__menu {
+    animation: none;
+  }
+  
+  .actions-dropdown__item {
+    transition: none;
+  }
+  
+  .actions-dropdown__item:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ===== HIGH CONTRAST ===== */
+@media (prefers-contrast: high) {
+  .actions-dropdown__menu {
+    border-width: 0.2rem;
+    border-color: var(--text-primary);
+  }
+  
+  .actions-dropdown__item:focus {
+    outline-width: 0.3rem;
+    outline-offset: -0.3rem;
+  }
+}

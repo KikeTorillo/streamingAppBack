@@ -1,0 +1,230 @@
+/* ===== ADMIN DASHBOARD STYLES ===== */
+/* src/Pages/Admin/AdminDashboard/AdminDashboard.css */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.admin-dashboard {
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+  
+  /* Espaciado */
+  padding: 0;
+  
+  /* Fuente */
+  font-family: var(--font-family-base);
+}
+
+/* ===== SECCIONES ===== */
+.admin-dashboard__section-title {
+  /* Reset */
+  margin: 0 0 var(--space-lg) 0;
+  
+  /* Tipografía */
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  line-height: var(--line-height-tight);
+}
+
+/* ===== ESTADÍSTICAS ===== */
+.admin-dashboard__stats {
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.admin-dashboard__stats-grid {
+  /* Grid responsivo */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(25rem, 1fr));
+  gap: var(--space-lg);
+  
+  /* Alineación */
+  align-items: stretch;
+}
+
+/* ===== ACCIONES RÁPIDAS ===== */
+.admin-dashboard__quick-actions {
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.admin-dashboard__actions-grid {
+  /* Grid de acciones */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: var(--space-md);
+}
+
+.admin-dashboard__action-button {
+  /* Altura uniforme */
+  min-height: 5.6rem;
+  
+  /* Justificar contenido */
+  justify-content: flex-start;
+  
+  /* Padding interno */
+  padding: var(--space-md) var(--space-lg);
+  
+  /* Transiciones */
+  transition: all var(--transition-normal);
+}
+
+.admin-dashboard__action-button:hover {
+  transform: translateY(-0.1rem);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet grande (1200px - 1399px) */
+@media (max-width: 1399px) {
+  .admin-dashboard__stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+    gap: var(--space-md);
+  }
+  
+  .admin-dashboard__actions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  }
+}
+
+/* Tablet (768px - 1199px) */
+@media (max-width: 1199px) {
+  .admin-dashboard {
+    gap: var(--space-xl);
+  }
+  
+  .admin-dashboard__stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  }
+  
+  .admin-dashboard__actions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: var(--space-sm);
+  }
+  
+  .admin-dashboard__action-button {
+    min-height: 5rem;
+    padding: var(--space-sm) var(--space-md);
+  }
+  
+  .admin-dashboard__section-title {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Mobile grande (480px - 767px) */
+@media (max-width: 767px) {
+  .admin-dashboard {
+    gap: var(--space-lg);
+  }
+  
+  .admin-dashboard__stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: var(--space-md);
+  }
+  
+  .admin-dashboard__actions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  }
+  
+  .admin-dashboard__section-title {
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* Mobile pequeño (hasta 479px) */
+@media (max-width: 479px) {
+  .admin-dashboard {
+    gap: var(--space-md);
+  }
+  
+  .admin-dashboard__stats-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+  }
+  
+  .admin-dashboard__actions-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+  }
+  
+  .admin-dashboard__action-button {
+    min-height: 4.8rem;
+  }
+}
+
+/* ===== ESTADOS ESPECIALES ===== */
+
+/* Loading state para todo el dashboard */
+.admin-dashboard--loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Error state */
+.admin-dashboard--error .admin-dashboard__stats-grid {
+  opacity: 0.5;
+}
+
+/* ===== ACCESIBILIDAD ===== */
+
+/* Reducir animaciones si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+  .admin-dashboard__action-button {
+    transition: none;
+  }
+  
+  .admin-dashboard__action-button:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .admin-dashboard__section-title {
+    font-weight: var(--font-weight-bold);
+  }
+  
+  .admin-dashboard__action-button {
+    border-width: 0.2rem;
+  }
+}
+
+/* ===== FOCUS MANAGEMENT ===== */
+
+/* Skip links para navegación por teclado */
+.admin-dashboard__skip-link {
+  position: absolute;
+  top: -4rem;
+  left: var(--space-md);
+  background-color: var(--color-primary);
+  color: var(--text-on-primary);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  z-index: 1000;
+  transition: top var(--transition-fast);
+}
+
+.admin-dashboard__skip-link:focus {
+  top: var(--space-md);
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .admin-dashboard__quick-actions {
+    display: none;
+  }
+  
+  .admin-dashboard__stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+  }
+}

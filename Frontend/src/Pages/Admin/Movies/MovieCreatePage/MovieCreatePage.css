@@ -1,0 +1,44 @@
+/* ===== MOVIECREATEPAGE.CSS - SISTEMA DE DISEÑO PURO ===== */
+/* src/Pages/Admin/Movies/MovieCreatePage/MovieCreatePage.css */
+
+/* 
+✅ SISTEMA PURO: Solo estilos específicos de MovieCreatePage
+✅ RESPETO TOTAL: Container maneja su propio layout completamente
+✅ VARIABLES: Solo variables CSS del sistema de diseño
+✅ FILOSOFÍA: El Container se comporta como debe, sin ajustes
+*/
+
+/* ===== ESTADOS ESPECÍFICOS DE LA PÁGINA ===== */
+
+/* Estado de carga aplicado al Container */
+.movie-create--loading {
+  pointer-events: none;
+  opacity: 0.8;
+  transition: opacity var(--transition-normal);
+}
+
+/* Barra de progreso flotante */
+.movie-create-page__progress {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-xl);
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+}
+
+/* ===== ACCESIBILIDAD ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  .movie-create--loading {
+    transition: none;
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+
+@media print {
+  .movie-create--loading {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

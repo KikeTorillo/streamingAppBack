@@ -1,0 +1,183 @@
+/* ===== OPCIÓN 3: WIDTH POR DEFECTO + MAX-WIDTH (RECOMENDADA) ===== */
+/* El mejor balance: consistencia visual + flexibilidad cuando se necesita */
+
+.container-xs {
+  width: 48rem;       /* ✅ Ancho por defecto consistente */
+  max-width: 48rem;   /* ✅ Límite máximo */
+  margin: 0 auto;
+  padding: var(--space-lg);
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 0.1rem solid var(--border-light);
+  font-family: var(--font-family-base);
+}
+
+.container-sm {
+  width: 64rem;       /* ✅ Ancho por defecto consistente */
+  max-width: 64rem;   /* ✅ Límite máximo */
+  margin: 0 auto;
+  padding: var(--space-xl);
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 0.1rem solid var(--border-light);
+  font-family: var(--font-family-base);
+}
+
+.container-md {
+  width: 80rem;       /* ✅ Ancho por defecto consistente */
+  max-width: 80rem;   /* ✅ Límite máximo */
+  margin: 0 auto;
+  padding: var(--space-xl);
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 0.1rem solid var(--border-light);
+  font-family: var(--font-family-base);
+}
+
+.container-lg {
+  width: 120rem;      /* ✅ Ancho por defecto consistente */
+  max-width: 120rem;  /* ✅ Límite máximo */
+  margin: 0 auto;
+  padding: var(--space-xl);
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 0.1rem solid var(--border-light);
+  font-family: var(--font-family-base);
+}
+
+.container-xl {
+  width: 144rem;      /* ✅ Ancho por defecto consistente */
+  max-width: 144rem;  /* ✅ Límite máximo */
+  margin: 0 auto;
+  padding: var(--space-xl);
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 0.1rem solid var(--border-light);
+  font-family: var(--font-family-base);
+}
+
+.container-full {
+  width: 100%;        /* ✅ Siempre 100% */
+  max-width: none;    /* ✅ Sin límite */
+  margin: 0;
+  padding: var(--space-xl);
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 0.1rem solid var(--border-light);
+  font-family: var(--font-family-base);
+}
+
+/* ===== VARIANTE FLEXIBLE PARA CASOS ESPECIALES ===== */
+/* Si necesitas que el contenido pueda ser más pequeño que el default */
+
+.container-xs--flexible {
+  width: auto;        /* ✅ Se ajusta al contenido */
+  max-width: 48rem;   /* ✅ Pero no pasa del límite */
+  min-width: 24rem;   /* ✅ Mínimo razonable */
+}
+
+.container-sm--flexible {
+  width: auto;
+  max-width: 64rem;
+  min-width: 32rem;
+}
+
+.container-md--flexible {
+  width: auto;
+  max-width: 80rem;
+  min-width: 48rem;
+}
+
+.container-lg--flexible {
+  width: auto;
+  max-width: 120rem;
+  min-width: 64rem;
+}
+
+.container-xl--flexible {
+  width: auto;
+  max-width: 144rem;
+  min-width: 80rem;
+}
+
+/* ===== RESPONSIVE: Mantener proporciones en pantallas pequeñas ===== */
+@media (max-width: 1440px) {
+  .container-xl { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+}
+
+@media (max-width: 1200px) {
+  .container-lg { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+  .container-xl { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+}
+
+@media (max-width: 800px) {
+  .container-md { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+  .container-lg { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+  .container-xl { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .container-sm { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+  .container-md { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+  .container-lg { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+  .container-xl { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .container-xs { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+  .container-sm { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+  .container-md { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+  .container-lg { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+  .container-xl { 
+    width: calc(100vw - 4rem); 
+    max-width: calc(100vw - 4rem);
+  }
+}

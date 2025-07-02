@@ -1,0 +1,407 @@
+/* ===== SELECT COMPONENT - HOMOLOGADO CON INPUT USANDO VARIABLES CENTRALIZADAS ===== */
+/* Select.css - Corregido para usar las mismas variables que Input.css */
+
+/* ===== WRAPPER BASE ===== */
+.select-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    font-family: var(--font-family-base);
+}
+
+/* ===== SELECT BASE - IDÉNTICO A INPUT-BASE ===== */
+.select-base {
+    display: block;
+    width: 100%;
+    position: relative;
+    font-family: var(--font-family-base);
+    font-weight: var(--font-weight-normal);
+    color: var(--text-primary);
+    border: 0.1rem solid var(--border-default);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-primary);
+    transition: all var(--transition-normal);
+    outline: none;
+    appearance: none;
+    box-sizing: border-box;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+
+    /* Comportamiento */
+    cursor: pointer;
+    line-height: var(--line-height-normal);
+
+    /* Flecha personalizada del select */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right var(--space-md) center;
+    background-repeat: no-repeat;
+    background-size: 1.5rem 1.5rem;
+}
+
+/* ===== TAMAÑOS - USANDO VARIABLES CENTRALIZADAS IDÉNTICAS A INPUT ===== */
+.select-base--xs {
+    padding: var(--component-padding-xs);
+    font-size: var(--component-font-xs);
+    min-height: var(--component-height-xs);
+    line-height: var(--line-height-tight);
+}
+
+.select-base--sm {
+    padding: var(--component-padding-sm);
+    font-size: var(--component-font-sm);
+    min-height: var(--component-height-sm);
+    line-height: var(--line-height-tight);
+}
+
+.select-base--md {
+    padding: var(--component-padding-md);
+    font-size: var(--component-font-md);
+    min-height: var(--component-height-md);
+    line-height: var(--line-height-normal);
+}
+
+/* 🔧 CORRECCIÓN PRINCIPAL: LG ahora usa las mismas variables que Input */
+.select-base--lg {
+    padding: var(--component-padding-lg);        
+  font-size: var(--component-font-lg);         
+  min-height: var(--component-height-lg);      
+  line-height: var(--lint-normal);
+}
+
+.select-base--xl {
+    padding: var(--component-padding-xl);       
+  font-size: var(--component-font-xl);        
+  min-height: var(--component-height-xl);     
+  line-height: var(--line-height-normal);
+}
+
+/* ===== RADIO DE BORDES - IDÉNTICO A INPUT ===== */
+.select-base--rounded-sm {
+    border-radius: var(--radius-sm);
+}
+
+.select-base--rounded-md {
+    border-radius: var(--radius-md);
+}
+
+.select-base--rounded-lg {
+    border-radius: var(--radius-lg);
+}
+
+.select-base--rounded-xl {
+    border-radius: var(--radius-xl);
+}
+
+.select-base--rounded-full {
+    border-radius: var(--radius-full);
+}
+
+/* ===== ESTADOS INTERACTIVOS - IDÉNTICOS A INPUT ===== */
+.select-base:hover:not(:disabled):not(:focus) {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+.select-base:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 0.3rem rgba(59, 130, 246, 0.1);
+    outline: 0.2rem solid var(--border-focus);
+    outline-offset: 0.2rem;
+    z-index: 1;
+}
+
+.select-base:disabled {
+    background-color: var(--bg-disabled);
+    color: var(--text-disabled);
+    cursor: not-allowed;
+    border-color: var(--border-default);
+    opacity: 0.6;
+}
+
+/* ===== VARIANTES SEMÁNTICAS - IDÉNTICAS A INPUT ===== */
+
+/* Default */
+.select-base--default {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-color: var(--border-default);
+}
+
+/* Error */
+.select-base--error {
+    border-color: var(--color-danger);
+    background-color: var(--color-danger-light);
+}
+
+.select-base--error:focus {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 0.3rem rgba(239, 68, 68, 0.1);
+    outline-color: var(--color-danger);
+}
+
+.select-base--error:hover:not(:disabled):not(:focus) {
+    border-color: var(--color-danger-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Success */
+.select-base--success {
+    border-color: var(--color-success);
+    background-color: var(--color-success-light);
+}
+
+.select-base--success:focus {
+    border-color: var(--color-success);
+    box-shadow: 0 0 0 0.3rem rgba(34, 197, 94, 0.1);
+    outline-color: var(--color-success);
+}
+
+.select-base--success:hover:not(:disabled):not(:focus) {
+    border-color: var(--color-success-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Warning */
+.select-base--warning {
+    border-color: var(--color-warning);
+    background-color: var(--color-warning-light);
+}
+
+.select-base--warning:focus {
+    border-color: var(--color-warning);
+    box-shadow: 0 0 0 0.3rem rgba(245, 158, 11, 0.1);
+    outline-color: var(--color-warning);
+}
+
+.select-base--warning:hover:not(:disabled):not(:focus) {
+    border-color: var(--color-warning-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ===== FLECHA DEL SELECT ===== */
+.select-base__arrow {
+    position: absolute;
+    right: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    transition: color var(--transition-normal);
+}
+
+/* Estados de la flecha */
+.select-base:focus+.select-base__arrow {
+    color: var(--border-focus);
+}
+
+.select-base:disabled+.select-base__arrow {
+    color: var(--text-disabled);
+}
+
+/* ===== OPCIONES DEL SELECT ===== */
+.select-base option {
+    padding: var(--space-sm) var(--space-md);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    font-size: inherit;
+    line-height: var(--line-height-normal);
+}
+
+.select-base option:hover {
+    background-color: var(--bg-secondary);
+}
+
+.select-base option:selected {
+    background-color: var(--color-primary);
+    color: var(--text-on-primary);
+}
+
+.select-base option:disabled {
+    color: var(--text-disabled);
+    background-color: var(--bg-disabled);
+    font-style: italic;
+}
+
+/* ===== GRUPOS DE OPCIONES ===== */
+.select-base optgroup {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    font-style: normal;
+    padding: var(--space-xs) 0;
+    background-color: var(--bg-tertiary);
+}
+
+.select-base optgroup option {
+    font-weight: var(--font-weight-normal);
+    padding-left: var(--space-lg);
+    background-color: var(--bg-primary);
+}
+
+/* ===== RESPONSIVE - ÁREA TÁCTIL MÓVIL ===== */
+@media (max-width: 768px) {
+
+    /* Asegurar área táctil mínima en móviles (igual que Input) */
+    .select-base--xs,
+    .select-base--sm {
+        min-height: var(--touch-target-min);
+        /* 44px mínimo */
+        padding: var(--space-sm) calc(var(--space-md) + 2.4rem) var(--space-sm) var(--space-md);
+    }
+
+    /* Los tamaños grandes mantienen altura pero ajustan padding */
+    .select-base--lg {
+        padding: var(--space-sm) calc(var(--space-md) + 2.4rem) var(--space-sm) var(--space-md);
+        font-size: var(--font-size-base);
+        min-height: var(--component-height-lg);
+        /* Mantener 56px */
+    }
+
+    .select-base--xl {
+        padding: var(--space-md) calc(var(--space-lg) + 2.4rem) var(--space-md) var(--space-lg);
+        font-size: var(--font-size-lg);
+        min-height: var(--component-height-xl);
+        /* Mantener 56px */
+    }
+
+    /* Ajustar flecha en móviles */
+    .select-base__arrow {
+        right: var(--space-sm);
+    }
+}
+
+@media (max-width: 480px) {
+
+    /* En móviles muy pequeños, optimizar para usabilidad */
+    .select-base--lg,
+    .select-base--xl {
+        padding: var(--space-sm) calc(var(--space-md) + 2.4rem) var(--space-sm) var(--space-md);
+        font-size: var(--font-size-base);
+        /* Mantener altura estándar para consistencia */
+        min-height: var(--component-height-lg);
+    }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+@media (prefers-reduced-motion: reduce) {
+
+    .select-base,
+    .select-base__arrow {
+        transition: none;
+    }
+}
+
+@media (prefers-contrast: high) {
+    .select-base {
+        border-width: 0.2rem;
+    }
+
+    .select-base:focus {
+        outline-width: 0.3rem;
+    }
+}
+
+/* ===== MODO OSCURO ===== */
+.dark .select-base {
+    background-color: var(--bg-primary);
+    border-color: var(--border-default);
+    color: var(--text-primary);
+}
+
+.dark .select-base:disabled {
+    background-color: var(--bg-disabled);
+    color: var(--text-disabled);
+    border-color: var(--border-default);
+}
+
+.dark .select-base:focus {
+    box-shadow: 0 0 0 0.3rem rgba(96, 165, 250, 0.1);
+}
+
+.dark .select-base option {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.dark .select-base option:selected {
+    background-color: var(--color-primary);
+    color: var(--text-on-primary);
+}
+
+/* Soporte para prefers-color-scheme */
+@media (prefers-color-scheme: dark) {
+    .select-base:focus {
+        box-shadow: 0 0 0 0.3rem rgba(96, 165, 250, 0.1);
+    }
+}
+
+/* ===== MEJORAS ESPECÍFICAS POR NAVEGADOR ===== */
+
+/* Firefox */
+@-moz-document url-prefix() {
+    .select-base {
+        background-image: none;
+    }
+
+    /* Agregar flecha manual para Firefox si es necesario */
+    .select-base::after {
+        content: '▼';
+        position: absolute;
+        right: var(--space-md);
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: var(--text-secondary);
+    }
+}
+
+/* Safari específico */
+@media not all and (min-resolution:.001dpcm) {
+    @supports (-webkit-appearance:none) {
+        .select-base:focus {
+            outline-offset: 0;
+        }
+    }
+}
+
+/* Edge específico */
+@supports (-ms-ime-align:auto) {
+    .select-base::-ms-expand {
+        display: none;
+    }
+}
+
+/* ===== HERRAMIENTAS DE DEBUGGING ===== */
+/* Solo activo cuando se agrega clase .debug-heights al body */
+.debug-heights .select-base {
+    outline: 2px dashed orange !important;
+    outline-offset: -2px;
+}
+
+.debug-heights .select-base::after {
+    content: 'Select: ' attr(class);
+    position: absolute;
+    top: -2rem;
+    left: 0;
+    background: orange;
+    color: white;
+    font-size: 1rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.2rem;
+    z-index: 1000;
+    white-space: nowrap;
+    font-family: monospace;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .select-base {
+        border: 0.1rem solid #000;
+        box-shadow: none;
+        background-image: none;
+    }
+
+    .select-base__arrow {
+        display: none;
+    }
+}

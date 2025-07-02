@@ -1,0 +1,621 @@
+/* ===== BADGE COMPONENT - ÁTOMO DEL SISTEMA DE DISEÑO ===== */
+/* Badge.css */
+
+/* Clase base del badge - Usando variables del sistema */
+.badge {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  
+  /* Tipografía - Usando variables del sistema */
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  
+  /* Interacción */
+  user-select: none;
+  
+  /* Transiciones - Usando variables del sistema */
+  transition: all var(--transition-normal);
+  
+  /* Bordes - Usando variables del sistema */
+  border-radius: var(--radius-full);
+  border: 0.1rem solid transparent;
+  
+  /* Eliminar estilos por defecto */
+  box-sizing: border-box;
+  
+  /* Mejorar accesibilidad táctil */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Contenido principal */
+.badge__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  position: relative;
+  z-index: 1;
+}
+
+/* TAMAÑOS - Usando variables del sistema de espaciado */
+.badge--xs {
+  padding: 0.2rem var(--space-xs);
+  font-size: var(--font-size-xs);
+  min-height: 1.6rem;
+  gap: 0.2rem;
+}
+
+.badge--sm {
+  padding: 0.2rem var(--space-sm);
+  font-size: var(--font-size-xs);
+  min-height: 2.0rem;
+  gap: var(--space-xs);
+}
+
+.badge--md {
+  padding: 0.4rem var(--space-sm);
+  font-size: var(--font-size-sm);
+  min-height: 2.4rem;
+  gap: var(--space-xs);
+}
+
+.badge--lg {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-base);
+  min-height: 3.2rem;
+  gap: var(--space-sm);
+}
+
+.badge--xl {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-lg);
+  min-height: 4.0rem;
+  gap: var(--space-sm);
+}
+
+/* VARIANTES DE COLOR - Estilo SOLID */
+.badge--primary.badge--solid {
+  background-color: var(--color-primary);
+  color: var(--text-on-primary);
+  border-color: var(--color-primary);
+}
+
+.badge--secondary.badge--solid {
+  background-color: var(--color-secondary);
+  color: var(--text-on-primary);
+  border-color: var(--color-secondary);
+}
+
+.badge--success.badge--solid {
+  background-color: var(--color-success);
+  color: var(--text-on-primary);
+  border-color: var(--color-success);
+}
+
+.badge--warning.badge--solid {
+  background-color: var(--color-warning);
+  color: var(--text-on-primary);
+  border-color: var(--color-warning);
+}
+
+.badge--danger.badge--solid {
+  background-color: var(--color-danger);
+  color: var(--text-on-primary);
+  border-color: var(--color-danger);
+}
+
+.badge--info.badge--solid {
+  background-color: var(--blue-500);
+  color: var(--text-on-primary);
+  border-color: var(--blue-500);
+}
+
+.badge--neutral.badge--solid {
+  background-color: var(--gray-500);
+  color: var(--text-on-primary);
+  border-color: var(--gray-500);
+}
+
+/* VARIANTES DE COLOR - Estilo SOFT */
+.badge--primary.badge--soft {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border-color: transparent;
+}
+
+.badge--secondary.badge--soft {
+  background-color: var(--color-secondary-light);
+  color: var(--color-secondary);
+  border-color: transparent;
+}
+
+.badge--success.badge--soft {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+  border-color: transparent;
+}
+
+.badge--warning.badge--soft {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+  border-color: transparent;
+}
+
+.badge--danger.badge--soft {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+  border-color: transparent;
+}
+
+.badge--info.badge--soft {
+  background-color: var(--blue-100);
+  color: var(--blue-700);
+  border-color: transparent;
+}
+
+.badge--neutral.badge--soft {
+  background-color: var(--gray-100);
+  color: var(--gray-700);
+  border-color: transparent;
+}
+
+/* VARIANTES DE COLOR - Estilo OUTLINE */
+.badge--primary.badge--outline {
+  background-color: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.badge--secondary.badge--outline {
+  background-color: transparent;
+  color: var(--color-secondary);
+  border-color: var(--color-secondary);
+}
+
+.badge--success.badge--outline {
+  background-color: transparent;
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.badge--warning.badge--outline {
+  background-color: transparent;
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+}
+
+.badge--danger.badge--outline {
+  background-color: transparent;
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.badge--info.badge--outline {
+  background-color: transparent;
+  color: var(--blue-500);
+  border-color: var(--blue-500);
+}
+
+.badge--neutral.badge--outline {
+  background-color: transparent;
+  color: var(--gray-500);
+  border-color: var(--gray-500);
+}
+
+/* VARIANTES DE COLOR - Estilo DOT */
+.badge--dot {
+  padding: 0.6rem;
+  min-width: 0.8rem;
+  min-height: 0.8rem;
+  border-radius: var(--radius-full);
+}
+
+.badge--dot-only {
+  padding: 0;
+  width: 0.8rem;
+  height: 0.8rem;
+  min-width: 0.8rem;
+  min-height: 0.8rem;
+}
+
+.badge--primary.badge--dot {
+  background-color: var(--color-primary);
+}
+
+.badge--secondary.badge--dot {
+  background-color: var(--color-secondary);
+}
+
+.badge--success.badge--dot {
+  background-color: var(--color-success);
+}
+
+.badge--warning.badge--dot {
+  background-color: var(--color-warning);
+}
+
+.badge--danger.badge--dot {
+  background-color: var(--color-danger);
+}
+
+.badge--info.badge--dot {
+  background-color: var(--blue-500);
+}
+
+.badge--neutral.badge--dot {
+  background-color: var(--gray-500);
+}
+
+/* BORDER RADIUS - Usando variables del sistema */
+.badge--rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+.badge--rounded-md {
+  border-radius: var(--radius-md);
+}
+
+.badge--rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.badge--rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+/* ESTADOS INTERACTIVOS */
+.badge--clickable {
+  cursor: pointer;
+}
+
+.badge--clickable:hover {
+  transform: translateY(-0.1rem);
+  box-shadow: var(--shadow-md);
+}
+
+.badge--clickable:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.badge--clickable:focus-visible {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+  z-index: 1;
+}
+
+/* Hover effects específicos por estilo */
+.badge--clickable.badge--solid:hover {
+  opacity: 0.9;
+}
+
+.badge--clickable.badge--outline:hover {
+  background-color: var(--bg-hover);
+}
+
+.badge--clickable.badge--soft:hover {
+  opacity: 0.8;
+}
+
+/* ESTADO DISABLED */
+.badge--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ESTADO LOADING */
+.badge--loading {
+  color: transparent;
+  pointer-events: none;
+}
+
+/* SPINNER DE LOADING */
+.badge__spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.badge__spinner-svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  animation: badge-spin 1s linear infinite;
+}
+
+.badge__spinner-circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  animation: badge-spinner-dash 1.5s ease-in-out infinite;
+}
+
+/* ICONOS */
+.badge__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.badge__icon--left {
+  margin-right: 0;
+}
+
+.badge__icon--right {
+  margin-left: 0;
+}
+
+/* Ajustar tamaño de iconos por tamaño de badge */
+.badge--xs .badge__icon {
+  font-size: 1.0rem;
+}
+
+.badge--sm .badge__icon {
+  font-size: 1.2rem;
+}
+
+.badge--md .badge__icon {
+  font-size: 1.4rem;
+}
+
+.badge--lg .badge__icon {
+  font-size: 1.6rem;
+}
+
+.badge--xl .badge__icon {
+  font-size: 1.8rem;
+}
+
+/* TEXTO */
+.badge__text {
+  line-height: 1;
+}
+
+.badge--uppercase .badge__text {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* BOTÓN DE REMOVER */
+.badge__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: var(--space-xs);
+  padding: 0.2rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.badge__remove:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.badge__remove:active {
+  transform: scale(0.9);
+}
+
+.badge__remove:focus-visible {
+  outline: 0.1rem solid currentColor;
+  outline-offset: 0.1rem;
+}
+
+.badge__remove-icon {
+  width: 1.0rem;
+  height: 1.0rem;
+}
+
+/* Ajustar remove button por tamaño */
+.badge--xs .badge__remove-icon {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.badge--sm .badge__remove-icon {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.badge--lg .badge__remove-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.badge--xl .badge__remove-icon {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+/* ANIMACIÓN PULSE */
+.badge--pulse {
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* Animaciones de spinner */
+@keyframes badge-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes badge-spinner-dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+/* RESPONSIVE - Mejorado para área táctil */
+@media (max-width: 768px) {
+  /* Mejorar área táctil en móviles para badges clickeables */
+  .badge--clickable.badge--xs,
+  .badge--clickable.badge--sm {
+    min-height: 4.4rem;
+    padding: var(--space-sm) var(--space-md);
+  }
+  
+  /* Ajustar iconos en móvil */
+  .badge--xs .badge__icon,
+  .badge--sm .badge__icon {
+    font-size: 1.4rem;
+  }
+  
+  /* Mejorar botón de remover en móvil */
+  .badge__remove {
+    padding: var(--space-xs);
+    min-width: 2.4rem;
+    min-height: 2.4rem;
+  }
+}
+
+/* MODO OSCURO - Ajustes específicos */
+.dark .badge--soft {
+  /* Ajustar colores soft en modo oscuro */
+}
+
+.dark .badge--primary.badge--soft {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: var(--blue-300);
+}
+
+.dark .badge--secondary.badge--soft {
+  background-color: rgba(107, 114, 128, 0.2);
+  color: var(--gray-300);
+}
+
+.dark .badge--success.badge--soft {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: var(--green-300);
+}
+
+.dark .badge--warning.badge--soft {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: var(--yellow-300);
+}
+
+.dark .badge--danger.badge--soft {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: var(--red-300);
+}
+
+.dark .badge--info.badge--soft {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: var(--blue-300);
+}
+
+.dark .badge--neutral.badge--soft {
+  background-color: rgba(107, 114, 128, 0.2);
+  color: var(--gray-300);
+}
+
+/* Outline en modo oscuro */
+.dark .badge--outline {
+  background-color: transparent;
+}
+
+.dark .badge--clickable.badge--outline:hover {
+  background-color: var(--bg-hover);
+}
+
+/* VARIACIONES ESPECIALES */
+
+/* Badge con gradiente */
+.badge--gradient.badge--primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+}
+
+.badge--gradient.badge--success {
+  background: linear-gradient(135deg, var(--color-success), var(--color-success-hover));
+}
+
+.badge--gradient.badge--warning {
+  background: linear-gradient(135deg, var(--color-warning), var(--color-warning-hover));
+}
+
+.badge--gradient.badge--danger {
+  background: linear-gradient(135deg, var(--color-danger), var(--color-danger-hover));
+}
+
+/* Badge con sombra */
+.badge--shadow {
+  box-shadow: var(--shadow-sm);
+}
+
+.badge--shadow:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* UTILIDADES ADICIONALES */
+.badge--bordered {
+  border-width: 0.2rem;
+}
+
+.badge--no-wrap {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 12rem;
+}
+
+/* Performance optimization */
+.badge--clickable:hover {
+  will-change: transform, box-shadow;
+}
+
+.badge--clickable:not(:hover) {
+  will-change: auto;
+}
+
+/* Accesibilidad mejorada */
+.badge:focus-visible {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+  z-index: 1;
+}
+
+/* Estados para screen readers */
+.badge[aria-busy="true"] .badge__spinner {
+  display: flex;
+}

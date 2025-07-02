@@ -1,0 +1,135 @@
+/* ===== FILEINPUTFIELD COMPONENT - OPTIMIZADO SIN REDUNDANCIAS ===== */
+/* FileInputField.css - Solo estilos específicos de la molécula */
+/* Aprovecha COMPLETAMENTE el átomo FileInput actualizado con variables centralizadas */
+
+/* ===== WRAPPER BASE ===== */
+.file-input-field-wrapper {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-family: var(--font-family-base);
+    gap: var(--space-xs);
+}
+
+.file-input-field-wrapper--full-width {
+    width: 100%;
+}
+
+.file-input-field-wrapper--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* ===== LABEL (IDÉNTICO A TEXTINPUT Y TEXTSELECT) ===== */
+.file-input-field__label {
+     display: block;
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-tight);
+    margin: 0;
+    transition: color var(--transition-normal);
+}
+
+.file-input-field__label--required::after {
+    content: ' *';
+    color: var(--color-danger);
+    font-weight: var(--font-weight-bold);
+}
+
+/* Estados del label */
+.file-input-field-wrapper--focused .file-input-field__label {
+    color: var(--border-focus);
+}
+
+.file-input-field-wrapper--error .file-input-field__label {
+    color: var(--color-danger);
+}
+
+.file-input-field-wrapper--success .file-input-field__label {
+    color: var(--color-success);
+}
+
+.file-input-field-wrapper--warning .file-input-field__label {
+    color: var(--color-warning);
+}
+
+
+
+/* ===== FOOTER (IDÉNTICO A TEXTINPUT Y TEXTSELECT) ===== */
+.file-input-field__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-md);
+    min-height: 2rem;
+}
+
+/* ===== MENSAJES ===== */
+.file-input-field__helper-text {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: var(--line-height-normal);
+    margin: 0;
+    transition: color var(--transition-normal);
+}
+
+.file-input-field__error-text {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--color-danger);
+    line-height: var(--line-height-normal);
+    font-weight: var(--font-weight-medium);
+    margin: 0;
+    animation: slideInError 0.2s ease-out;
+}
+
+/* Animación sutil para errores (igual que TextInput) */
+@keyframes slideInError {
+    from {
+        opacity: 0;
+        transform: translateY(-0.4rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== VERSIÓN COMPACTA (ESPECÍFICA DE FILEINPUTFIELD) ===== */
+.file-input-field-wrapper--compact {
+    gap: calc(var(--space-xs) / 2);
+}
+
+.file-input-field-wrapper--compact .file-input-field__footer {
+    min-height: 1.6rem;
+    gap: var(--space-sm);
+}
+
+.file-input-field-wrapper--compact .file-input-field__helper-text,
+.file-input-field-wrapper--compact .file-input-field__error-text {
+    font-size: var(--font-size-xs);
+}
+
+/* ===== RESPONSIVE ESPECÍFICO SOLO PARA MENSAJES ===== */
+@media (max-width: 768px) {
+    /* Solo ajustes específicos del footer en móviles */
+    .file-input-field__footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-xs);
+    }
+}
+
+/* Accesibilidad específica solo para animaciones de la molécula */
+@media (prefers-reduced-motion: reduce) {
+    .file-input-field__error-text {
+        animation: none;
+    }
+    
+    .file-input-field__label,
+    .file-input-field__helper-text {
+        transition: none;
+    }
+}

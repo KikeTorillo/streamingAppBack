@@ -1,0 +1,70 @@
+/* VideoPlayer.css */
+/* Oculta el botón CC (captions) en dispositivos iOS */
+@supports (-webkit-touch-callout: none) {
+  .vjs-captions-button {
+    display: none !important;
+  }
+}
+
+/* Cambia el color principal del reproductor */
+.video-js .vjs-control-bar {
+  background-color: #333; /* Fondo oscuro */
+}
+
+/* Cambia el color de la barra de progreso */
+.video-js .vjs-play-progress {
+  background-color: #ff0000; /* Verde brillante */
+}
+
+/* Cambia el color del botón de reproducción */
+.video-js .vjs-big-play-button {
+  background-color: #ff0000; /* Rojo */
+  border-radius: 50%; /* Forma circular */
+  width: 3em; /* Ancho del círculo */
+  height: 3em; /* Altura del círculo */
+  top: calc(50% - .6em);
+}
+
+/* Aumenta el tamaño del símbolo de play */
+.video-js .vjs-big-play-button .vjs-icon-placeholder:before {
+  font-size: 4em; /* Ajusta el tamaño del ícono */
+  line-height: 1; /* Centra el ícono verticalmente */
+  top: .2em;
+}
+
+/* Cambia el color del indicador de tiempo actual */
+.video-js .vjs-current-time {
+  color: #ffffff; /* Blanco */
+}
+
+/* Cambia el color del indicador de duración total */
+.video-js .vjs-duration {
+  color: #cccccc; /* Gris claro */
+}
+
+/* Cambia el color del indicador de tiempo restante */
+.video-js .vjs-remaining-time {
+  color: #ff0000; /* Rojo */
+}
+
+/* Ejemplo de ajustes de controles según tamaño de pantalla */
+@media (max-width: 480px) {
+  /* Oculta algunos controles en pantallas pequeñas */
+  .vjs-progress-control {
+    display: none !important;
+  }
+
+  /*tiempo restante*/
+  .vjs-remaining-time {
+    display: none !important;
+  }
+
+  /*boton para cambiar resoluciones este esta ligado a el boton CC*/
+  .vjs-quality-selector {
+    display: none !important;
+  }
+
+  .vjs-audio-button {
+    display: none !important;
+  }
+}

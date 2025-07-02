@@ -139,9 +139,44 @@ services:
     restart: always
     depends_on:
       - postgres
+  
+  # ==========================================
+  # 🎨 FRONTEND - REACT + VITE + STORYBOOK
+  # ==========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile.frontend
+      args:
+        - NODE_ENV=${NODE_ENV:-development}
+    container_name: streaming-frontend
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - VITE_API_KEY=${VITE_API_KEY}
+      - VITE_BACKEND_URL=http://backend:3000
+      - VITE_CDN_URL=http://cdn:80
+      - VITE_MODE=${NODE_ENV:-development}
+    volumes:
+      # Hot reload para desarrollo
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/dist
+    networks:
+      - streaming-network
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+      - "6006:6006"  # Puerto para Storybook
+    restart: unless-stopped
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Servicio Backend Node.js
-  app:
+  backend:
     build:
       context: ./app
       dockerfile: dockerfile.appdev  # ✅ Nombre correcto del dockerfile

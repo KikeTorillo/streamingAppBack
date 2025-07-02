@@ -1,0 +1,310 @@
+/* ===== AVATAR COMPONENT - CORREGIDO PARA REGLAS DEL PROYECTO ===== */
+/* Avatar.css - Usando 5 tamaños estándar y 4 variantes de presentación */
+
+/* Clase base del avatar - Usando variables del sistema */
+.avatar {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  
+  /* Tipografía - Usando variables del sistema */
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-semibold);
+  
+  /* Interacción */
+  user-select: none;
+  
+  /* Transiciones - Usando variables del sistema */
+  transition: all var(--transition-normal);
+  
+  /* Eliminar estilos por defecto */
+  overflow: hidden;
+  box-sizing: border-box;
+  
+  /* Mejorar accesibilidad táctil */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Contenedor principal */
+.avatar__container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--bg-secondary);
+  border: 0.1rem solid var(--border-default);
+  transition: inherit;
+}
+
+/* TAMAÑOS - 5 TAMAÑOS ESTÁNDAR DEL SISTEMA */
+.avatar--xs {
+  width: 2.4rem;   /* 24px */
+  height: 2.4rem;
+  font-size: var(--font-size-xs);
+}
+
+.avatar--sm {
+  width: 3.2rem;   /* 32px */
+  height: 3.2rem;
+  font-size: var(--font-size-sm);
+}
+
+.avatar--md {
+  width: 4.0rem;   /* 40px */
+  height: 4.0rem;
+  font-size: var(--font-size-base);
+}
+
+.avatar--lg {
+  width: 4.8rem;   /* 48px */
+  height: 4.8rem;
+  font-size: var(--font-size-lg);
+}
+
+.avatar--xl {
+  width: 6.4rem;   /* 64px */
+  height: 6.4rem;
+  font-size: var(--font-size-xl);
+}
+
+/* VARIANTES DE PRESENTACIÓN - 4 VARIANTES APROPIADAS PARA CONTENIDO */
+
+/* Default */
+.avatar--default .avatar__container {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-default);
+  box-shadow: none;
+}
+
+/* Elevated */
+.avatar--elevated .avatar__container {
+  background-color: var(--bg-primary);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-md);
+}
+
+/* Bordered */
+.avatar--bordered .avatar__container {
+  background-color: var(--bg-primary);
+  border: 0.2rem solid var(--border-focus);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Minimal */
+.avatar--minimal .avatar__container {
+  background-color: var(--bg-muted);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* FORMAS DEL AVATAR */
+.avatar--circle .avatar__container {
+  border-radius: var(--radius-full);
+}
+
+.avatar--rounded .avatar__container {
+  border-radius: var(--radius-lg);
+}
+
+.avatar--square .avatar__container {
+  border-radius: var(--radius-md);
+}
+
+/* IMAGEN DEL AVATAR */
+.avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: all var(--transition-normal);
+}
+
+/* FALLBACK - INICIALES O ICONO */
+.avatar__fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-on-primary);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+}
+
+/* ESTADOS INTERACTIVOS */
+.avatar--clickable {
+  cursor: pointer;
+}
+
+.avatar--clickable:hover .avatar__container {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-hover);
+}
+
+.avatar--clickable:active .avatar__container {
+  transform: scale(0.95);
+  box-shadow: var(--shadow-sm);
+}
+
+.avatar--clickable:focus-visible {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+  z-index: 1;
+}
+
+/* ESTADO DE LOADING */
+.avatar--loading .avatar__container {
+  opacity: 0.7;
+}
+
+.avatar__loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.avatar__spinner-svg {
+  width: 50%;
+  height: 50%;
+  animation: avatar-spin 1s linear infinite;
+}
+
+.avatar__spinner-circle {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 31.416;
+  stroke-dashoffset: 31.416;
+  animation: avatar-spinner-dash 2s ease-in-out infinite;
+}
+
+/* ESTADO DISABLED */
+.avatar--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.avatar--disabled .avatar__container {
+  filter: grayscale(100%);
+}
+
+/* INDICADOR DE ESTADO */
+.avatar__status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 25%;
+  height: 25%;
+  border-radius: var(--radius-full);
+  border: 0.2rem solid var(--bg-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.avatar__status--online {
+  background-color: var(--color-success);
+}
+
+.avatar__status--offline {
+  background-color: var(--text-muted);
+}
+
+.avatar__status--away {
+  background-color: var(--color-warning);
+}
+
+.avatar__status--busy {
+  background-color: var(--color-danger);
+}
+
+/* BADGE */
+.avatar__badge {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.4rem;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-danger);
+  color: var(--text-on-primary);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  padding: 0 var(--space-xs);
+  border: 0.1rem solid var(--bg-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ANIMACIONES */
+@keyframes avatar-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes avatar-spinner-dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+/* ESTADOS PSEUDO PARA STORYBOOK */
+.avatar.pseudo-hover .avatar__container {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-hover);
+}
+
+.avatar.pseudo-focus {
+  outline: 0.2rem solid var(--border-focus);
+  outline-offset: 0.2rem;
+  z-index: 1;
+}
+
+/* RESPONSIVE - MOBILE FIRST */
+@media (max-width: 768px) {
+  .avatar--clickable {
+    min-width: 4.4rem; /* Área táctil mínima en móviles */
+    min-height: 4.4rem;
+  }
+  
+  .avatar--xs.avatar--clickable {
+    min-width: 3.2rem;
+    min-height: 3.2rem;
+  }
+  
+  .avatar--sm.avatar--clickable {
+    min-width: 4.4rem;
+    min-height: 4.4rem;
+  }
+}
