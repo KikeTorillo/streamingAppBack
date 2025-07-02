@@ -204,9 +204,6 @@ services:
     ports:
       - "6006:6006"
     restart: unless-stopped
-    depends_on:
-      frontend:
-        condition: service_healthy  # Esperar a que frontend esté healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:6006 || exit 1"]
       interval: 30s

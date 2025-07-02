@@ -67,9 +67,6 @@ COPY . .
 RUN chown -R nodejs:nodejs /app
 USER nodejs
 
-# Exponer puertos
-EXPOSE 5173 6006
-
 # Healthcheck para verificar que Vite esté funcionando
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:5173 || exit 1

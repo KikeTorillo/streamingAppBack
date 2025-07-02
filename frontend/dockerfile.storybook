@@ -72,13 +72,6 @@ RUN npm list @storybook/react-vite @storybook/addon-docs || \
 RUN chown -R nodejs:nodejs /app
 USER nodejs
 
-# Exponer solo puerto de Storybook
-EXPOSE 6006
-
-# ✅ Healthcheck específico para Storybook
-HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
-    CMD curl -f http://localhost:6006 || exit 1
-
 # ✅ Comando específico para Storybook
 CMD ["npm", "run", "storybook"]
 
