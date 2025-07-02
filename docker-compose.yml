@@ -206,7 +206,7 @@ services:
       - FRONT_URL_LOCAL=${FRONT_URL_LOCAL}
       - WHITE_LIST=${WHITE_LIST}
     volumes:
-      - ./app:/usr/src/app
+      - ./backend/app:/usr/src/app
       - /usr/src/app/node_modules
     networks:
       - lan

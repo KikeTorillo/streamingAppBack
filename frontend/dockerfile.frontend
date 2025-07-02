@@ -4,7 +4,7 @@
 # ==========================================
 # 📦 STAGE 1: Base con Node.js LTS
 # ==========================================
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Metadata del contenedor
 LABEL maintainer="arellanestorillo@yahoo.com"
@@ -26,9 +26,9 @@ RUN apk add --no-cache \
     git \
     && rm -rf /var/cache/apk/*
 
-# Crear usuario no-root para seguridad
+# Crear usuario no-root para seguridad (CORREGIDO)
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+    adduser -S nodejs -u 1001 -G nodejs
 
 # ==========================================
 # 📋 STAGE 2: Dependencias
@@ -63,7 +63,7 @@ ENV CHOKIDAR_USEPOLLING=true
 # Copiar código fuente
 COPY . .
 
-# Cambiar propietario a usuario no-root
+# Cambiar propietario a usuario no-root (CORREGIDO)
 RUN chown -R nodejs:nodejs /app
 USER nodejs
 
@@ -103,10 +103,10 @@ LABEL stage="production"
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY --from=builder /app/storybook-static /usr/share/nginx/html/storybook
 
-# Configuración personalizada de NGINX
-COPY nginx.conf /etc/nginx/nginx.conf
+# Configuración personalizada de NGINX (opcional)
+# COPY nginx.conf /etc/nginx/nginx.conf
 
-# Crear usuario no-root
+# Crear usuario no-root para NGINX
 RUN addgroup -g 1001 -S nginx && \
     adduser -S nginx -u 1001 -G nginx
 
