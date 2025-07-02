@@ -151,11 +151,11 @@ services:
         - NODE_ENV=${NODE_ENV:-development}
     container_name: streaming-frontend
     environment:
-      - VITE_API_KEY={VITE_API_KEY}
-      - VITE_FRONT_URL_LOCAL={VITE_FRONT_URL_LOCAL}
-      - VITE_MODE={VITE_MODE}
-      - VITE_HOST_LOCAL={VITE_HOST_LOCAL}
-      - VITE_TMDB_API_KEY={VITE_TMDB_API_KEY}
+      - VITE_API_KEY=${VITE_API_KEY}
+      - VITE_FRONT_URL_LOCAL=${VITE_FRONT_URL_LOCAL}
+      - VITE_MODE=${VITE_MODE}
+      - VITE_HOST_LOCAL=${VITE_HOST_LOCAL}
+      - VITE_TMDB_API_KEY=${VITE_TMDB_API_KEY}
       # Configuración Vite para Docker
       - VITE_HOST=0.0.0.0
       - VITE_PORT=5173
