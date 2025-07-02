@@ -14,15 +14,15 @@ function environmentService() {
     let urlFront = '';
 
     // 3. Configuración condicional según entorno
-    if (mode !== 'local') {
+    //if (mode !== 'local') {
         // Configuración para entornos de producción/develop
-        urlBackend = import.meta.env.VITE_HOST_VERCEL; // URL del backend en Vercel
-        urlFront = import.meta.env.VITE_FRONT_URL_PROD; // URL del frontend en producción
-    } else {
+    //    urlBackend = import.meta.env.VITE_HOST_VERCEL; // URL del backend en Vercel
+    //    urlFront = import.meta.env.VITE_FRONT_URL_PROD; // URL del frontend en producción
+    //} else {
         // Configuración para entorno local
         urlBackend = import.meta.env.VITE_HOST_LOCAL; // URL local del backend
         urlFront = import.meta.env.VITE_FRONT_URL_LOCAL; // URL local del frontend
-    }
+    //}
 
     // 4. Retornar configuración consolidada
     return {

@@ -4,12 +4,25 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    
+    "_comment_storybook": "=== STORYBOOK SCRIPTS CORREGIDOS ===",
+    "storybook": "storybook dev --port 6006 --host 0.0.0.0 --no-open --quiet",
+    "storybook:dev": "storybook dev --port 6006 --host 0.0.0.0 --no-open",
+    "storybook:build": "storybook build --output-dir storybook-static",
+    "storybook:serve": "npx serve storybook-static -l 6006",
+    
+    "_comment_docker": "=== SCRIPTS ESPECÍFICOS PARA DOCKER ===",
+    "docker:dev": "concurrently \"npm run dev\" \"npm run storybook\"",
+    "docker:storybook": "storybook dev --port 6006 --host 0.0.0.0 --no-open --quiet --disable-telemetry",
+    
+    "_comment_utils": "=== UTILITARIOS ===",
+    "clean": "rm -rf dist storybook-static node_modules/.vite",
+    "deps:check": "npm outdated",
+    "deps:update": "npm update"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.1",

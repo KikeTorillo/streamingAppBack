@@ -13,6 +13,8 @@ import { environmentService } from "../environmentService";
 const loginService = async (userValue, passValue) => {
     // 1. Obtener configuración del entorno
     const { urlBackend, apiKey } = environmentService();
+
+    console.log('Configuración del entorno:', { urlBackend, apiKey });
     
     // 2. Configurar headers de la solicitud
     const myHeaders = new Headers();

@@ -151,11 +151,15 @@ services:
         - NODE_ENV=${NODE_ENV:-development}
     container_name: streaming-frontend
     environment:
-      - NODE_ENV=${NODE_ENV:-development}
-      - VITE_API_KEY=${VITE_API_KEY}
-      - VITE_BACKEND_URL=http://backend:3000
-      - VITE_CDN_URL=http://cdn:80
-      - VITE_MODE=${NODE_ENV:-development}
+      - VITE_API_KEY={VITE_API_KEY}
+      - VITE_FRONT_URL_LOCAL={VITE_FRONT_URL_LOCAL}
+      - VITE_MODE={VITE_MODE}
+      - VITE_HOST_LOCAL={VITE_HOST_LOCAL}
+      - VITE_TMDB_API_KEY={VITE_TMDB_API_KEY}
+      # Configuración Vite para Docker
+      - VITE_HOST=0.0.0.0
+      - VITE_PORT=5173
+      - CHOKIDAR_USEPOLLING=true
     volumes:
       # Hot reload para desarrollo
       - ./frontend:/app
