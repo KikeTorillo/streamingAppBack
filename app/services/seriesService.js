@@ -249,50 +249,95 @@ class SeriesService {
   }
 
   /**
-   * Elimina una serie por su ID y remueve los archivos asociados en MinIO.
-   * @param {number} id - ID de la serie a eliminar.
-   * @returns {Object} Confirmación de eliminación.
-   */
+ * 🗑️ Elimina una serie y todos sus episodios relacionados
+ * @param {number} id - ID de la serie a eliminar
+ * @returns {Object} Confirmación de eliminación con estadísticas
+ */
   async delete(id) {
     const client = await this.pool.connect();
+
     try {
       await client.query('BEGIN');
+      console.log(`🎬 Eliminando serie con CASCADE - ID: ${id}`);
 
-      const serie = await this.findOne(id);
+      // 1. Obtener información completa antes de eliminar
+      const serieInfoQuery = `
+      SELECT 
+        s.id, s.title, s.cover_image,
+        COUNT(ep.id) as total_episodes,
+        array_agg(DISTINCT vi.file_hash) FILTER (WHERE vi.file_hash IS NOT NULL) as video_hashes
+      FROM series s
+      LEFT JOIN episodes ep ON s.id = ep.serie_id
+      LEFT JOIN videos vi ON ep.video_id = vi.id
+      WHERE s.id = $1
+      GROUP BY s.id, s.title, s.cover_image;
+    `;
 
-      const episodesOfSerie = await client.query(
-        `
-        select ep.id,vi.file_hash 
-        from videos vi 
-        left join episodes ep on vi.id=ep.video_id 
-        where serie_id = $1;`,
-        [serie.id]
-      );
+      const infoResult = await client.query(serieInfoQuery, [id]);
 
-      const episodesResult = episodesOfSerie.rows;
-
-      for (let index = 0; index < episodesResult.length; index++) {
-        let episodeId = episodesResult[index].id;
-        let result = await this.deleteEpisode(episodeId);
-        console.log(result);
+      if (infoResult.rowCount === 0) {
+        throw new Error(`Serie con ID ${id} no encontrada`);
       }
 
-      // Elimina la serie de la base de datos.
-      const deleteSerieQuery = `DELETE FROM series WHERE id = $1`;
-      await client.query(deleteSerieQuery, [id]);
+      const serieInfo = infoResult.rows[0];
+      console.log(`📺 Serie: "${serieInfo.title}" con ${serieInfo.total_episodes} episodios`);
 
-      // Rutas remotas a eliminar en MinIO:
-      const remoteCoverPath = `${config.coversDir}/${serie.cover_image}`;
-   
-      await deleteFilesByPrefix(remoteCoverPath);
+      // 2. Eliminar archivos de MinIO antes del CASCADE
+      // Videos
+      if (serieInfo.video_hashes && serieInfo.video_hashes.length > 0) {
+        console.log(`☁️ Eliminando ${serieInfo.video_hashes.length} archivos de video...`);
+
+        for (const hash of serieInfo.video_hashes) {
+          if (hash) {
+            const remotePath = `${config.videoDir}/${hash}`;
+            try {
+              await deleteFilesByPrefix(remotePath);
+              console.log(`✅ Video eliminado: ${hash}`);
+            } catch (error) {
+              console.warn(`⚠️ Error eliminando video ${hash}:`, error.message);
+            }
+          }
+        }
+      }
+
+      // Portada
+      if (serieInfo.cover_image) {
+        const remoteCoverPath = `${config.coversDir}/${serieInfo.cover_image}`;
+        try {
+          await deleteFilesByPrefix(remoteCoverPath);
+          console.log(`✅ Portada eliminada: ${serieInfo.cover_image}`);
+        } catch (error) {
+          console.warn(`⚠️ Error eliminando portada:`, error.message);
+        }
+      }
+
+      // 3. Eliminar serie (CASCADE eliminará episodios y videos automáticamente)
+      const deleteResult = await client.query('DELETE FROM series WHERE id = $1', [id]);
+
+      if (deleteResult.rowCount === 0) {
+        throw new Error('No se pudo eliminar la serie');
+      }
 
       await client.query('COMMIT');
 
-      return { message: 'Serie eliminada exitosamente', id };
+      const result = {
+        message: 'Serie eliminada exitosamente con CASCADE',
+        serieId: id,
+        serieTitle: serieInfo.title,
+        statistics: {
+          episodesDeleted: parseInt(serieInfo.total_episodes),
+          videosDeleted: serieInfo.video_hashes ? serieInfo.video_hashes.length : 0,
+          coverDeleted: !!serieInfo.cover_image
+        }
+      };
+
+      console.log(`🎉 Eliminación CASCADE completada:`, result);
+      return result;
+
     } catch (error) {
       await client.query('ROLLBACK');
-      console.error('Error al eliminar la serie:', error.message);
-      throw new Error('Error al eliminar la serie: ' + error.message);
+      console.error(`❌ Error en eliminación CASCADE:`, error.message);
+      throw new Error(`Error al eliminar la serie: ${error.message}`);
     } finally {
       client.release();
     }
