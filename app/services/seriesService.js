@@ -359,10 +359,9 @@ class SeriesService {
     }
   }
 
-  /**
-   * Obtiene todas las series.
-   * @returns {Promise<Array>} Lista de series.
-   */
+  // ✅ REEMPLAZAR en tu app/services/seriesService.js
+  // En el método findEpisode
+
   async findEpisode(serieId, season, episodeNumber) {
     try {
       await this.findOne(serieId);
@@ -370,31 +369,64 @@ class SeriesService {
       let query;
       const arrayValues = [];
       arrayValues.push(serieId);
+
       if (season && episodeNumber) {
         query = `
-        SELECT ep.*
+        SELECT 
+          ep.*,
+          v.file_hash,
+          v.available_resolutions,
+          v.available_subtitles,
+          v.duration as video_duration
         FROM episodes ep
-        where serie_id = $1 and season = $2 and episode_number = $3;
+        LEFT JOIN videos v ON ep.video_id = v.id
+        WHERE ep.serie_id = $1 AND ep.season = $2 AND ep.episode_number = $3;
       `;
         arrayValues.push(season);
         arrayValues.push(episodeNumber);
       } else if (season) {
         query = `
-        SELECT ep.*
+        SELECT 
+          ep.*,
+          v.file_hash,
+          v.available_resolutions,
+          v.available_subtitles,
+          v.duration as video_duration
         FROM episodes ep
-        where serie_id = $1 and season = $2;
+        LEFT JOIN videos v ON ep.video_id = v.id
+        WHERE ep.serie_id = $1 AND ep.season = $2
+        ORDER BY ep.episode_number;
       `;
         arrayValues.push(season);
       } else {
         query = `
-        SELECT ep.*
+        SELECT 
+          ep.*,
+          v.file_hash,
+          v.available_resolutions,
+          v.available_subtitles,
+          v.duration as video_duration
         FROM episodes ep
-        where serie_id = $1;
+        LEFT JOIN videos v ON ep.video_id = v.id
+        WHERE ep.serie_id = $1
+        ORDER BY ep.season, ep.episode_number;
       `;
       }
 
       const result = await this.pool.query(query, arrayValues);
-      return result.rows;
+
+      // ✅ PROCESAR LOS RESULTADOS para parsear JSON
+      const episodes = result.rows.map(episode => ({
+        ...episode,
+        available_resolutions: episode.available_resolutions ?
+          JSON.parse(episode.available_resolutions) : null,
+        available_subtitles: episode.available_subtitles ?
+          JSON.parse(episode.available_subtitles) : null
+      }));
+
+      console.log('📺 Episodes with video data:', episodes);
+      return episodes;
+
     } catch (error) {
       throw new Error('Error al obtener los episodios: ' + error.message);
     }
