@@ -161,8 +161,6 @@ services:
       - ./frontend:/app
       - /app/node_modules
       - /app/dist
-    networks:
-      - streaming-network
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
       - "6006:6006"  # Puerto para Storybook
@@ -178,7 +176,7 @@ services:
   # Servicio Backend Node.js
   backend:
     build:
-      context: ./app
+      context: ./backend/app
       dockerfile: dockerfile.appdev  # ✅ Nombre correcto del dockerfile
     container_name: streaming-app  # ✅ Nombre fijo del contenedor
     environment:

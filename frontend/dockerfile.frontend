@@ -130,6 +130,6 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
 CMD ["nginx", "-g", "daemon off;"]
 
 # ==========================================
-# 🎯 STAGE FINAL: Selección según NODE_ENV
+# 🎯 STAGE FINAL: Usar development por defecto
 # ==========================================
-FROM ${NODE_ENV} AS final
+FROM development AS final

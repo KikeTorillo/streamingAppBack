@@ -14,7 +14,7 @@ NC=\033[0m # No Color
 
 # Variables del proyecto
 PROJECT_NAME=streaming-app
-DOCKER_COMPOSE=docker-compose
+DOCKER_COMPOSE=docker compose
 FRONTEND_DIR=frontend
 BACKEND_DIR=backend
 
@@ -223,7 +223,7 @@ health: ## 🔍 Verificar salud de todos los servicios
 setup: ## ⚡ Setup inicial completo del proyecto
 	@echo "$(BLUE)⚡ Configuración inicial del proyecto...$(NC)"
 	@echo "$(YELLOW)1. Copiando archivo de entorno...$(NC)"
-	@cp .env.example .env 2>/dev/null || echo "⚠️  .env.example no encontrado"
+	@cp .env .env 2>/dev/null || echo "⚠️  .env no encontrado"
 	@echo "$(YELLOW)2. Instalando dependencias...$(NC)"
 	@$(MAKE) install
 	@echo "$(YELLOW)3. Construyendo imágenes...$(NC)"
