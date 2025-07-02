@@ -160,6 +160,11 @@ services:
       - VITE_HOST=0.0.0.0
       - VITE_PORT=5173
       - CHOKIDAR_USEPOLLING=true
+      # ✅ Variables para Storybook WebSocket
+      - STORYBOOK_HOST=0.0.0.0
+      - STORYBOOK_PORT=6006
+      # ✅ Fix para error 426 - Deshabilitar WebSocket si es necesario
+      - FORCE_WEBSOCKET_FALLBACK=true
     volumes:
       # Hot reload para desarrollo
       - ./frontend:/app
