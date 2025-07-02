@@ -1,0 +1,92 @@
+# 📚 Dockerfile específico para Storybook
+# frontend/dockerfile.storybook
+
+# ==========================================
+# 📦 STAGE 1: Base con Node.js LTS
+# ==========================================
+FROM node:20-alpine AS base
+
+LABEL maintainer="arellanestorillo@yahoo.com"
+LABEL description="Storybook Service para StreamingApp"
+LABEL version="1.0"
+LABEL service="storybook"
+
+# Variables específicas para Storybook
+ARG NODE_ENV=development
+ARG SERVICE_TYPE=storybook
+ENV NODE_ENV=${NODE_ENV}
+ENV SERVICE_TYPE=${SERVICE_TYPE}
+
+# Configuración optimizada para Storybook
+ENV NPM_CONFIG_LOGLEVEL=warn
+ENV NPM_CONFIG_FUND=false
+ENV NPM_CONFIG_AUDIT=false
+ENV STORYBOOK_DISABLE_TELEMETRY=true
+
+# Instalar dependencias del sistema
+RUN apk add --no-cache \
+    curl \
+    git \
+    && rm -rf /var/cache/apk/*
+
+# Crear usuario no-root
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 -G nodejs
+
+# ==========================================
+# 📋 STAGE 2: Dependencias Storybook
+# ==========================================
+FROM base AS dependencies
+
+WORKDIR /app
+
+# Copiar archivos de configuración
+COPY package*.json ./
+COPY yarn.lock* ./
+
+# ✅ Instalar SOLO dependencias necesarias para Storybook
+RUN npm ci && npm cache clean --force
+
+# ==========================================
+# 📚 STAGE 3: Storybook Development
+# ==========================================
+FROM dependencies AS storybook-dev
+
+# Variables específicas de Storybook
+ENV STORYBOOK_HOST=0.0.0.0
+ENV STORYBOOK_PORT=6006
+ENV CHOKIDAR_USEPOLLING=true
+
+# Copiar código fuente
+COPY . .
+
+# ✅ Verificar que las dependencias de Storybook estén actualizadas
+RUN npm list @storybook/react-vite @storybook/addon-docs || \
+    npm install @storybook/addon-docs@9.0.10 @storybook/react-vite@9.0.10
+
+# Cambiar propietario
+RUN chown -R nodejs:nodejs /app
+USER nodejs
+
+# Exponer solo puerto de Storybook
+EXPOSE 6006
+
+# ✅ Healthcheck específico para Storybook
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+    CMD curl -f http://localhost:6006 || exit 1
+
+# ✅ Comando específico para Storybook
+CMD ["npm", "run", "storybook"]
+
+# ==========================================
+# 🏗️ STAGE 4: Storybook Build
+# ==========================================
+FROM dependencies AS storybook-build
+
+COPY . .
+RUN npm run storybook:build
+
+# ==========================================
+# 🎯 STAGE FINAL: Desarrollo por defecto
+# ==========================================
+FROM storybook-dev AS final

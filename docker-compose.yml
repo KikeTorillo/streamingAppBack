@@ -139,16 +139,16 @@ services:
     restart: always
     depends_on:
       - postgres
-  
-  # ==========================================
-  # 🎨 FRONTEND - REACT + VITE + STORYBOOK
+
+  # 🎨 FRONTEND VITE - SERVICIO PRINCIPAL
   # ==========================================
   frontend:
     build:
       context: ./frontend
       dockerfile: dockerfile.frontend
       args:
-        - NODE_ENV=${NODE_ENV:-development}
+        - NODE_ENV=development
+        - SERVICE_TYPE=frontend
     container_name: streaming-frontend
     environment:
       - VITE_API_KEY=${VITE_API_KEY}
@@ -156,31 +156,65 @@ services:
       - VITE_MODE=${VITE_MODE}
       - VITE_HOST_LOCAL=${VITE_HOST_LOCAL}
       - VITE_TMDB_API_KEY=${VITE_TMDB_API_KEY}
-      # Configuración Vite para Docker
+      # Configuración Vite específica
       - VITE_HOST=0.0.0.0
       - VITE_PORT=5173
       - CHOKIDAR_USEPOLLING=true
-      # ✅ Variables para Storybook WebSocket
-      - STORYBOOK_HOST=0.0.0.0
-      - STORYBOOK_PORT=6006
-      # ✅ Fix para error 426 - Deshabilitar WebSocket si es necesario
-      - FORCE_WEBSOCKET_FALLBACK=true
     volumes:
-      # Hot reload para desarrollo
       - ./frontend:/app
       - /app/node_modules
       - /app/dist
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
-      - "6006:6006"  # Puerto para Storybook
     restart: unless-stopped
     depends_on:
       - backend
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      test: ["CMD-SHELL", "curl -f http://localhost:5173 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
+    # ✅ Comando específico solo para Vite
+    command: ["npm", "run", "dev"]
+
+  # ==========================================
+  # 📚 STORYBOOK - SERVICIO INDEPENDIENTE
+  # ==========================================
+  storybook:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile.storybook  # Dockerfile específico
+      args:
+        - NODE_ENV=development
+        - SERVICE_TYPE=storybook
+    container_name: streaming-storybook
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - STORYBOOK_HOST=0.0.0.0
+      - STORYBOOK_PORT=6006
+      # Configuración específica de Storybook
+      - STORYBOOK_DISABLE_TELEMETRY=true
+      - STORYBOOK_DISABLE_UPDATES=true
+    volumes:
+      - ./frontend:/app
+      - storybook_node_modules
+      - storybook_static
+    ports:
+      - "6006:6006"
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_healthy  # Esperar a que frontend esté healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:6006 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # ✅ Comando específico solo para Storybook
+    command: ["npm", "run", "storybook"]
 
   # Servicio Backend Node.js
   backend:
