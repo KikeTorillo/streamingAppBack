@@ -199,8 +199,8 @@ services:
       - STORYBOOK_DISABLE_UPDATES=true
     volumes:
       - ./frontend:/app
-      - storybook_node_modules
-      - storybook_static
+      - /app/node_modules
+      - /app/storybook-static
     ports:
       - "6006:6006"
     restart: unless-stopped

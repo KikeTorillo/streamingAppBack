@@ -44,8 +44,12 @@ WORKDIR /app
 COPY package*.json ./
 COPY yarn.lock* ./
 
-# ✅ Instalar SOLO dependencias necesarias para Storybook
-RUN npm ci && npm cache clean --force
+# ✅ FIX: Usar npm install si no existe package-lock.json
+RUN if [ -f "package-lock.json" ]; then \
+        npm ci && npm cache clean --force; \
+    else \
+        npm install && npm cache clean --force; \
+    fi
 
 # ==========================================
 # 📚 STAGE 3: Storybook Development
