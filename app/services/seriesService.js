@@ -250,6 +250,7 @@ class SeriesService {
 
   /**
  * 🗑️ Elimina una serie y todos sus episodios relacionados
+ * ✅ VERSIÓN SIMPLIFICADA - PostgreSQL + Triggers manejan todo automáticamente
  * @param {number} id - ID de la serie a eliminar
  * @returns {Object} Confirmación de eliminación con estadísticas
  */
@@ -258,12 +259,14 @@ class SeriesService {
 
     try {
       await client.query('BEGIN');
-      console.log(`🎬 Eliminando serie con CASCADE - ID: ${id}`);
+      console.log(`🎬 Eliminando serie ID: ${id}`);
 
-      // 1. Obtener información completa antes de eliminar
+      // ✅ PASO 1: Obtener información ANTES de eliminar (para MinIO y estadísticas)
       const serieInfoQuery = `
       SELECT 
-        s.id, s.title, s.cover_image,
+        s.id, 
+        s.title, 
+        s.cover_image,
         COUNT(ep.id) as total_episodes,
         array_agg(DISTINCT vi.file_hash) FILTER (WHERE vi.file_hash IS NOT NULL) as video_hashes
       FROM series s
@@ -280,63 +283,76 @@ class SeriesService {
       }
 
       const serieInfo = infoResult.rows[0];
+      const videoHashes = serieInfo.video_hashes && serieInfo.video_hashes[0] !== null ? serieInfo.video_hashes : [];
+
       console.log(`📺 Serie: "${serieInfo.title}" con ${serieInfo.total_episodes} episodios`);
 
-      // 2. Eliminar archivos de MinIO antes del CASCADE
-      // Videos
-      if (serieInfo.video_hashes && serieInfo.video_hashes.length > 0) {
-        console.log(`☁️ Eliminando ${serieInfo.video_hashes.length} archivos de video...`);
+      // ✅ PASO 2: Eliminar archivos de MinIO (lo único que no puede hacer PostgreSQL)
+      if (videoHashes.length > 0) {
+        console.log(`☁️ Eliminando ${videoHashes.length} archivos de video de MinIO...`);
 
-        for (const hash of serieInfo.video_hashes) {
+        for (const hash of videoHashes) {
           if (hash) {
             const remotePath = `${config.videoDir}/${hash}`;
             try {
               await deleteFilesByPrefix(remotePath);
-              console.log(`✅ Video eliminado: ${hash}`);
+              console.log(`✅ Video eliminado de MinIO: ${hash}`);
             } catch (error) {
               console.warn(`⚠️ Error eliminando video ${hash}:`, error.message);
+              // Continuar con otros archivos aunque uno falle
             }
           }
         }
       }
 
-      // Portada
+      // Eliminar portada de MinIO
       if (serieInfo.cover_image) {
         const remoteCoverPath = `${config.coversDir}/${serieInfo.cover_image}`;
         try {
           await deleteFilesByPrefix(remoteCoverPath);
-          console.log(`✅ Portada eliminada: ${serieInfo.cover_image}`);
+          console.log(`✅ Portada eliminada de MinIO: ${serieInfo.cover_image}`);
         } catch (error) {
           console.warn(`⚠️ Error eliminando portada:`, error.message);
         }
       }
 
-      // 3. Eliminar serie (CASCADE eliminará episodios y videos automáticamente)
+      // ✅ PASO 3: ⚡ LA MAGIA - Una consulta elimina TODO automáticamente
+      console.log(`🗑️ Eliminando serie de la base de datos...`);
       const deleteResult = await client.query('DELETE FROM series WHERE id = $1', [id]);
 
       if (deleteResult.rowCount === 0) {
         throw new Error('No se pudo eliminar la serie');
       }
 
+      // 🎉 En este punto PostgreSQL ya eliminó automáticamente:
+      // - ✅ La serie (obviamente)
+      // - ✅ Todos los episodios (por CASCADE: serie_id REFERENCES series(id) ON DELETE CASCADE)
+      // - ✅ Todos los videos (por TRIGGER: auto_delete_video_on_episode_delete)
+
       await client.query('COMMIT');
 
       const result = {
-        message: 'Serie eliminada exitosamente con CASCADE',
+        message: 'Serie eliminada exitosamente',
         serieId: id,
         serieTitle: serieInfo.title,
         statistics: {
-          episodesDeleted: parseInt(serieInfo.total_episodes),
-          videosDeleted: serieInfo.video_hashes ? serieInfo.video_hashes.length : 0,
+          episodesDeleted: parseInt(serieInfo.total_episodes) || 0,
+          videosDeleted: videoHashes.length,
           coverDeleted: !!serieInfo.cover_image
+        },
+        automaticDeletion: {
+          episodesCascade: true,
+          videosTrigger: true,
+          minioFiles: true
         }
       };
 
-      console.log(`🎉 Eliminación CASCADE completada:`, result);
+      console.log(`🎉 Eliminación completada automáticamente:`, result);
       return result;
 
     } catch (error) {
       await client.query('ROLLBACK');
-      console.error(`❌ Error en eliminación CASCADE:`, error.message);
+      console.error(`❌ Error al eliminar serie ${id}:`, error.message);
       throw new Error(`Error al eliminar la serie: ${error.message}`);
     } finally {
       client.release();

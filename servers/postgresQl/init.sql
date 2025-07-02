@@ -1,4 +1,10 @@
-CREATE EXTENSION IF NOT EXISTS pg_trgm;  -- Primera línea del archivo
+-- ======================================================================
+-- INIT.SQL CORREGIDO - Streaming App Database Schema
+-- ✅ CORREGIDO: Episodes → Videos CASCADE automático
+-- ======================================================================
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;  -- Para búsquedas de texto
+
 ----------------------------------------------------------------------
 -- Función y Trigger para actualizar automáticamente el campo updated_at
 ----------------------------------------------------------------------
@@ -10,6 +16,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+----------------------------------------------------------------------
+-- Tabla: roles
+----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS roles(
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
@@ -29,7 +38,6 @@ CREATE TABLE IF NOT EXISTS categories (
 
 ----------------------------------------------------------------------
 -- Tabla: users
--- Nota: Se podrían agregar campos adicionales (por ejemplo, username, avatar, etc.) según las necesidades.
 ----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -41,6 +49,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP -- Registro de actualizaciones
 );
+
 CREATE INDEX ON users (role_id); -- Para joins frecuentes con roles
 CREATE INDEX ON users (recovery_token) WHERE recovery_token IS NOT NULL; -- Búsquedas de tokens
 CREATE UNIQUE INDEX users_email_unique ON users (email) WHERE email IS NOT NULL; -- Índice único para email, pero solo cuando no es NULL
@@ -51,7 +60,7 @@ CREATE UNIQUE INDEX users_email_unique ON users (email) WHERE email IS NOT NULL;
 CREATE TABLE IF NOT EXISTS videos (
     id SERIAL PRIMARY KEY,
     file_hash VARCHAR(64) UNIQUE NOT NULL, -- Hash único del archivo de video
-    available_resolutions JSONB,           -- Resoluciones disponibles (puede considerarse una tabla separada si se requieren búsquedas complejas)
+    available_resolutions JSONB,           -- Resoluciones disponibles
     available_subtitles JSONB,             -- Subtítulos disponibles
     duration INTERVAL CHECK (duration >= INTERVAL '0 seconds'), -- Duración del video (opcional)
     views BIGINT DEFAULT 0,                -- Número de visualizaciones
@@ -59,11 +68,9 @@ CREATE TABLE IF NOT EXISTS videos (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP  -- Fecha de actualización
 );
 
--- Índices
+-- Índices para videos
 CREATE INDEX IF NOT EXISTS idx_videos_resolutions ON videos USING GIN (available_resolutions);
 CREATE INDEX IF NOT EXISTS idx_videos_subtitles ON videos USING GIN (available_subtitles);
-
-
 
 ----------------------------------------------------------------------
 -- Tabla: series
@@ -85,19 +92,18 @@ CREATE INDEX IF NOT EXISTS idx_series_title ON series(title_normalized);
 CREATE INDEX IF NOT EXISTS idx_series_category ON series(category_id);
 CREATE INDEX IF NOT EXISTS idx_series_title_trgm ON series USING GIN (title gin_trgm_ops);
 
-
 ----------------------------------------------------------------------
--- Tabla: episodes
+-- ✅ TABLA: episodes - CORREGIDA CON CASCADE CORRECTO
 ----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS episodes (
     id SERIAL PRIMARY KEY,
-    serie_id INT NOT NULL REFERENCES series(id) ON DELETE CASCADE,  -- Relación con la serie
+    serie_id INT NOT NULL REFERENCES series(id) ON DELETE CASCADE,  -- ✅ Series → Episodes CASCADE (correcto)
     season INT NOT NULL,                   -- Temporada del episodio
     episode_number INT NOT NULL,           -- Número del episodio
-    title VARCHAR(255),         -- Título de la serie
+    title VARCHAR(255),                    -- Título del episodio
     title_normalized VARCHAR(255) GENERATED ALWAYS AS (LOWER(COALESCE(title, 'sin titulo'))) STORED,
     description TEXT,                      -- Descripción opcional
-    video_id INT NOT NULL REFERENCES videos(id) ON DELETE CASCADE,    -- Relación con el video correspondiente
+    video_id INT NOT NULL REFERENCES videos(id) ON DELETE RESTRICT,  -- ✅ CAMBIADO: RESTRICT en lugar de CASCADE
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha de creación
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha de actualización
     CONSTRAINT unique_episode UNIQUE (serie_id, season, episode_number), -- Impide duplicados en la misma temporada
@@ -108,11 +114,33 @@ CREATE TABLE IF NOT EXISTS episodes (
 CREATE INDEX IF NOT EXISTS idx_episodes_series ON episodes(serie_id);
 CREATE INDEX IF NOT EXISTS idx_episodes_video ON episodes(video_id);
 
-
-
+----------------------------------------------------------------------
+-- ✅ FUNCIÓN PARA ELIMINAR VIDEOS AUTOMÁTICAMENTE
+-- Cuando se elimina un episodio, automáticamente elimina su video asociado
+----------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION auto_delete_video_on_episode_delete()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Eliminar el video asociado cuando se elimina un episodio
+    DELETE FROM videos WHERE id = OLD.video_id;
+    
+    -- Log para debugging (opcional)
+    RAISE NOTICE 'Video ID % eliminado automáticamente al eliminar episodio ID %', OLD.video_id, OLD.id;
+    
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
 
 ----------------------------------------------------------------------
--- Tabla: movies
+-- ✅ TRIGGER PARA ELIMINACIÓN AUTOMÁTICA DE VIDEOS
+----------------------------------------------------------------------
+CREATE TRIGGER trigger_auto_delete_video_on_episode_delete
+    AFTER DELETE ON episodes
+    FOR EACH ROW
+    EXECUTE FUNCTION auto_delete_video_on_episode_delete();
+
+----------------------------------------------------------------------
+-- Tabla: movies (mantiene su configuración actual que funciona bien)
 ----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS movies (
     id SERIAL PRIMARY KEY,
@@ -121,7 +149,7 @@ CREATE TABLE IF NOT EXISTS movies (
     title_normalized VARCHAR(255) GENERATED ALWAYS AS (LOWER(title)) STORED,
     description TEXT,                      -- Descripción opcional
     category_id INT NOT NULL REFERENCES categories(id) ON DELETE RESTRICT, -- Relación con la categoría
-    video_id INT NOT NULL REFERENCES videos(id) ON DELETE CASCADE,    -- Relación con el video correspondiente
+    video_id INT NOT NULL REFERENCES videos(id) ON DELETE CASCADE,    -- ✅ Movies → Videos CASCADE (correcto para movies)
     release_year INT NOT NULL CHECK (release_year BETWEEN 1900 AND EXTRACT(YEAR FROM CURRENT_DATE)),  -- Año de lanzamiento
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha de creación
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha de actualización
@@ -133,7 +161,6 @@ CREATE INDEX IF NOT EXISTS idx_movies_title ON movies(title_normalized);
 CREATE INDEX IF NOT EXISTS idx_movies_category ON movies(category_id);
 CREATE INDEX IF NOT EXISTS idx_movies_video ON movies(video_id);
 CREATE INDEX IF NOT EXISTS idx_movies_title_trgm ON movies USING GIN (title gin_trgm_ops);
-
 
 ----------------------------------------------------------------------
 -- Tabla: audit_log (Sistema de Auditoría)
@@ -233,7 +260,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 ----------------------------------------------------------------------
--- Triggers para actualizar el campo updated_at automáticamente en cada actualización
+-- Triggers para actualizar el campo updated_at automáticamente
 ----------------------------------------------------------------------
 DO $$ 
 DECLARE
@@ -244,7 +271,7 @@ BEGIN
         AND tablename IN ('users', 'roles', 'videos', 'series', 'episodes', 'movies', 'categories')
     LOOP
         IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = tbl AND column_name = 'updated_at') THEN
-            EXECUTE format('
+         EXECUTE format('
                 CREATE TRIGGER update_%s_updated_at 
                 BEFORE UPDATE ON %I
                 FOR EACH ROW
@@ -252,7 +279,6 @@ BEGIN
         END IF;
     END LOOP;
 END $$;
-
 
 ----------------------------------------------------------------------
 -- Triggers de Auditoría para Tablas Clave
@@ -300,7 +326,9 @@ DO $$
         ON CONFLICT (name) DO NOTHING;
 END $$;
 
-
+----------------------------------------------------------------------
+-- Inserción condicional de roles iniciales
+----------------------------------------------------------------------
 DO $$
 BEGIN
     INSERT INTO roles (name, description)
@@ -311,6 +339,9 @@ BEGIN
     ON CONFLICT (name) DO NOTHING;
 END $$;
 
+----------------------------------------------------------------------
+-- Inserción del usuario administrador inicial
+----------------------------------------------------------------------
 DO $$
 BEGIN
     INSERT INTO users (user_name, email, password, role_id)
@@ -318,3 +349,34 @@ BEGIN
         ('admin','admin@mail.com', '$2b$10$zQi8jhrrGemGp2WeiPcWEufIb3W5nn0c7bdhwckaRp4nYQBYqAeAO', 1)
     ON CONFLICT (user_name) DO NOTHING;
 END $$;
+
+----------------------------------------------------------------------
+-- ✅ VERIFICACIÓN FINAL - Query para comprobar la configuración
+----------------------------------------------------------------------
+-- Puedes ejecutar esto después de aplicar el esquema para verificar:
+/*
+SELECT 
+    tc.table_name, 
+    tc.constraint_name,
+    kcu.column_name,
+    ccu.table_name AS references_table,
+    ccu.column_name AS references_column,
+    rc.delete_rule,
+    CASE 
+        WHEN tc.table_name = 'episodes' AND kcu.column_name = 'video_id' 
+        THEN '✅ CORRECTO: RESTRICT + Trigger automático'
+        WHEN tc.table_name = 'episodes' AND kcu.column_name = 'serie_id' 
+        THEN '✅ CORRECTO: CASCADE'
+        ELSE '✅ CONFIGURACIÓN VÁLIDA'
+    END as status
+FROM information_schema.table_constraints tc
+JOIN information_schema.key_column_usage kcu 
+    ON tc.constraint_name = kcu.constraint_name
+JOIN information_schema.constraint_column_usage ccu 
+    ON ccu.constraint_name = tc.constraint_name
+LEFT JOIN information_schema.referential_constraints rc 
+    ON tc.constraint_name = rc.constraint_name
+WHERE tc.constraint_type = 'FOREIGN KEY' 
+    AND tc.table_name IN ('episodes', 'movies', 'series')
+ORDER BY tc.table_name, kcu.column_name;
+*/

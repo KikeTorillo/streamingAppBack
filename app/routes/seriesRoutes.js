@@ -51,6 +51,25 @@ router.get(
   }
 );
 
+/**
+ * Ruta para obtener una serie específica por ID
+ */
+router.get(
+  '/:id',
+  authenticateJwt,
+  checkRoles(['admin']),
+  validatorHandler(getSerieSchema, 'params'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const serie = await service.findOne(id);
+      res.json(serie);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 // /**
 //  * Endpoint para buscar videos por nombre:
 //  * - Esta ruta maneja una solicitud GET para buscar videos cuyos nombres coincidan con una consulta.
