@@ -359,7 +359,6 @@ class SeriesService {
     }
   }
 
-  // ✅ REEMPLAZAR en tu app/services/seriesService.js
   // En el método findEpisode
 
   async findEpisode(serieId, season, episodeNumber) {
@@ -415,16 +414,61 @@ class SeriesService {
 
       const result = await this.pool.query(query, arrayValues);
 
-      // ✅ PROCESAR LOS RESULTADOS para parsear JSON
-      const episodes = result.rows.map(episode => ({
-        ...episode,
-        available_resolutions: episode.available_resolutions ?
-          JSON.parse(episode.available_resolutions) : null,
-        available_subtitles: episode.available_subtitles ?
-          JSON.parse(episode.available_subtitles) : null
-      }));
+      // ✅ PROCESAR LOS RESULTADOS para parsear JSON de forma segura
+      const episodes = result.rows.map(episode => {
+        console.log('🔍 Processing episode:', episode.id);
+        console.log('🔍 Raw available_resolutions:', episode.available_resolutions);
+        console.log('🔍 Raw available_subtitles:', episode.available_subtitles);
 
-      console.log('📺 Episodes with video data:', episodes);
+        let parsedResolutions = null;
+        let parsedSubtitles = null;
+
+        // ✅ PARSEO SEGURO de available_resolutions
+        if (episode.available_resolutions) {
+          try {
+            if (typeof episode.available_resolutions === 'string') {
+              parsedResolutions = JSON.parse(episode.available_resolutions);
+            } else {
+              parsedResolutions = episode.available_resolutions; // Ya es un objeto/array
+            }
+          } catch (error) {
+            console.error('❌ Error parsing available_resolutions:', error.message);
+            console.error('❌ Raw value:', episode.available_resolutions);
+            parsedResolutions = null;
+          }
+        }
+
+        // ✅ PARSEO SEGURO de available_subtitles
+        if (episode.available_subtitles) {
+          try {
+            if (typeof episode.available_subtitles === 'string') {
+              parsedSubtitles = JSON.parse(episode.available_subtitles);
+            } else {
+              parsedSubtitles = episode.available_subtitles; // Ya es un objeto/array
+            }
+          } catch (error) {
+            console.error('❌ Error parsing available_subtitles:', error.message);
+            console.error('❌ Raw value:', episode.available_subtitles);
+            parsedSubtitles = null;
+          }
+        }
+
+        const processedEpisode = {
+          ...episode,
+          available_resolutions: parsedResolutions,
+          available_subtitles: parsedSubtitles
+        };
+
+        console.log('✅ Processed episode:', processedEpisode.id, {
+          file_hash: processedEpisode.file_hash,
+          available_resolutions: processedEpisode.available_resolutions,
+          available_subtitles: processedEpisode.available_subtitles
+        });
+
+        return processedEpisode;
+      });
+
+      console.log('📺 Episodes with video data:', episodes.length);
       return episodes;
 
     } catch (error) {
