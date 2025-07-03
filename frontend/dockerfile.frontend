@@ -85,9 +85,6 @@ COPY . .
 # Build de la aplicación
 RUN npm run build
 
-# Build de Storybook
-RUN npm run build-storybook
-
 # ==========================================
 # 🚀 STAGE 5: Producción con NGINX
 # ==========================================

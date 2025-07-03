@@ -1,5 +1,5 @@
 #!/bin/sh
-# Script de inicio robusto para Storybook en Docker
+# Script de inicio robusto para Storybook en Docker - FIX ERROR 426
 
 echo "🚀 Iniciando Storybook en Docker..."
 
@@ -57,7 +57,14 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-echo "✅ Puerto 6006 libre. Iniciando Storybook..."
+# 🔥 FIX ERROR 426: Variables de entorno para WebSocket
+export HOST=0.0.0.0
+export PORT=6006
+export STORYBOOK_HOST=0.0.0.0
+export STORYBOOK_PORT=6006
 
-# Usar el script docker:storybook del package.json
+echo "✅ Puerto 6006 libre. Iniciando Storybook..."
+echo "🌐 WebSocket configurado para 0.0.0.0:6006"
+
+# 🚀 COMANDO MEJORADO: Con configuración específica para WebSocket
 exec npm run docker:storybook

@@ -156,7 +156,6 @@ services:
       - VITE_MODE=${VITE_MODE}
       - VITE_HOST_LOCAL=${VITE_HOST_LOCAL}
       - VITE_TMDB_API_KEY=${VITE_TMDB_API_KEY}
-      # Configuración Vite específica
       - VITE_HOST=0.0.0.0
       - VITE_PORT=5173
       - CHOKIDAR_USEPOLLING=true
@@ -169,13 +168,6 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5173 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    # ✅ Comando específico solo para Vite
     command: ["npm", "run", "dev"]
 
   # ==========================================
@@ -199,15 +191,8 @@ services:
       - /app/node_modules
       - /app/storybook-static
     ports:
-      - "6006:6006"
-    # ✅ CAMBIO IMPORTANTE: Usar "no" para evitar reinicios automáticos durante el error
+      - "6006:6006"   
     restart: "no"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:6006 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 90s  # Aumentado para dar más tiempo al inicio
 
   # Servicio Backend Node.js
   backend:

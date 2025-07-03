@@ -9,29 +9,19 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
     
-    "_comment_storybook_426_fix": "=== STORYBOOK - FIX ERROR 426 UPGRADE REQUIRED ===",
-    "storybook": "storybook dev -p 6006",
-    "storybook:dev": "storybook dev -p 6006",
-    "storybook:build": "storybook build --output-dir storybook-static",
-    "storybook:serve": "npx serve storybook-static -l 6006",
-    
     "_comment_docker_426_fix": "=== SCRIPTS DOCKER - SOLUCIÓN ERROR 426 ===",
     "docker:dev": "concurrently \"npm run dev\" \"sleep 5 && npm run docker:storybook\"",
     "docker:storybook": "FORCE_COLOR=true storybook dev --port 6006 --host 0.0.0.0 --no-open --quiet --disable-telemetry --no-version-updates",
     "docker:storybook-safe": "npm run docker:kill-ports && sleep 3 && npm run docker:storybook",
     "docker:kill-ports": "pkill -f 'node.*vite' || true && pkill -f 'node.*storybook' || true",
     
+    "_comment_websocket_fix": "=== FIX ESPECÍFICO ERROR 426 ===",
+    "docker:storybook-websocket": "HOST=0.0.0.0 PORT=6006 STORYBOOK_HOST=0.0.0.0 storybook dev --port 6006 --host 0.0.0.0 --no-open --quiet --disable-telemetry --no-version-updates --no-dll",
+    
     "_comment_troubleshooting": "=== DIAGNÓSTICO ERROR 426 ===",
     "debug:ports": "netstat -tulpn | grep -E ':(5173|6006)'",
     "debug:storybook": "storybook dev --port 6006 --host 0.0.0.0 --no-open --debug-webpack",
-    "test:websocket": "curl -i -N -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Key: test' -H 'Sec-WebSocket-Version: 13' http://localhost:6006/",
-    
-    "_comment_utils": "=== UTILITARIOS DE LIMPIEZA ===",
-    "clean": "rm -rf dist storybook-static node_modules/.vite",
-    "clean:ports": "npm run docker:kill-ports",
-    "deps:check": "npm outdated",
-    "deps:update": "npm update",
-    "fix:storybook-versions": "npm install @storybook/addon-docs@9.0.10 @storybook/react-vite@9.0.10"
+    "test:websocket": "curl -i -N -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Key: test' -H 'Sec-WebSocket-Version: 13' http://localhost:6006/"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.1",
