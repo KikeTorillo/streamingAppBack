@@ -1,0 +1,114 @@
+{
+  "name": "streamingapp-monorepo",
+  "version": "1.0.0",
+  "description": "Plataforma integral de streaming con backend Node.js, frontend React+Vite y Storybook",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KikeTorillo/streamingAppBack.git"
+  },
+  "author": "Kike Torillo <arellanestorillo@yahoo.com>",
+  "license": "ISC",
+  "workspaces": [
+    "backend/app",
+    "frontend/app"
+  ],
+  "scripts": {
+    "// === SCRIPTS PRINCIPALES ===": "",
+    "dev": "npm run dev:docker",
+    "start": "npm run dev:docker",
+    "stop": "npm run stop:docker",
+    "clean": "npm run clean:docker",
+    
+    "// === DOCKER ORCHESTRATION ===": "",
+    "dev:docker": "docker compose down --volumes --remove-orphans && docker compose up -d --build",
+    "start:docker": "docker compose up -d",
+    "stop:docker": "docker compose down --volumes --remove-orphans",
+    "restart:docker": "npm run stop:docker && npm run start:docker",
+    "clean:docker": "npm run stop:docker && docker system prune -af --volumes",
+    "logs": "docker compose logs -f",
+    "logs:backend": "docker compose logs -f app",
+    "logs:frontend": "docker compose logs -f frontend",
+    "logs:storybook": "docker compose logs -f storybook",
+    
+    "// === DESARROLLO LOCAL (SIN DOCKER) ===": "",
+    "dev:local": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:storybook\"",
+    "dev:backend": "cd backend/app && npm run start",
+    "dev:frontend": "cd frontend/app && npm run dev",
+    "dev:storybook": "cd frontend/app && npm run docker:storybook",
+    
+    "// === GESTIÓN DE DEPENDENCIAS ===": "",
+    "install:all": "npm install && npm run install:backend && npm run install:frontend",
+    "install:backend": "cd backend/app && npm install",
+    "install:frontend": "cd frontend/app && npm install",
+    "update:all": "npm update && npm run update:backend && npm run update:frontend",
+    "update:backend": "cd backend/app && npm update",
+    "update:frontend": "cd frontend/app && npm update",
+    
+    "// === BUILD Y PRODUCCIÓN ===": "",
+    "build": "npm run build:frontend",
+    "build:frontend": "cd frontend/app && npm run build",
+    "preview:frontend": "cd frontend/app && npm run preview",
+    
+    "// === LINTING Y CALIDAD DE CÓDIGO ===": "",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend/app && npm run lint",
+    "lint:frontend": "cd frontend/app && npm run lint",
+    "lint:fix": "npm run lint:fix:backend && npm run lint:fix:frontend",
+    "lint:fix:backend": "cd backend/app && npm run lint -- --fix || true",
+    "lint:fix:frontend": "cd frontend/app && npm run lint -- --fix || true",
+    
+    "// === TESTING ===": "",
+    "test": "npm run test:frontend",
+    "test:frontend": "cd frontend/app && npm run test",
+    "test:storybook": "cd frontend/app && npm run test:storybook",
+    
+    "// === UTILIDADES ===": "",
+    "status": "docker compose ps",
+    "health": "docker compose ps && docker system df",
+    "ports": "netstat -tulpn | grep -E ':(3000|5173|6006|5432|9000|9001|8082)'",
+    "env:copy": "cp example.env .env && echo '✅ Archivo .env creado desde example.env'",
+    "env:validate": "node -e \"require('dotenv').config(); console.log('✅ Variables de entorno cargadas correctamente');\"",
+    
+    "// === SERVICIOS INDIVIDUALES ===": "",
+    "up:backend": "docker compose up -d app postgres minio",
+    "up:frontend": "docker compose up -d frontend",
+    "up:storybook": "docker compose up -d storybook",
+    "up:database": "docker compose up -d postgres pgadmin",
+    "up:storage": "docker compose up -d minio",
+    "up:cdn": "docker compose up -d cdn1 transcoder1 transcoder2",
+    
+    "// === DESARROLLO Y DEBUG ===": "",
+    "debug:backend": "docker compose logs -f app",
+    "debug:frontend": "docker compose logs -f frontend",
+    "debug:storybook": "docker compose logs -f storybook",
+    "shell:backend": "docker exec -it streaming-app /bin/bash",
+    "shell:frontend": "docker exec -it streaming-frontend /bin/sh",
+    "shell:storybook": "docker exec -it streaming-storybook /bin/sh",
+    "shell:db": "docker exec -it postgres psql -U admin -d streamingApp",
+    
+    "// === BACKUPS Y MANTENIMIENTO ===": "",
+    "backup:db": "docker exec postgres pg_dump -U admin streamingApp > backup_$(date +%Y%m%d_%H%M%S).sql",
+    "restore:db": "echo 'Uso: docker exec -i postgres psql -U admin streamingApp < backup_file.sql'",
+    "cleanup:images": "docker image prune -af",
+    "cleanup:volumes": "docker volume prune -f",
+    "cleanup:networks": "docker network prune -f",
+    
+    "// === MONITOREO ===": "",
+    "monitor": "docker stats",
+    "monitor:services": "docker compose ps && docker compose top",
+    "check:health": "curl -f http://localhost:3000 && curl -f http://localhost:5173 && curl -f http://localhost:6006"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "volta": {
+    "node": "20.18.0",
+    "npm": "10.8.2"
+  }
+}

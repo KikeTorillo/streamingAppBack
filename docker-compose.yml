@@ -149,7 +149,7 @@ services:
       args:
         - NODE_ENV=development
         - SERVICE_TYPE=frontend
-    container_name: streaming-frontend
+    container_name: front
     environment:
       - VITE_API_KEY=${VITE_API_KEY}
       - VITE_FRONT_URL_LOCAL=${VITE_FRONT_URL_LOCAL}
@@ -180,7 +180,7 @@ services:
       args:
         - NODE_ENV=development
         - SERVICE_TYPE=storybook
-    container_name: streaming-storybook
+    container_name: storybook
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
@@ -199,7 +199,7 @@ services:
     build:
       context: ./backend/app
       dockerfile: dockerfile.appdev  # ✅ Nombre correcto del dockerfile
-    container_name: streaming-app  # ✅ Nombre fijo del contenedor
+    container_name: back  # ✅ Nombre fijo del contenedor
     environment:
       - IP_ADDRESS_POSTGRESQL=postgres # ✅ Usar nombre de servicio
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
