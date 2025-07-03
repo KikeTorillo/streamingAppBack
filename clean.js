@@ -56,14 +56,14 @@ function deleteContentLocalFolders(folders) {
 
 // Carpetas locales que deben ser eliminadas
 const localFolders = [
-  '../servers/cdn/nginx_cache',
-  '../servers/transcoderServers/transcoder1/nginx_cache',
-  '../servers/transcoderServers/transcoder2/nginx_cache',
-  '../servers/minio/aws3DataMinio',
-  '../servers/postgresQl/postgres_data',
-  './uploads',
-  './vod',
-  './tempProcessinDir'
+  './servers/cdn/nginx_cache',
+  './servers/transcoderServers/transcoder1/nginx_cache',
+  './servers/transcoderServers/transcoder2/nginx_cache',
+  './servers/minio/aws3DataMinio',
+  './servers/postgresQl/postgres_data',
+  './backend/app/uploads',
+  './backend/app/vod',
+  './backend/app/tempProcessinDir'
 ];
 
 // Ejecutar el proceso

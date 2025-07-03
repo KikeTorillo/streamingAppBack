@@ -19,6 +19,7 @@
     "start": "npm run dev:docker",
     "stop": "npm run stop:docker",
     "clean": "npm run clean:docker",
+    "reset": "node ./clean.js",
     
     "// === DOCKER ORCHESTRATION ===": "",
     "dev:docker": "docker compose down --volumes --remove-orphans && docker compose up -d --build",
