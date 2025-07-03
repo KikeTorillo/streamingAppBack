@@ -1,84 +1,33 @@
-# 📚 Dockerfile específico para Storybook
-# frontend/dockerfile.storybook
+# Dockerfile para Storybook con fix para puerto en uso
+FROM node:20-alpine
 
-# ==========================================
-# 📦 STAGE 1: Base con Node.js LTS
-# ==========================================
-FROM node:20-alpine AS base
-
-LABEL maintainer="arellanestorillo@yahoo.com"
-LABEL description="Storybook Service para StreamingApp"
-LABEL version="1.0"
-LABEL service="storybook"
-
-# Variables específicas para Storybook
-ARG NODE_ENV=development
-ARG SERVICE_TYPE=storybook
-ENV NODE_ENV=${NODE_ENV}
-ENV SERVICE_TYPE=${SERVICE_TYPE}
-
-# Configuración optimizada para Storybook
-ENV NPM_CONFIG_LOGLEVEL=warn
-ENV NPM_CONFIG_FUND=false
-ENV NPM_CONFIG_AUDIT=false
-ENV STORYBOOK_DISABLE_TELEMETRY=true
+WORKDIR /app
 
 # Instalar dependencias del sistema
 RUN apk add --no-cache \
     curl \
-    git \
+    procps \
     && rm -rf /var/cache/apk/*
-
-# Crear usuario no-root
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 -G nodejs
-
-# ==========================================
-# 📋 STAGE 2: Dependencias Storybook
-# ==========================================
-FROM base AS dependencies
-
-WORKDIR /app
 
 # Copiar archivos de configuración
 COPY package*.json ./
-COPY yarn.lock* ./
 
-# ✅ FIX: Usar npm install si no existe package-lock.json
-RUN if [ -f "package-lock.json" ]; then \
-        npm ci && npm cache clean --force; \
-    else \
-        npm install && npm cache clean --force; \
-    fi
+# Instalar dependencias
+RUN npm install
 
-# ==========================================
-# 📚 STAGE 3: Storybook Development
-# ==========================================
-FROM dependencies AS storybook-dev
-
-# Copiar código fuente
+# Copiar el resto del código
 COPY . .
 
-# ✅ Verificar que las dependencias de Storybook estén actualizadas
-RUN npm list @storybook/react-vite @storybook/addon-docs || \
-    npm install @storybook/addon-docs@9.0.10 @storybook/react-vite@9.0.10
+# Copiar y dar permisos al script de entrada
+COPY docker-entrypoint-storybook.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-# Cambiar propietario
-RUN chown -R nodejs:nodejs /app
-USER nodejs
+# Configuración para hot reload
+ENV CHOKIDAR_USEPOLLING=true
+ENV STORYBOOK_DISABLE_TELEMETRY=true
 
-# ✅ Comando específico para Storybook
-CMD ["npm", "run", "storybook"]
+# Puerto de Storybook
+EXPOSE 6006
 
-# ==========================================
-# 🏗️ STAGE 4: Storybook Build
-# ==========================================
-FROM dependencies AS storybook-build
-
-COPY . .
-RUN npm run storybook:build
-
-# ==========================================
-# 🎯 STAGE FINAL: Desarrollo por defecto
-# ==========================================
-FROM storybook-dev AS final
+# Usar el script de entrada
+ENTRYPOINT ["/docker-entrypoint.sh"]
