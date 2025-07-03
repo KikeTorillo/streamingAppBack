@@ -32,41 +32,6 @@ const config = {
   "docs": {
     "theme": 'dark'
   },
-  
-  // 🔥 FIX CRÍTICO: Configuración Docker/WebSocket
-  viteFinal: (config) => {
-    config.server = {
-      ...config.server,
-      host: '0.0.0.0',
-      port: 6006,
-      strictPort: true,
-      open: false,
-      // 🚀 FIX ERROR 426: WebSocket configuration
-      hmr: {
-        port: 6006,
-        host: '0.0.0.0',
-        // ✅ CRÍTICO: Configuración WebSocket para Docker
-        clientPort: 6006,
-        // ✅ Evitar problemas de proxy
-        overlay: false
-      },
-      // 🔧 Configuración adicional para Docker
-      watch: {
-        usePolling: true,
-        interval: 100
-      }
-    };
-
-    // 🛡️ Fix para modo desarrollo
-    if (config.mode === 'development') {
-      config.define = {
-        ...config.define,
-        global: 'globalThis'
-      };
-    }
-
-    return config;
-  }
 };
 
 export default config;

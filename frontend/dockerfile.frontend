@@ -6,11 +6,6 @@
 # ==========================================
 FROM node:20-alpine AS base
 
-# Metadata del contenedor
-LABEL maintainer="arellanestorillo@yahoo.com"
-LABEL description="Frontend StreamingApp con React, Vite y Storybook"
-LABEL version="2.0"
-
 # Variables de build
 ARG NODE_ENV=development
 ENV NODE_ENV=${NODE_ENV}
