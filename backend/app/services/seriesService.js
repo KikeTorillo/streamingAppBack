@@ -53,10 +53,16 @@ class SeriesService {
   async find() {
     try {
       const query = `
-        SELECT se.*
-        FROM series se
-        ORDER BY se.release_year DESC
-      `;
+      SELECT 
+        se.*,
+        c.name as category_name,
+        COUNT(ep.id) as episodes_count
+      FROM series se
+      LEFT JOIN categories c ON c.id = se.category_id  
+      LEFT JOIN episodes ep ON ep.serie_id = se.id
+      GROUP BY se.id, c.name
+      ORDER BY se.release_year DESC
+    `;
       const result = await this.pool.query(query);
       return result.rows;
     } catch (error) {

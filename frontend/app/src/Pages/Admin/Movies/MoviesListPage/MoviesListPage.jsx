@@ -1,4 +1,4 @@
-// ===== MOVIES LIST PAGE - ADMIN PANEL (CON BORRADO IMPLEMENTADO) =====
+// ===== MOVIES LIST PAGE - COLUMNAS CORREGIDAS PARA BACKEND REAL =====
 // src/Pages/Admin/Movies/MoviesListPage/MoviesListPage.jsx
 
 import React, { useState, useEffect } from 'react';
@@ -14,14 +14,11 @@ import { getMoviesService } from '../../../../services/Movies/getMoviesService';
 import { deleteMovieService } from '../../../../services/Movies/deleteMovieService';
 
 /**
- * MoviesListPage - Página de listado de películas para el admin panel
+ * MoviesListPage - CORREGIDO con columnas reales del backend
  * 
- * ✅ SISTEMA DE DISEÑO: AdminLayout + DataTable + componentes del sistema
- * ✅ PATRÓN: Mismo flujo que UsersListPage/CategoriesListPage
- * ✅ FUNCIONALIDADES: CRUD completo, filtros, búsqueda
- * ✅ UX: Estados de loading, error y success consistentes
- * ✅ BORRADO: Implementado con deleteMovieService
- * ✅ COMPONENTES: Solo componentes con stories de Storybook
+ * ✅ COLUMNAS REALES: Solo campos que existen en la base de datos
+ * ✅ BACKEND COMPATIBLE: Usa estructura real de movies table
+ * ✅ INFORMACIÓN CORRECTA: No muestra datos que no vienen del servidor
  */
 function MoviesListPage() {
   const navigate = useNavigate();
@@ -30,26 +27,49 @@ function MoviesListPage() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [deleting, setDeleting] = useState(null); // ID de la película siendo eliminada
+  const [deleting, setDeleting] = useState(null);
 
-  // ===== CONFIGURACIÓN DE COLUMNAS PARA DATATABLE =====
+  // ===== CONFIGURACIÓN DE COLUMNAS CORREGIDAS =====
   const movieColumns = [
     {
+      id: 'id',
+      accessorKey: 'id',
+      header: 'ID',
+      size: 60,
+      cell: ({ getValue }) => (
+        <span style={{ 
+          fontFamily: 'var(--font-mono)', 
+          fontSize: 'var(--font-size-sm)' 
+        }}>
+          #{getValue()}
+        </span>
+      )
+    },
+    {
       id: 'poster',
-      accessorKey: 'poster',
-      header: 'Poster',
+      accessorKey: 'cover_image',
+      header: 'Portada',
       enableSorting: false,
       size: 80,
       cell: ({ getValue, row }) => {
-        const posterUrl = getValue();
+        const coverImage = getValue();
         const title = row.original.title;
         
         return (
-          <div style={{ width: '60px', height: '90px', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
-            {posterUrl ? (
+          <div style={{ 
+            width: '60px', 
+            height: '90px', 
+            borderRadius: 'var(--radius-md)', 
+            overflow: 'hidden',
+            backgroundColor: 'var(--bg-muted)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {coverImage ? (
               <img 
-                src={posterUrl} 
-                alt={`Poster de ${title}`}
+                src={coverImage} 
+                alt={`Portada de ${title}`}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -66,10 +86,11 @@ function MoviesListPage() {
                 width: '100%',
                 height: '100%',
                 backgroundColor: 'var(--bg-muted)',
-                display: posterUrl ? 'none' : 'flex',
+                display: coverImage ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '2.0rem'
+                fontSize: 'var(--font-size-xl)',
+                color: 'var(--text-secondary)'
               }}
             >
               🎬
@@ -85,142 +106,195 @@ function MoviesListPage() {
       size: 250,
       cell: ({ getValue, row }) => {
         const title = getValue();
-        const year = row.original.year;
+        const mediaType = row.original.media_type || 'movie';
+        
         return (
           <div>
             <div style={{ 
               fontWeight: 'var(--font-weight-semibold)',
-              color: 'var(--text-primary)',
               marginBottom: 'var(--space-xs)'
             }}>
               {title}
             </div>
-            {year && (
-              <div style={{ 
-                fontSize: 'var(--font-size-sm)',
-                color: 'var(--text-muted)'
-              }}>
-                {year}
-              </div>
-            )}
+            <Badge 
+              variant={mediaType === 'movie' ? 'info' : 'warning'}
+              size="xs"
+              style="soft"
+            >
+              {mediaType === 'movie' ? '🎬 Película' : '📺 Serie'}
+            </Badge>
           </div>
         );
       }
     },
     {
       id: 'category',
-      accessorKey: 'category',
+      accessorKey: 'category_id',
       header: 'Categoría',
-      size: 130,
-      cell: ({ getValue }) => {
-        const category = getValue();
-        return category ? (
-          <Badge 
-            variant="neutral"
-            style="soft"
-            size="sm"
-          >
-            {category}
-          </Badge>
-        ) : (
-          <span style={{ color: 'var(--text-muted)' }}>Sin categoría</span>
-        );
-      }
-    },
-    {
-      id: 'type',
-      accessorKey: 'type',
-      header: 'Tipo',
-      size: 100,
-      cell: ({ getValue }) => {
-        const type = getValue();
-        const isMovie = type === 'movie';
-        return (
-          <Badge 
-            variant={isMovie ? 'primary' : 'secondary'}
-            style="soft"
-            size="sm"
-            icon={isMovie ? '🎬' : '📺'}
-          >
-            {isMovie ? 'Película' : 'Serie'}
-          </Badge>
-        );
-      }
-    },
-    {
-      id: 'duration',
-      accessorKey: 'duration',
-      header: 'Duración',
-      size: 100,
+      size: 120,
       cell: ({ getValue, row }) => {
-        const duration = getValue();
-        const type = row.original.type;
+        const categoryId = getValue();
         
-        if (!duration) {
-          return <span style={{ color: 'var(--text-muted)' }}>--</span>;
-        }
-        
-        if (type === 'series') {
-          return `${duration} ep.`;
-        }
-        
-        const hours = Math.floor(duration / 60);
-        const minutes = duration % 60;
-        return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-      }
-    },
-    {
-      id: 'rating',
-      accessorKey: 'rating',
-      header: 'Rating',
-      size: 100,
-      cell: ({ getValue }) => {
-        const rating = getValue();
-        return rating ? (
+        // Si tienes las categorías cargadas, puedes hacer el mapeo
+        // Por ahora mostramos el ID hasta que implementes la carga de categorías
+        return (
           <Badge 
-            variant="warning" 
-            style="soft"
-            icon="⭐"
+            variant="outline"
             size="sm"
+            style="soft"
           >
-            {rating}
+            📂 Cat #{categoryId}
           </Badge>
-        ) : (
-          <span style={{ color: 'var(--text-muted)' }}>Sin rating</span>
         );
       }
     },
     {
-      id: 'status',
-      accessorKey: 'status',
-      header: 'Estado',
+      id: 'release_year',
+      accessorKey: 'release_year',
+      header: 'Año',
       size: 100,
+      cell: ({ getValue }) => (
+        <span style={{ 
+          color: 'var(--text-secondary)',
+          fontFamily: 'var(--font-mono)'
+        }}>
+          {getValue()}
+        </span>
+      )
+    },
+    {
+      id: 'description',
+      accessorKey: 'description',
+      header: 'Descripción',
+      size: 200,
       cell: ({ getValue }) => {
-        const status = getValue();
+        const description = getValue();
+        
+        if (!description) {
+          return (
+            <span style={{ 
+              color: 'var(--text-muted)',
+              fontStyle: 'italic'
+            }}>
+              Sin descripción
+            </span>
+          );
+        }
+        
+        // Truncar descripción larga
+        const truncated = description.length > 80 
+          ? description.substring(0, 80) + '...' 
+          : description;
+          
         return (
-          <Badge 
-            variant={status === 'active' ? 'success' : 'neutral'}
-            style="soft"
-            size="sm"
+          <span 
+            style={{ 
+              color: 'var(--text-secondary)',
+              fontSize: 'var(--font-size-sm)'
+            }}
+            title={description} // Tooltip con descripción completa
           >
-            {status === 'active' ? 'Activo' : 'Inactivo'}
-          </Badge>
+            {truncated}
+          </span>
+        );
+      }
+    },
+    {
+      id: 'created_at',
+      accessorKey: 'created_at',
+      header: 'Fecha Agregada',
+      size: 140,
+      cell: ({ getValue }) => {
+        const date = new Date(getValue());
+        const now = new Date();
+        
+        // ✅ CORREGIDO: Comparar solo las fechas (año, mes, día) ignorando horas
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const createdDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        
+        // Calcular diferencia en días de forma correcta
+        const diffTime = today.getTime() - createdDate.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        let timeDisplay;
+        let badgeVariant = 'neutral';
+        
+        if (diffDays === 0) {
+          // Mismo día = HOY
+          timeDisplay = 'Hoy';
+          badgeVariant = 'success';
+        } else if (diffDays === 1) {
+          // 1 día de diferencia = AYER
+          timeDisplay = 'Ayer';
+          badgeVariant = 'warning';
+        } else if (diffDays === -1) {
+          // Fecha futura (edge case)
+          timeDisplay = 'Mañana';
+          badgeVariant = 'info';
+        } else if (diffDays > 1 && diffDays <= 7) {
+          // Entre 2-7 días
+          timeDisplay = `${diffDays} días`;
+          badgeVariant = 'info';
+        } else if (diffDays > 7 && diffDays <= 30) {
+          // Entre 1-4 semanas
+          const weeks = Math.floor(diffDays / 7);
+          timeDisplay = weeks === 1 ? '1 sem' : `${weeks} sem`;
+        } else if (diffDays > 30 && diffDays <= 365) {
+          // Entre 1-12 meses
+          const months = Math.floor(diffDays / 30);
+          timeDisplay = months === 1 ? '1 mes' : `${months} meses`;
+        } else if (diffDays > 365) {
+          // Más de 1 año
+          const years = Math.floor(diffDays / 365);
+          timeDisplay = years === 1 ? '1 año' : `${years} años`;
+        } else {
+          // Fecha muy reciente (menos de 1 día)
+          timeDisplay = date.toLocaleDateString('es-ES', { 
+            month: 'short', 
+            day: 'numeric'
+          });
+        }
+        
+        return (
+          <div>
+            <Badge 
+              variant={badgeVariant}
+              size="xs"
+              style="soft"
+            >
+              {timeDisplay}
+            </Badge>
+            <div style={{ 
+              fontSize: 'var(--font-size-xs)',
+              color: 'var(--text-muted)',
+              marginTop: 'var(--space-xs)'
+            }}>
+              {date.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit', 
+                year: 'numeric'
+              })} {date.toLocaleTimeString('es-ES', {
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </div>
+          </div>
         );
       }
     }
   ];
 
-  // ===== FUNCIONES =====
+  // ===== FUNCIONES (mantienen la misma lógica) =====
   
-  /**
-   * Cargar lista de películas
-   */
   const loadMovies = async () => {
     try {
       setLoading(true);
       setError(null);
       
       const moviesData = await getMoviesService();
+      
+      console.log('📥 Datos recibidos del backend:', moviesData);
+      
       setMovies(moviesData || []);
     } catch (err) {
       console.error('Error loading movies:', err);
@@ -230,33 +304,19 @@ function MoviesListPage() {
     }
   };
 
-  /**
-   * Crear nueva película
-   */
   const handleCreateMovie = () => {
     navigate('/admin/movies/create');
   };
 
-  /**
-   * Editar película
-   */
   const handleEditMovie = (movie) => {
     navigate(`/admin/movies/edit/${movie.id}`);
   };
 
-  /**
-   * Ver película (navegar al reproductor)
-   */
   const handleViewMovie = (movie) => {
     navigate(`/movie/${movie.id}`);
   };
 
-  /**
-   * ✅ ELIMINAR PELÍCULA - IMPLEMENTACIÓN COMPLETA CON DELETEMOVIESERVICE
-   * Sigue el mismo patrón que CategoriesListPage
-   */
   const handleDeleteMovie = async (movie) => {
-    // Confirmación con información detallada
     const confirmMessage = 
       `¿Estás seguro de que quieres eliminar "${movie.title}"?\n\n` +
       `⚠️ ADVERTENCIA: Esta acción eliminará permanentemente:\n` +
@@ -274,28 +334,22 @@ function MoviesListPage() {
       
       console.log('🗑️ Eliminando película:', movie);
       
-      // ✅ USAR SERVICIO REAL - deleteMovieService
       const response = await deleteMovieService(movie.id);
       
       console.log('📥 Respuesta del servicio de eliminación:', response);
       
-      // ✅ Si llegamos aquí, la eliminación fue exitosa
       console.log('✅ Película eliminada exitosamente');
       
-      // Mostrar notificación de éxito usando alert (se puede mejorar con toast)
       alert(`✅ Película "${movie.title}" eliminada exitosamente`);
       
-      // Recargar lista para reflejar los cambios
       await loadMovies();
       
     } catch (error) {
       console.error('💥 Error al eliminar película:', error);
       
-      // ✅ Manejar errores específicos del backend
       let errorMessage = `Error al eliminar la película "${movie.title}".`;
       
       if (error.response?.status === 401) {
-        // Sesión expirada
         console.log('🔒 Sesión expirada, redirigiendo...');
         sessionStorage.clear();
         navigate('/login');
@@ -307,13 +361,11 @@ function MoviesListPage() {
       } else if (error.response?.status === 409) {
         errorMessage = 'No se puede eliminar la película porque tiene datos asociados.';
       } else if (error.response?.data?.message) {
-        // Mensaje específico del backend
         errorMessage = error.response.data.message;
       } else if (error.message) {
         errorMessage = error.message;
       }
       
-      // Mostrar error al usuario
       alert(`❌ ${errorMessage}`);
       
     } finally {
@@ -321,9 +373,6 @@ function MoviesListPage() {
     }
   };
 
-  /**
-   * Importar desde TMDB
-   */
   const handleImportFromTMDB = () => {
     navigate('/admin/movies/create');
   };
@@ -333,11 +382,36 @@ function MoviesListPage() {
     loadMovies();
   }, []);
 
+  // ===== ESTADÍSTICAS MEJORADAS =====
+  const getMoviesStats = () => {
+    const total = movies.length;
+    const thisWeek = movies.filter(movie => {
+      const createdDate = new Date(movie.created_at);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return createdDate >= weekAgo;
+    }).length;
+    
+    const withCategory = movies.filter(movie => movie.category_id).length;
+    const moviesCount = movies.filter(movie => !movie.media_type || movie.media_type === 'movie').length;
+    const seriesCount = movies.filter(movie => movie.media_type === 'tv').length;
+    
+    return { total, thisWeek, withCategory, moviesCount, seriesCount };
+  };
+
+  const stats = getMoviesStats();
+
   // ===== RENDER =====
   return (
     <AdminLayout
       title="Gestión de Películas y Series"
-      subtitle={`${movies.length} contenidos registrados en el sistema`}
+      subtitle={(() => {
+        if (loading) return 'Cargando contenido...';
+        if (error) return 'Error al cargar contenido';
+        if (stats.total === 0) return 'No hay contenido registrado';
+        
+        return `${stats.total} contenidos | ${stats.moviesCount} películas | ${stats.seriesCount} series | ${stats.thisWeek} nuevos esta semana`;
+      })()}
       headerActions={
         <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
           <Button
@@ -384,7 +458,7 @@ function MoviesListPage() {
           onEdit={handleEditMovie}
           onView={handleViewMovie}
           onDelete={handleDeleteMovie}
-          deleting={deleting} // Estado de eliminación para UI
+          deleting={deleting}
           emptyTitle="No hay películas registradas"
           emptyDescription="Comienza agregando tu primera película o serie"
           emptyIcon="🎬"

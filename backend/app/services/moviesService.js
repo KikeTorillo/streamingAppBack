@@ -47,11 +47,16 @@ class MoviesService {
   async find() {
     try {
       const query = `
-        SELECT vi.file_hash, vi.available_resolutions, m.*
-        FROM movies m
-        LEFT JOIN videos vi ON vi.id = m.video_id
-        ORDER BY m.release_year DESC
-      `;
+      SELECT 
+        m.*,
+        vi.file_hash, 
+        vi.available_resolutions,
+        c.name as category_name
+      FROM movies m
+      LEFT JOIN videos vi ON vi.id = m.video_id
+      LEFT JOIN categories c ON c.id = m.category_id
+      ORDER BY m.release_year DESC
+    `;
       const result = await this.pool.query(query);
       return result.rows;
     } catch (error) {
