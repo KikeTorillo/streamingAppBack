@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y ffmpeg
 
 # Instala dependencias y nodemon global
 COPY package*.json ./
-RUN npm ci && npm install -g nodemon
+RUN npm install -g nodemon
 
 # No copiamos código aquí porque lo montaremos como volumen
 EXPOSE 3000

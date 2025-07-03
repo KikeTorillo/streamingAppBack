@@ -144,7 +144,7 @@ services:
   # ==========================================
   frontend:
     build:
-      context: ./frontend
+      context: ./frontend/app
       dockerfile: dockerfile.frontend
       args:
         - NODE_ENV=development
@@ -160,7 +160,7 @@ services:
       - VITE_PORT=5173
       - CHOKIDAR_USEPOLLING=true
     volumes:
-      - ./frontend:/app
+      - ./frontend/app:/app
       - /app/node_modules
       - /app/dist
     ports:
@@ -175,7 +175,7 @@ services:
   # ==========================================
   storybook:
     build:
-      context: ./frontend
+      context: ./frontend/app
       dockerfile: dockerfile.storybook
       args:
         - NODE_ENV=development
@@ -187,7 +187,7 @@ services:
       - STORYBOOK_DISABLE_TELEMETRY=true
       - STORYBOOK_DISABLE_UPDATES=true
     volumes:
-      - ./frontend:/app
+      - ./frontend/app:/app
       - /app/node_modules
       - /app/storybook-static
     ports:
