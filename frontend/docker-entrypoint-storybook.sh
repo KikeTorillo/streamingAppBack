@@ -3,20 +3,50 @@
 
 echo "🚀 Iniciando Storybook en Docker..."
 
-# Función para limpiar procesos zombie
+# Función para verificar si el puerto está en uso
+check_port() {
+    netstat -tln | grep -q ":6006 "
+    return $?
+}
+
+# Función para limpiar procesos y puertos
 cleanup() {
-    echo "🧹 Limpiando procesos anteriores..."
-    # Matar cualquier proceso de node/storybook anterior
-    pkill -f "storybook" || true
-    pkill -f "node" || true
+    echo "🧹 Limpiando procesos y puertos anteriores..."
+    
+    # Matar todos los procesos node y storybook
+    pkill -9 -f "storybook" 2>/dev/null || true
+    pkill -9 -f "node" 2>/dev/null || true
+    
+    # Esperar un momento
+    sleep 3
+    
+    # Si el puerto sigue ocupado, buscar y matar el proceso específico
+    if check_port; then
+        echo "⚠️  Puerto 6006 aún ocupado, buscando proceso..."
+        PID=$(netstat -tlnp 2>/dev/null | grep ":6006" | awk '{print $7}' | cut -d'/' -f1)
+        if [ ! -z "$PID" ]; then
+            echo "🔪 Matando proceso PID: $PID"
+            kill -9 $PID 2>/dev/null || true
+        fi
+    fi
+    
+    # Esperar un poco más
     sleep 2
 }
 
 # Limpiar al inicio
 cleanup
 
+# Verificar que el puerto está libre
+if check_port; then
+    echo "❌ ERROR: Puerto 6006 sigue ocupado después de la limpieza"
+    echo "Esperando 10 segundos adicionales..."
+    sleep 10
+    cleanup
+fi
+
 # Trap para limpiar al salir
-trap cleanup EXIT
+trap cleanup EXIT INT TERM
 
 # Verificar que estamos en el directorio correcto
 cd /app
@@ -27,12 +57,7 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-echo "✅ Iniciando Storybook en puerto 6006..."
+echo "✅ Puerto 6006 libre. Iniciando Storybook..."
 
-# Ejecutar Storybook con configuración específica para Docker
-exec npx storybook dev \
-    --port 6006 \
-    --host 0.0.0.0 \
-    --no-open \
-    --quiet \
-    --disable-telemetry
+# Usar el script docker:storybook del package.json
+exec npm run docker:storybook

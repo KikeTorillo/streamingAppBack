@@ -7,6 +7,7 @@ WORKDIR /app
 RUN apk add --no-cache \
     curl \
     procps \
+    net-tools \
     && rm -rf /var/cache/apk/*
 
 # Copiar archivos de configuración

@@ -184,7 +184,7 @@ services:
   storybook:
     build:
       context: ./frontend
-      dockerfile: dockerfile.storybook  # Dockerfile específico
+      dockerfile: dockerfile.storybook
       args:
         - NODE_ENV=development
         - SERVICE_TYPE=storybook
@@ -192,9 +192,6 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
-      - STORYBOOK_HOST=0.0.0.0
-      - STORYBOOK_PORT=6006
-      # Configuración específica de Storybook
       - STORYBOOK_DISABLE_TELEMETRY=true
       - STORYBOOK_DISABLE_UPDATES=true
     volumes:
@@ -203,15 +200,14 @@ services:
       - /app/storybook-static
     ports:
       - "6006:6006"
-    restart: unless-stopped
+    # ✅ CAMBIO IMPORTANTE: Usar "no" para evitar reinicios automáticos durante el error
+    restart: "no"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:6006 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
-    # ✅ Comando específico solo para Storybook
-    command: ["npm", "run", "storybook"]
+      start_period: 90s  # Aumentado para dar más tiempo al inicio
 
   # Servicio Backend Node.js
   backend:
