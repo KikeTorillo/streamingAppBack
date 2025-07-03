@@ -10,8 +10,8 @@
     "preview": "vite preview --host 0.0.0.0 --port 4173",
     
     "_comment_storybook_426_fix": "=== STORYBOOK - FIX ERROR 426 UPGRADE REQUIRED ===",
-    "storybook": "storybook dev --port 6006 --host 0.0.0.0 --no-open --quiet --disable-telemetry",
-    "storybook:dev": "storybook dev --port 6006 --host 0.0.0.0 --no-open --disable-telemetry",
+    "storybook": "storybook dev -p 6006",
+    "storybook:dev": "storybook dev -p 6006",
     "storybook:build": "storybook build --output-dir storybook-static",
     "storybook:serve": "npx serve storybook-static -l 6006",
     

@@ -56,11 +56,6 @@ RUN if [ -f "package-lock.json" ]; then \
 # ==========================================
 FROM dependencies AS storybook-dev
 
-# Variables específicas de Storybook
-ENV STORYBOOK_HOST=0.0.0.0
-ENV STORYBOOK_PORT=6006
-ENV CHOKIDAR_USEPOLLING=true
-
 # Copiar código fuente
 COPY . .
 
