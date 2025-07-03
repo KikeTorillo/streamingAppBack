@@ -377,45 +377,51 @@ class SeriesService {
 
       if (season && episodeNumber) {
         query = `
-        SELECT 
-          ep.*,
-          v.file_hash,
-          v.available_resolutions,
-          v.available_subtitles,
-          v.duration as video_duration
-        FROM episodes ep
-        LEFT JOIN videos v ON ep.video_id = v.id
-        WHERE ep.serie_id = $1 AND ep.season = $2 AND ep.episode_number = $3;
-      `;
+          SELECT 
+            ep.*,
+            s.title as serie_name,
+            v.file_hash,
+            v.available_resolutions,
+            v.available_subtitles,
+            v.duration as video_duration
+          FROM episodes ep
+          LEFT JOIN series s ON s.id = ep.serie_id
+          LEFT JOIN videos v ON ep.video_id = v.id
+          WHERE ep.serie_id = $1 AND ep.season = $2 AND ep.episode_number = $3;
+        `;
         arrayValues.push(season);
         arrayValues.push(episodeNumber);
       } else if (season) {
         query = `
-        SELECT 
-          ep.*,
-          v.file_hash,
-          v.available_resolutions,
-          v.available_subtitles,
-          v.duration as video_duration
-        FROM episodes ep
-        LEFT JOIN videos v ON ep.video_id = v.id
-        WHERE ep.serie_id = $1 AND ep.season = $2
-        ORDER BY ep.episode_number;
-      `;
+          SELECT 
+            ep.*,
+            s.title as serie_name,    
+            v.file_hash,
+            v.available_resolutions,
+            v.available_subtitles,
+            v.duration as video_duration
+          FROM episodes ep
+          LEFT JOIN series s ON s.id = ep.serie_id
+          LEFT JOIN videos v ON ep.video_id = v.id
+          WHERE ep.serie_id = $1 AND ep.season = $2
+          ORDER BY ep.episode_number;
+        `;
         arrayValues.push(season);
       } else {
         query = `
-        SELECT 
-          ep.*,
-          v.file_hash,
-          v.available_resolutions,
-          v.available_subtitles,
-          v.duration as video_duration
-        FROM episodes ep
-        LEFT JOIN videos v ON ep.video_id = v.id
-        WHERE ep.serie_id = $1
-        ORDER BY ep.season, ep.episode_number;
-      `;
+          SELECT 
+            ep.*,
+            s.title as serie_name,
+            v.file_hash,
+            v.available_resolutions,
+            v.available_subtitles,
+            v.duration as video_duration
+          FROM episodes ep
+          LEFT JOIN series s ON s.id = ep.serie_id
+          LEFT JOIN videos v ON ep.video_id = v.id
+          WHERE ep.serie_id = $1
+          ORDER BY ep.season, ep.episode_number;
+        `;
       }
 
       const result = await this.pool.query(query, arrayValues);

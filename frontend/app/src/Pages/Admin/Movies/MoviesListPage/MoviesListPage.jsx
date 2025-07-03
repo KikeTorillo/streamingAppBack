@@ -129,21 +129,20 @@ function MoviesListPage() {
     },
     {
       id: 'category',
-      accessorKey: 'category_id',
+      accessorKey: 'category_name',
       header: 'Categoría',
-      size: 120,
+      size: 150,
       cell: ({ getValue, row }) => {
-        const categoryId = getValue();
+        const categoryName = getValue();
+        const categoryId = row.original.category_id;
         
-        // Si tienes las categorías cargadas, puedes hacer el mapeo
-        // Por ahora mostramos el ID hasta que implementes la carga de categorías
         return (
           <Badge 
             variant="outline"
             size="sm"
             style="soft"
           >
-            📂 Cat #{categoryId}
+            📂 {categoryName || 'Sin categoría'}
           </Badge>
         );
       }
@@ -392,7 +391,7 @@ function MoviesListPage() {
       return createdDate >= weekAgo;
     }).length;
     
-    const withCategory = movies.filter(movie => movie.category_id).length;
+    const withCategory = movies.filter(movie => movie.category_name).length;
     const moviesCount = movies.filter(movie => !movie.media_type || movie.media_type === 'movie').length;
     const seriesCount = movies.filter(movie => movie.media_type === 'tv').length;
     
@@ -404,7 +403,7 @@ function MoviesListPage() {
   // ===== RENDER =====
   return (
     <AdminLayout
-      title="Gestión de Películas y Series"
+      title="Gestión de Películas"
       subtitle={(() => {
         if (loading) return 'Cargando contenido...';
         if (error) return 'Error al cargar contenido';

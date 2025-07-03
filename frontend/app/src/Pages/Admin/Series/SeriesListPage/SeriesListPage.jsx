@@ -129,21 +129,20 @@ function SeriesListPage() {
     },
     {
       id: 'category',
-      accessorKey: 'category_id',
+      accessorKey: 'category_name',
       header: 'Categoría',
-      size: 120,
-      cell: ({ getValue }) => {
-        const categoryId = getValue();
+      size: 150,
+      cell: ({ getValue, row }) => {
+        const categoryName = getValue();
+        const categoryId = row.original.category_id;
         
-        // Si tienes las categorías cargadas, puedes hacer el mapeo
-        // Por ahora mostramos el ID hasta que implementes la carga de categorías
         return (
           <Badge 
             variant="outline"
             size="sm"
             style="soft"
           >
-            📂 Cat #{categoryId}
+            📂 {categoryName || 'Sin categoría'}
           </Badge>
         );
       }
@@ -411,9 +410,9 @@ function SeriesListPage() {
       return createdDate >= weekAgo;
     }).length;
     
-    const withCategory = series.filter(seriesItem => seriesItem.category_id).length;
+    const withCategory = series.filter(seriesItem => seriesItem.category_name).length;
     const withEpisodes = series.filter(seriesItem => (seriesItem.episodes_count || 0) > 0).length;
-    const totalEpisodes = series.reduce((sum, seriesItem) => sum + (seriesItem.episodes_count || 0), 0);
+    const totalEpisodes = series.reduce((sum, seriesItem) => sum + (parseInt(seriesItem.episodes_count) || 0), 0);
     
     return { total, thisWeek, withCategory, withEpisodes, totalEpisodes };
   };
