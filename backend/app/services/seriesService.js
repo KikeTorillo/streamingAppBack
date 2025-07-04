@@ -428,10 +428,6 @@ class SeriesService {
 
       // ✅ PROCESAR LOS RESULTADOS para parsear JSON de forma segura
       const episodes = result.rows.map(episode => {
-        console.log('🔍 Processing episode:', episode.id);
-        console.log('🔍 Raw available_resolutions:', episode.available_resolutions);
-        console.log('🔍 Raw available_subtitles:', episode.available_subtitles);
-
         let parsedResolutions = null;
         let parsedSubtitles = null;
 
@@ -471,16 +467,9 @@ class SeriesService {
           available_subtitles: parsedSubtitles
         };
 
-        console.log('✅ Processed episode:', processedEpisode.id, {
-          file_hash: processedEpisode.file_hash,
-          available_resolutions: processedEpisode.available_resolutions,
-          available_subtitles: processedEpisode.available_subtitles
-        });
-
         return processedEpisode;
       });
 
-      console.log('📺 Episodes with video data:', episodes.length);
       return episodes;
 
     } catch (error) {

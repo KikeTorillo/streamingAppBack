@@ -277,23 +277,9 @@ function AdminLayout({
             </div>
           </div>
         </header>
-
-        {/* ===== CONTENIDO PRINCIPAL ===== */}
         <main className="admin-layout__content">
           {children}
         </main>
-
-        {/* ===== FOOTER (OPCIONAL) ===== */}
-        <footer className="admin-layout__footer">
-          <div className="admin-layout__footer-content">
-            <span>© 2024 StreamingApp Admin</span>
-            <div className="admin-layout__footer-links">
-              <button onClick={() => navigate('/admin')}>Dashboard</button>
-              <button onClick={() => navigate('/admin/settings')}>Configuración</button>
-              <button onClick={() => navigate('/support')}>Soporte</button>
-            </div>
-          </div>
-        </footer>
       </div>
     </div>
   );
