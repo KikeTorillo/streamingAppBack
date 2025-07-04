@@ -98,7 +98,18 @@
     "// === MONITOREO ===": "",
     "monitor": "docker stats",
     "monitor:services": "docker compose ps && docker compose top",
-    "check:health": "curl -f http://localhost:3000 && curl -f http://localhost:5173 && curl -f http://localhost:6006"
+    "check:health": "curl -f http://localhost:3000 && curl -f http://localhost:5173 && curl -f http://localhost:6006",
+
+    "// === PRODUCCIÓN SYNOLOGY ===": "",
+    "prod:build": "cd frontend/app && npm run build",
+    "prod:up": "docker compose -f docker-compose.prod.yml up -d --build",
+    "prod:down": "docker compose -f docker-compose.prod.yml down",
+    "prod:restart": "npm run prod:down && npm run prod:up",
+    "prod:logs": "docker compose -f docker-compose.prod.yml logs -f",
+    "prod:status": "docker compose -f docker-compose.prod.yml ps",
+    
+    "clean:prod": "docker compose -f docker-compose.prod.yml down --volumes --remove-orphans",
+    "clean:all": "npm run clean:docker && npm run clean:prod"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

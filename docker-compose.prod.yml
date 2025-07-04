@@ -1,0 +1,111 @@
+# 🏠 CONFIGURACIÓN OPTIMIZADA PARA SYNOLOGY NAS
+services:
+  # Frontend con NGINX estático
+  frontend:
+    build:
+      context: ./frontend/app
+      dockerfile: dockerfile.frontend.prod  # ← Usa el Dockerfile optimizado
+    container_name: streaming-frontend-prod
+    restart: unless-stopped
+    ports:
+      - "8080:80"    # Puerto para acceder desde el navegador
+    depends_on:
+      - backend
+    networks:
+      - streaming-net
+    # Límites de recursos para NAS
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.5'
+
+  # Backend (optimizado para producción)
+  backend:
+    build:
+      context: ./backend/app  
+      dockerfile: dockerfile.appdev  # Mantener tu Dockerfile actual por ahora
+    container_name: streaming-backend-prod
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      - JWT_SECRET=${JWT_SECRET}
+      - API_KEY=${API_KEY}
+    # NO exponer puerto (solo acceso interno vía frontend)
+    depends_on:
+      - postgres
+      - minio
+    networks:
+      - streaming-net
+    # Límites de recursos para NAS
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+
+  # PostgreSQL optimizado para NAS
+  postgres:
+    image: postgres:15-alpine
+    container_name: streaming-postgres-prod
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_INITDB_ARGS="--auth-host=scram-sha-256"
+    volumes:
+      # IMPORTANTE: Usar ruta específica del NAS
+      - /volume1/docker/streaming/postgres:/var/lib/postgresql/data
+      - ./backend/app/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - streaming-net
+    # Límites de recursos para NAS
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+  # MinIO para almacenamiento de videos
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: streaming-minio-prod
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_REGION=${MINIO_REGION}
+    volumes:
+      # IMPORTANTE: Usar ruta específica del NAS
+      - /volume1/docker/streaming/minio:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - streaming-net
+    # Límites de recursos para NAS
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+# Red interna para comunicación entre servicios
+networks:
+  streaming-net:
+    driver: bridge
+
+# NOTA: No usar volúmenes anónimos en Synology
+# Siempre usar rutas específicas como /volume1/docker/...
