@@ -56,6 +56,9 @@ function SeriesListPage() {
         const coverImage = getValue();
         const title = row.original.title;
         
+        // Construir URL completa para la imagen (igual que en MoviesListPage)
+        const imageUrl = coverImage ? `http://localhost:8082/covers/${coverImage}/cover.jpg` : null;
+        
         return (
           <div style={{ 
             width: '60px', 
@@ -67,9 +70,9 @@ function SeriesListPage() {
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            {coverImage ? (
+            {imageUrl ? (
               <img 
-                src={coverImage} 
+                src={imageUrl} 
                 alt={`Portada de ${title}`}
                 style={{
                   width: '100%',
@@ -87,7 +90,7 @@ function SeriesListPage() {
                 width: '100%',
                 height: '100%',
                 backgroundColor: 'var(--bg-muted)',
-                display: coverImage ? 'none' : 'flex',
+                display: imageUrl ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 'var(--font-size-xl)',
@@ -161,43 +164,7 @@ function SeriesListPage() {
         </span>
       )
     },
-    {
-      id: 'description',
-      accessorKey: 'description',
-      header: 'Descripción',
-      size: 200,
-      cell: ({ getValue }) => {
-        const description = getValue();
-        
-        if (!description) {
-          return (
-            <span style={{ 
-              color: 'var(--text-muted)',
-              fontStyle: 'italic'
-            }}>
-              Sin descripción
-            </span>
-          );
-        }
-        
-        // Truncar descripción larga
-        const truncated = description.length > 80 
-          ? description.substring(0, 80) + '...' 
-          : description;
-          
-        return (
-          <span 
-            style={{ 
-              color: 'var(--text-secondary)',
-              fontSize: 'var(--font-size-sm)'
-            }}
-            title={description} // Tooltip con descripción completa
-          >
-            {truncated}
-          </span>
-        );
-      }
-    },
+    // ✅ DESCRIPCIÓN ELIMINADA - Esta columna ya no existe
     {
       id: 'episodes_count',
       accessorKey: 'episodes_count',
