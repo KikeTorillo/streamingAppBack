@@ -1,86 +1,76 @@
-# 🏠 CONFIGURACIÓN OPTIMIZADA PARA SYNOLOGY NAS
 services:
-  # Frontend con NGINX estático
+  # 🎨 FRONTEND OPTIMIZADO PARA SYNOLOGY
   frontend:
     build:
       context: ./frontend/app
-      dockerfile: dockerfile.frontend.prod  # ← Usa el Dockerfile optimizado
+      dockerfile: dockerfile.frontend.prod
     container_name: streaming-frontend-prod
     restart: unless-stopped
     ports:
-      - "8080:80"    # Puerto para acceder desde el navegador
+      - "8080:80"    # Puerto para acceder al frontend
     depends_on:
       - backend
     networks:
-      - streaming-net
-    # Límites de recursos para NAS
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-          cpus: '0.5'
+      - lan
 
-  # Backend (optimizado para producción)
+  # 🖥️ BACKEND (usando tu configuración actual)
   backend:
     build:
-      context: ./backend/app  
-      dockerfile: dockerfile.appdev  # Mantener tu Dockerfile actual por ahora
+      context: ./backend/app
+      dockerfile: dockerfile.appdev  # Mantener tu Dockerfile actual
     container_name: streaming-backend-prod
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=${DB_NAME}
+      - WHITE_LIST=${WHITE_LIST}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - MINIO_ENDPOINT=minio
-      - MINIO_PORT=9000
-      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
-      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
-      - MINIO_BUCKET=${MINIO_BUCKET}
-      - JWT_SECRET=${JWT_SECRET}
+      - IP_ADDRESS_POSTGRESQL=postgres
+      - DB_PORT=5432                    # Puerto interno (no el 5433 del host)
+      - DB_NAME=${DB_NAME}
       - API_KEY=${API_KEY}
-    # NO exponer puerto (solo acceso interno vía frontend)
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONT_URL_LOCAL=http://frontend:80  # URL interna del frontend
+      - EMAIL=${EMAIL}
+      - PASS_EMAIL=${PASS_EMAIL}
+      - MINIO_COVERS_DIR=${MINIO_COVERS_DIR}
+      - MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - IP_ADDRESS_MINIO=minio
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      - TEMP_PROCESSING_DIR=${TEMP_PROCESSING_DIR}
+      - BACK_PORT=3000
+    # NO exponer puerto 3000 (solo acceso interno vía frontend)
     depends_on:
       - postgres
       - minio
     networks:
-      - streaming-net
-    # Límites de recursos para NAS
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '1.0'
+      - lan
 
-  # PostgreSQL optimizado para NAS
+  # 🗄️ POSTGRESQL (usando tu configuración actual)
   postgres:
-    image: postgres:15-alpine
+    build: ./servers/postgresQl
     container_name: streaming-postgres-prod
     restart: unless-stopped
     environment:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_INITDB_ARGS="--auth-host=scram-sha-256"
+      - TZ=America/Mexico_City
     volumes:
-      # IMPORTANTE: Usar ruta específica del NAS
-      - /volume1/docker/streaming/postgres:/var/lib/postgresql/data
-      - ./backend/app/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # MANTENER tus volúmenes relativos (funciona perfecto en Synology)
+      - ./servers/postgresQl/postgres_data:/var/lib/postgresql/data
+      - ./servers/postgresQl/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - streaming-net
-    # Límites de recursos para NAS
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.5'
+      - lan
+    ports:
+      - "5433:5432"  # Mantener tu configuración actual
 
-  # MinIO para almacenamiento de videos
+  # ☁️ MINIO (usando tu configuración actual)
   minio:
-    image: quay.io/minio/minio:latest
-    container_name: streaming-minio-prod
+    image: quay.io/minio/minio
+    container_name: minio-prod
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
@@ -88,24 +78,125 @@ services:
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
       - MINIO_REGION=${MINIO_REGION}
     volumes:
-      # IMPORTANTE: Usar ruta específica del NAS
-      - /volume1/docker/streaming/minio:/data
+      # MANTENER tu volumen relativo actual
+      - ./servers/minio/aws3DataMinio:/data
+    networks:
+      - lan
     ports:
       - "9000:9000"
       - "9001:9001"
+
+  # 🔧 MINIO INIT (mantener igual)
+  minio-init:
+    image: alpine:latest
+    depends_on:
+      - minio
+    environment:
+      - MINIO_HOST=minio
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+    volumes:
+      - ./servers/minio/init-minio.sh:/init-minio.sh
+    entrypoint: ["/bin/sh", "/init-minio.sh"]
     networks:
-      - streaming-net
-    # Límites de recursos para NAS
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.5'
+      - lan
 
-# Red interna para comunicación entre servicios
+  # 🛠️ PGADMIN (opcional, para administración)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin-prod
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PG_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PG_PASSWORD}
+    networks:
+      - lan
+    ports:
+      - "5050:80"
+
+  # 🌐 CDN Y TRANSCODERS (mantener tu configuración actual)
+  cdn1:
+    build:
+      context: ./servers
+      dockerfile: dockerfile
+      args:
+        - TEMPLATE_FILE=./cdn/nginx.conf.template
+    container_name: cdn1-prod
+    restart: unless-stopped
+    environment:
+      - NGINX_IP_ADDRESS=${NGINX_IP_ADDRESS_CDN}
+      - NGINX_SERVER1_PORT=${NGINX_CDN_SERVER1_PORT}
+      - NGINX_SERVER2_PORT=${NGINX_CDN_SERVER2_PORT}
+      - NGINX_TRANSCODER1=${NGINX_IP_ADDRESS_TRANSCODER1}
+      - NGINX_TRANSCODER2=${NGINX_IP_ADDRESS_TRANSCODER2}
+    volumes:
+      - ./servers/cdn/nginx_cache:/var/cache/nginx
+      - ./servers/cdn/index.html:/nginx-1.26.3/html/index.html
+    networks:
+      - lan
+    depends_on:
+      - transcoder1
+      - transcoder2
+    ports:
+      - "8082:80"
+
+  transcoder1:
+    build:
+      context: ./servers
+      dockerfile: dockerfile
+      args:
+        - TEMPLATE_FILE=./transcoderServers/transcoder1/nginx.conf.template
+    container_name: transcoder1-prod
+    restart: unless-stopped
+    environment:
+      - NGINX_IP_ADDRESS=${NGINX_IP_ADDRESS_TRANSCODER1}
+      - NGINX_SERVER1_PORT=${NGINX_TRANSCODER1_SERVER1_PORT}
+      - NGINX_SERVER2_PORT=${NGINX_TRANSCODER1_SERVER2_PORT}
+      - NGINX_MINIO_SERVER=minio:9000
+      - NGINX_MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - NGINX_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - NGINX_REGION=${MINIO_REGION}
+      - NGINX_MINIO_BUCKET=${MINIO_BUCKET}
+      - NGINX_MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
+      - NGINX_MINIO_COVERS_DIR=${MINIO_COVERS_DIR}
+    volumes:
+      - ./servers/transcoderServers/transcoder1/nginx_cache:/var/cache/nginx
+      - ./servers/transcoderServers/transcoder1/index.html:/nginx-1.26.3/html/index.html
+    networks:
+      - lan
+    depends_on:
+      - minio
+
+  transcoder2:
+    build:
+      context: ./servers
+      dockerfile: dockerfile
+      args:
+        - TEMPLATE_FILE=./transcoderServers/transcoder2/nginx.conf.template
+    container_name: transcoder2-prod
+    restart: unless-stopped
+    environment:
+      - NGINX_IP_ADDRESS=${NGINX_IP_ADDRESS_TRANSCODER2}
+      - NGINX_SERVER1_PORT=${NGINX_TRANSCODER2_SERVER1_PORT}
+      - NGINX_SERVER2_PORT=${NGINX_TRANSCODER2_SERVER2_PORT}
+      - NGINX_MINIO_SERVER=minio:9000
+      - NGINX_MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - NGINX_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - NGINX_REGION=${MINIO_REGION}
+      - NGINX_MINIO_BUCKET=${MINIO_BUCKET}
+      - NGINX_MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
+      - NGINX_MINIO_COVERS_DIR=${MINIO_COVERS_DIR}
+    volumes:
+      - ./servers/transcoderServers/transcoder2/nginx_cache:/var/cache/nginx
+      - ./servers/transcoderServers/transcoder2/index.html:/nginx-1.26.3/html/index.html
+    networks:
+      - lan
+    depends_on:
+      - minio
+
+# Red personalizada (mantener igual)
 networks:
-  streaming-net:
+  lan:
+    name: lan
     driver: bridge
-
-# NOTA: No usar volúmenes anónimos en Synology
-# Siempre usar rutas específicas como /volume1/docker/...
