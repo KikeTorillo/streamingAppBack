@@ -150,44 +150,6 @@ function EpisodesListPage() {
         );
       }
     },
-
-    {
-      id: 'description',
-      accessorKey: 'description',
-      header: 'Descripción',
-      size: 200,
-      cell: ({ getValue }) => {
-        const description = getValue();
-        
-        if (!description) {
-          return (
-            <span style={{ 
-              color: 'var(--text-muted)',
-              fontStyle: 'italic'
-            }}>
-              Sin descripción
-            </span>
-          );
-        }
-        
-        // Truncar descripción larga
-        const truncated = description.length > 60 
-          ? description.substring(0, 60) + '...' 
-          : description;
-          
-        return (
-          <span 
-            style={{ 
-              color: 'var(--text-secondary)',
-              fontSize: 'var(--font-size-sm)'
-            }}
-            title={description} // Tooltip con descripción completa
-          >
-            {truncated}
-          </span>
-        );
-      }
-    },
     {
       id: 'created_at',
       accessorKey: 'created_at',
