@@ -96,8 +96,7 @@
     "// === MONITOREO ===": "",
     "monitor": "docker stats",
     "monitor:services": "docker compose ps && docker compose top",
-    "check:health": "curl -f http://localhost:3000 && curl -f http://localhost:5173 && curl -f http://localhost:6006",
-
+    "check:health": "curl -f http://localhost:3000 && curl -f http://localhost:5173 && curl -f http://localhost:6006"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

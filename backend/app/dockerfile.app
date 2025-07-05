@@ -29,7 +29,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Instalar solo dependencias de producción
-RUN npm ci --only=production && \
+RUN npm install --only=production && \
     npm cache clean --force
 
 # ==========================================

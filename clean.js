@@ -62,6 +62,7 @@ const localFolders = [
   './servers/minio/aws3DataMinio',
   './servers/postgresQl/postgres_data',
   './backend/app/uploads',
+  './backend/app/temp_downloads',
   './backend/app/vod',
   './backend/app/tempProcessinDir'
 ];

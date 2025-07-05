@@ -8,6 +8,10 @@
  */
 function environmentService() {
     // 1. Detectar entorno actual
+    // Vite automáticamente establece estas variables según el comando usado:
+    // - npm run dev → DEV = true, PROD = false
+    // - npm run build → DEV = false, PROD = true
+    // No requiere configuración manual, Vite lo detecta automáticamente
     const isDevelopment = import.meta.env.DEV;
     const isProduction = import.meta.env.PROD;
     
@@ -39,8 +43,10 @@ function environmentService() {
         
         console.log('🔧 Modo DESARROLLO detectado');
     } else {
-        // 🏠 PRODUCCIÓN: URLs relativas + valores por defecto
-        urlBackend = '';  // ← CLAVE: URL relativa para que NGINX haga proxy
+        // 🏠 PRODUCCIÓN: URLs absolutas (proxy no funciona)
+        // NOTA: El proxy de NGINX no está funcionando correctamente,
+        // por eso usamos URL absoluta en lugar de relativa
+        urlBackend = viteHostLocal || 'http://localhost:3000';
         urlFront = window.location.origin;  // URL actual del browser
         apiKey = '1ogC7RKV419Y5XssdtcvmuRJ8RcCu451a';  // Valor por defecto
         tmdbApiKey = 'f31b2f3b55906ce54efce57ec7b5c0b7fsdfsd';  // Valor por defecto

@@ -1,12 +1,162 @@
 services:
-  # Servicio CDN1: Servidor web basado en NGINX
+  # 🗄️ POSTGRESQL - Base de datos principal
+  postgres:
+    build: ./servers/postgresQl
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - TZ=America/Mexico_City
+    volumes:
+      - ./servers/postgresQl/postgres_data:/var/lib/postgresql/data
+      - ./servers/postgresQl/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - lan
+    ports:
+      - "${DB_PORT}:5432"
+  
+  # 📊 PGADMIN - Administración de base de datos (opcional)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PG_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PG_PASSWORD}
+    networks:
+      - lan
+    ports:
+      - "${PG_PORT}:80"
+    depends_on:
+      - postgres
+  
+  # 🗂️ MINIO - Almacenamiento S3 compatible
+  minio:
+    image: quay.io/minio/minio
+    container_name: minio
+    restart: unless-stopped
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_REGION=${MINIO_REGION}
+    volumes:
+      - ./servers/minio/aws3DataMinio:/data
+    networks:
+      - lan
+    ports:
+      - "${MINIO_PORT}:9000"
+      - "${MINIO_PANEL_PORT}:9001"
+    command: server /data --console-address ":9001"
+
+  # Inicializador de MinIO
+  minio-init:
+    image: alpine:latest
+    container_name: minio-init
+    depends_on:
+      - minio
+    environment:
+      - MINIO_HOST=${IP_ADDRESS_MINIO}  # minio
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+    volumes:
+      - ./servers/minio/init-minio.sh:/init-minio.sh
+    entrypoint: ["/bin/sh", "/init-minio.sh"]
+    networks:
+      - lan
+  
+  # Servicio Backend Node.js
+  backend:
+    build:
+      context: ./backend/app
+      dockerfile: dockerfile.appdev
+    container_name: back
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    environment:
+      - IP_ADDRESS_POSTGRESQL=postgres
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - IP_ADDRESS_MINIO=minio
+      - NODE_ENV=${NODE_ENV}
+      - DB_HOST=${IP_ADDRESS_POSTGRESQL}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MINIO_ENDPOINT=${IP_ADDRESS_MINIO}
+      - MINIO_PORT=${MINIO_PORT}
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      - MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
+      - MINIO_COVERS_DIR=${MINIO_COVERS_DIR}
+      - TEMP_PROCESSING_DIR=${TEMP_PROCESSING_DIR}
+      - JWT_SECRET=${JWT_SECRET}
+      - API_KEY=${API_KEY}
+      - EMAIL=${EMAIL}
+      - PASS_EMAIL=${PASS_EMAIL}
+      - BACK_PORT=${BACK_PORT}
+      - FRONT_URL_LOCAL=${FRONT_URL_LOCAL}
+      - WHITE_LIST=${WHITE_LIST}
+    volumes:
+      - ./backend/app:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - lan
+    ports:
+      - "${BACK_PORT}:3000"
+    depends_on:
+      - postgres
+      - minio
+  
+  # 🎨 FRONTEND VITE - SERVICIO PRINCIPAL
+  frontend:
+    build:
+      context: ./frontend/app
+      dockerfile: dockerfile.frontend
+      args:
+        - NODE_ENV=development
+        - SERVICE_TYPE=frontend
+    container_name: front
+    restart: unless-stopped
+    environment:
+      - VITE_API_KEY=${VITE_API_KEY}
+      - VITE_FRONT_URL_LOCAL=${VITE_FRONT_URL_LOCAL}
+      - VITE_MODE=${VITE_MODE}
+      - VITE_HOST_LOCAL=${VITE_HOST_LOCAL}
+      - VITE_TMDB_API_KEY=${VITE_TMDB_API_KEY}
+      - VITE_HOST=0.0.0.0
+      - VITE_PORT=5173
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend/app:/app
+      - /app/node_modules
+      - /app/dist
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      - backend
+    command: ["npm", "run", "dev"]
+
+  # 🌐 CDN - Servidor de distribución de contenido
   cdn1:
     build:
       context: ./servers
       dockerfile: dockerfile
       args:
         - TEMPLATE_FILE=./cdn/nginx.conf.template
-    container_name: cdn1  # ✅ Nombre fijo del contenedor
+    container_name: cdn1
+    restart: unless-stopped
     environment:
       - NGINX_TRANSCODER1=${NGINX_IP_ADDRESS_TRANSCODER1}  # transcoder1
       - NGINX_TRANSCODER2=${NGINX_IP_ADDRESS_TRANSCODER2}  # transcoder2
@@ -15,7 +165,6 @@ services:
       - ./servers/cdn/index.html:/nginx-1.26.3/html/index.html
     networks:
       - lan
-    restart: always
     depends_on:
       - transcoder1
       - transcoder2
@@ -72,104 +221,6 @@ services:
     depends_on:
       - minio
 
-  # Servicio MinIO: Almacenamiento de objetos
-  minio:
-    image: quay.io/minio/minio
-    container_name: minio  # ✅ Nombre fijo del contenedor
-    command: server /data --console-address ":9001"
-    environment:
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      - MINIO_REGION=${MINIO_REGION}
-    volumes:
-      - ./servers/minio/aws3DataMinio:/data
-    networks:
-      - lan
-    ports:
-      - "${MINIO_PORT}:9000"
-      - "${MINIO_PANEL_PORT}:9001"
-    restart: always
-
-  # Inicializador de MinIO
-  minio-init:
-    image: alpine:latest
-    container_name: minio-init
-    depends_on:
-      - minio
-    environment:
-      - MINIO_HOST=${IP_ADDRESS_MINIO}  # minio
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      - MINIO_BUCKET=${MINIO_BUCKET}
-    volumes:
-      - ./servers/minio/init-minio.sh:/init-minio.sh
-    entrypoint: ["/bin/sh", "/init-minio.sh"]
-    networks:
-      - lan
-
-  # Servicio PostgreSQL
-  postgres:
-    build: ./servers/postgresQl
-    container_name: postgres  # ✅ Nombre fijo del contenedor
-    environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - TZ=America/Mexico_City
-    volumes:
-      - ./servers/postgresQl/postgres_data:/var/lib/postgresql/data
-      - ./servers/postgresQl/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - lan
-    ports:
-      - "${DB_PORT}:5432"
-    restart: always
-
-  # Servicio pgAdmin
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin  # ✅ Nombre fijo del contenedor
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PG_EMAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${PG_PASSWORD}
-    networks:
-      - lan
-    ports:
-      - "${PG_PORT}:80"
-    restart: always
-    depends_on:
-      - postgres
-
-  # 🎨 FRONTEND VITE - SERVICIO PRINCIPAL
-  # ==========================================
-  frontend:
-    build:
-      context: ./frontend/app
-      dockerfile: dockerfile.frontend
-      args:
-        - NODE_ENV=development
-        - SERVICE_TYPE=frontend
-    container_name: front
-    environment:
-      - VITE_API_KEY=${VITE_API_KEY}
-      - VITE_FRONT_URL_LOCAL=${VITE_FRONT_URL_LOCAL}
-      - VITE_MODE=${VITE_MODE}
-      - VITE_HOST_LOCAL=${VITE_HOST_LOCAL}
-      - VITE_TMDB_API_KEY=${VITE_TMDB_API_KEY}
-      - VITE_HOST=0.0.0.0
-      - VITE_PORT=5173
-      - CHOKIDAR_USEPOLLING=true
-    volumes:
-      - ./frontend/app:/app
-      - /app/node_modules
-      - /app/dist
-    ports:
-      - "${FRONTEND_PORT:-5173}:5173"
-    restart: unless-stopped
-    depends_on:
-      - backend
-    command: ["npm", "run", "dev"]
-
   # ==========================================
   # 📚 STORYBOOK - SERVICIO INDEPENDIENTE
   # ==========================================
@@ -193,51 +244,6 @@ services:
     ports:
       - "6006:6006"   
     restart: "no"
-
-  # Servicio Backend Node.js
-  backend:
-    build:
-      context: ./backend/app
-      dockerfile: dockerfile.appdev  # ✅ Nombre correcto del dockerfile
-    container_name: back  # ✅ Nombre fijo del contenedor
-    environment:
-      - IP_ADDRESS_POSTGRESQL=postgres # ✅ Usar nombre de servicio
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      - IP_ADDRESS_MINIO=minio # ✅ Usar nombre de servicio
-      - NODE_ENV=${NODE_ENV}
-      - DB_HOST=${IP_ADDRESS_POSTGRESQL}  # postgres
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - MINIO_ENDPOINT=${IP_ADDRESS_MINIO}  # minio
-      - MINIO_PORT=${MINIO_PORT}
-      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
-      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
-      - MINIO_BUCKET=${MINIO_BUCKET}
-      - MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
-      - MINIO_COVERS_DIR=${MINIO_COVERS_DIR}
-      - TEMP_PROCESSING_DIR=${TEMP_PROCESSING_DIR}
-      - JWT_SECRET=${JWT_SECRET}
-      - API_KEY=${API_KEY}
-      - EMAIL=${EMAIL}
-      - PASS_EMAIL=${PASS_EMAIL}
-      - BACK_PORT=${BACK_PORT}
-      - FRONT_URL_LOCAL=${FRONT_URL_LOCAL}
-      - WHITE_LIST=${WHITE_LIST}
-    volumes:
-      - ./backend/app:/usr/src/app
-      - /usr/src/app/node_modules
-    networks:
-      - lan
-    ports:
-      - "${BACK_PORT}:3000"
-    restart: always
-    depends_on:
-      - postgres
-      - minio
-
 # Red Docker simple - sin IPs estáticas
 networks:
   lan:

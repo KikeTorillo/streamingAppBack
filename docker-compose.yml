@@ -3,8 +3,8 @@
 services:
   # 🗄️ POSTGRESQL - Base de datos principal
   postgres:
-    image: postgres:16
-    container_name: postgres-prod
+    build: ./servers/postgresQl
+    container_name: postgres
     restart: unless-stopped
     environment:
       - POSTGRES_DB=${DB_NAME}
@@ -22,7 +22,7 @@ services:
   # 📊 PGADMIN - Administración de base de datos (opcional)
   pgadmin:
     image: dpage/pgadmin4
-    container_name: pgadmin-prod
+    container_name: pgadmin
     restart: unless-stopped
     environment:
       - PGADMIN_DEFAULT_EMAIL=${PG_EMAIL}
@@ -37,49 +37,79 @@ services:
   # 🗂️ MINIO - Almacenamiento S3 compatible
   minio:
     image: minio/minio
-    container_name: minio-prod
+    container_name: minio
     restart: unless-stopped
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_REGION=${MINIO_REGION}
     volumes:
-      - ./servers/minio/data:/data
+      - ./servers/minio/aws3DataMinio:/data
     networks:
       - lan
     ports:
       - "${MINIO_PORT}:9000"
-      - "${MINIO_CONSOLE_PORT}:9001"
+      - "${MINIO_PANEL_PORT}:9001"
     command: server /data --console-address ":9001"
+  
+  # Inicializador de MinIO
+  minio-init:
+    image: alpine:latest
+    container_name: minio-init
+    depends_on:
+      - minio
+    environment:
+      - MINIO_HOST=${IP_ADDRESS_MINIO}  # minio
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+    volumes:
+      - ./servers/minio/init-minio.sh:/init-minio.sh
+    entrypoint: ["/bin/sh", "/init-minio.sh"]
+    networks:
+      - lan
 
   # 🖥️ BACKEND - API Node.js
   backend:
     build:
       context: ./backend/app
       dockerfile: dockerfile.app
-    container_name: backend
+    container_name: back
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
     environment:
-      - NODE_ENV=production
-      - WHITE_LIST=${WHITE_LIST}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - IP_ADDRESS_POSTGRESQL=postgres  # Usar nombre del servicio
-      - DB_PORT=5432                    # Puerto interno
-      - DB_NAME=${DB_NAME}
-      - API_KEY=${API_KEY}
-      - JWT_SECRET=${JWT_SECRET}
-      - FRONT_URL_LOCAL=http://localhost:8080  # URL externa del frontend
-      - EMAIL=${EMAIL}
-      - PASS_EMAIL=${PASS_EMAIL}
-      - MINIO_COVERS_DIR=${MINIO_COVERS_DIR}
-      - MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
+      - IP_ADDRESS_POSTGRESQL=postgres
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      - IP_ADDRESS_MINIO=minio           # Usar nombre del servicio
-      - MINIO_PORT=9000
+      - IP_ADDRESS_MINIO=minio
+      - NODE_ENV=${NODE_ENV}
+      - DB_HOST=${IP_ADDRESS_POSTGRESQL}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MINIO_ENDPOINT=${IP_ADDRESS_MINIO}
+      - MINIO_PORT=${MINIO_PORT}
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
       - MINIO_BUCKET=${MINIO_BUCKET}
+      - MINIO_VIDEO_DIR=${MINIO_VIDEO_DIR}
+      - MINIO_COVERS_DIR=${MINIO_COVERS_DIR}
       - TEMP_PROCESSING_DIR=${TEMP_PROCESSING_DIR}
-      - BACK_PORT=3000
+      - JWT_SECRET=${JWT_SECRET}
+      - API_KEY=${API_KEY}
+      - EMAIL=${EMAIL}
+      - PASS_EMAIL=${PASS_EMAIL}
+      - BACK_PORT=${BACK_PORT}
+      - FRONT_URL_LOCAL=${FRONT_URL_LOCAL}
+      - WHITE_LIST=${WHITE_LIST}
     volumes:
       - ./backend/app:/usr/src/app
       - /usr/src/app/node_modules
@@ -96,7 +126,13 @@ services:
     build:
       context: ./frontend/app
       dockerfile: dockerfile.frontend.prod
-    container_name: frontend
+      args:
+        - VITE_API_KEY=${VITE_API_KEY}
+        - VITE_FRONT_URL_LOCAL=${VITE_FRONT_URL_LOCAL}
+        - VITE_MODE=${VITE_MODE}
+        - VITE_HOST_LOCAL=${VITE_HOST_LOCAL}
+        - VITE_TMDB_API_KEY=${VITE_TMDB_API_KEY}
+    container_name: front
     restart: unless-stopped
     ports:
       - "8080:80"    # Puerto principal de acceso
@@ -112,21 +148,21 @@ services:
       dockerfile: dockerfile
       args:
         - TEMPLATE_FILE=./cdn/nginx.conf.template
-    container_name: cdn1-prod
+    container_name: cdn1
     restart: unless-stopped
     environment:
-      - NGINX_TRANSCODER1=transcoder1   # Usar nombres de servicios
-      - NGINX_TRANSCODER2=transcoder2
+      - NGINX_TRANSCODER1=${NGINX_IP_ADDRESS_TRANSCODER1}  # transcoder1
+      - NGINX_TRANSCODER2=${NGINX_IP_ADDRESS_TRANSCODER2}  # transcoder2
     volumes:
       - ./servers/cdn/nginx_cache:/var/cache/nginx
       - ./servers/cdn/index.html:/nginx-1.26.3/html/index.html
     networks:
       - lan
-    ports:
-      - "8082:80"
     depends_on:
       - transcoder1
       - transcoder2
+    ports:
+      - "8082:80"
 
   # 🎞️ TRANSCODER1 - Servidor de transcodificación principal
   transcoder1:
@@ -135,10 +171,9 @@ services:
       dockerfile: dockerfile
       args:
         - TEMPLATE_FILE=./transcoderServers/transcoder1/nginx.conf.template
-    container_name: transcoder1-prod
-    restart: unless-stopped
+    container_name: transcoder1  # ✅ Nombre fijo del contenedor
     environment:
-      - NGINX_MINIO_SERVER=minio:9000   # Usar nombre del servicio
+      - NGINX_MINIO_SERVER=${IP_ADDRESS_MINIO}:${MINIO_PORT}  # minio:9000
       - NGINX_MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
       - NGINX_SECRET_KEY=${MINIO_ROOT_PASSWORD}
       - NGINX_REGION=${MINIO_REGION}
@@ -150,6 +185,7 @@ services:
       - ./servers/transcoderServers/transcoder1/index.html:/nginx-1.26.3/html/index.html
     networks:
       - lan
+    restart: always
     depends_on:
       - minio
 
@@ -160,10 +196,9 @@ services:
       dockerfile: dockerfile
       args:
         - TEMPLATE_FILE=./transcoderServers/transcoder2/nginx.conf.template
-    container_name: transcoder2-prod
-    restart: unless-stopped
+    container_name: transcoder2  # ✅ Nombre fijo del contenedor
     environment:
-      - NGINX_MINIO_SERVER=minio:9000   # Usar nombre del servicio
+      - NGINX_MINIO_SERVER=${IP_ADDRESS_MINIO}:${MINIO_PORT}  # minio:9000
       - NGINX_MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
       - NGINX_SECRET_KEY=${MINIO_ROOT_PASSWORD}
       - NGINX_REGION=${MINIO_REGION}
@@ -175,9 +210,10 @@ services:
       - ./servers/transcoderServers/transcoder2/index.html:/nginx-1.26.3/html/index.html
     networks:
       - lan
+    restart: always
     depends_on:
       - minio
-
+      
 # 🌐 RED DOCKER - Comunicación interna entre servicios
 networks:
   lan:
