@@ -20,8 +20,9 @@ const VideoPlayer = () => {
   const playerRef = useRef(null);
 
   // ✅ FIX: URL corregida sin puerto duplicado
-  const baseUrl = `http://localhost:8082/hls/${movieId}/`;
-  const subsUrl = `http://localhost:8082/subs/${movieId}/`;
+  const cdnUrl = import.meta.env.VITE_CDN_URL || 'http://localhost:8082';
+  const baseUrl = `${cdnUrl}/hls/${movieId}/`;
+  const subsUrl = `${cdnUrl}/subs/${movieId}/`;
   
   // ✅ FIX: Validar que movieId y resolutions existen
   if (!movieId) {

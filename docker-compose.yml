@@ -17,7 +17,7 @@ services:
     networks:
       - lan
     ports:
-      - "${DB_PORT}:5432"
+      - "5433:${DB_PORT}"
 
   # 📊 PGADMIN - Administración de base de datos (opcional)
   pgadmin:
@@ -73,17 +73,9 @@ services:
   backend:
     build:
       context: ./backend/app
-      dockerfile: dockerfile.app
+      dockerfile: dockerfile.appdev
     container_name: back
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 1G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
     environment:
       - IP_ADDRESS_POSTGRESQL=postgres
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}

@@ -6,7 +6,7 @@
  * @param {string} baseUrl - URL base del backend
  * @returns {string} URL completa de la portada
  */
-function buildCoverUrl(movieData, baseUrl = 'http://localhost:8082') {
+function buildCoverUrl(movieData, baseUrl = import.meta.env.VITE_CDN_URL || 'http://localhost:8082') {
   if (!movieData || !movieData.cover_image) return '';
   const sanitized = baseUrl.replace(/\/$/, '');
   return `${sanitized}/covers/${movieData.cover_image}/cover.jpg`;

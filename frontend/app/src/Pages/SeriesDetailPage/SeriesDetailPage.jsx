@@ -158,9 +158,9 @@ function SeriesDetailPage() {
 
         // ✅ FORMATEAR URL DE IMAGEN correctamente
         const coverUrl = episode.cover_image
-            ? `http://localhost:8082/covers/${episode.cover_image}/cover.jpg`
+            ? `${import.meta.env.VITE_CDN_URL || 'http://localhost:8082'}/covers/${episode.cover_image}/cover.jpg`
             : serie?.cover_image
-                ? `http://localhost:8082/covers/${serie.cover_image}/cover.jpg`
+                ? `${import.meta.env.VITE_CDN_URL || 'http://localhost:8082'}/covers/${serie.cover_image}/cover.jpg`
                 : 'https://via.placeholder.com/300x450?text=Episodio';
 
         const transformedEpisode = {
@@ -238,7 +238,7 @@ function SeriesDetailPage() {
                             flexWrap: 'wrap'
                         }}>
                             <img
-                                src={serie.cover_image ? `http://localhost:8082/covers/${serie.cover_image}/cover.jpg` : 'https://via.placeholder.com/300x450?text=Serie'}
+                                src={serie.cover_image ? `${import.meta.env.VITE_CDN_URL || 'http://localhost:8082'}/covers/${serie.cover_image}/cover.jpg` : 'https://via.placeholder.com/300x450?text=Serie'}
                                 alt={`Carátula de ${serie.title}`}
                                 style={{
                                     width: '200px',

@@ -56,7 +56,7 @@ function MoviesListPage() {
         const title = row.original.title;
         
         // Construir URL completa para la imagen (igual que en MainPage)
-        const imageUrl = coverImage ? `http://localhost:8082/covers/${coverImage}/cover.jpg` : null;
+        const imageUrl = coverImage ? `${import.meta.env.VITE_CDN_URL || 'http://localhost:8082'}/covers/${coverImage}/cover.jpg` : null;
         
         return (
           <div style={{ 

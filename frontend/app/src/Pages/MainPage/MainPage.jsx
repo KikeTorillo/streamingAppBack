@@ -224,7 +224,7 @@ function MainPage() {
                 category: serie.category || 'Sin categoría', // Para mostrar
                 categoryId: serie.categoryId, // Para filtrar
                 year: serie.releaseYear || serie.year || new Date().getFullYear(),
-                cover: `http://localhost:8082/covers/${serie.cover_image}/cover.jpg`,
+                cover: `${import.meta.env.VITE_CDN_URL || 'http://localhost:8082'}/covers/${serie.cover_image}/cover.jpg`,
                 type: 'series',
                 rating: serie.rating || 0,
                 seasons: serie.seasons || 1
